@@ -164,3 +164,18 @@ private void FuncMethod()
 */
 
 #endregion
+
+#region 협업
+
+/* 본인이 작업한 스크립트에 기록 남기기
+    // 이후 수정이나 기타 작업한 사람이 다음 기록 남기기
+    ///
+      수정 기록이 5줄을 넘어가면 요약해놓기
+    ///
+    public class PlayerController
+    {
+
+    }
+*/
+
+#endregion
