@@ -5,7 +5,6 @@ ResolutionFixed 스크립트 동작
 -목표 비율(setWidth:setHeight)을 유지하도록 카메라에 레터박스를 적용
 -UI는 Canvas Scaler가 담당하고, 이 스크립트는 월드/배경 카메라 화면 비율 고정용
 */
-
 public class ResolutionFixed : MonoBehaviour
 {
     //기준 해상도(비율 계산 기준)
