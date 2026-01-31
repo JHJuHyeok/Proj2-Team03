@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 public class MonsterJsonCreator : EditorWindow
 {
-    List<MonsterData> monsters = new List<MonsterData>();
+    private List<MonsterData> monsters = new List<MonsterData>();
     private UnityEngine.Vector2 scrollPos;
 
     // 에디터 창 표시
