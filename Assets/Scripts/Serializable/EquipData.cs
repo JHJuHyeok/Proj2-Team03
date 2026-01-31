@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [System.Serializable]
 public class EquipDataList
 {
+    public EquipType listType;
     public List<EquipData> equipList;
 }
 
@@ -40,7 +41,8 @@ public enum EquipGrade
 public class ItemEffect
 {
     public EffectType type;     // 효과 종류
-    public float value;         // 수치
+    public float initValue;     // 초기 수치
+    public float levelUpValue;  // 레벨 당 증가 수치
 }
 
 public enum EffectType
