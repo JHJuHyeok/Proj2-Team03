@@ -1,4 +1,11 @@
 using UnityEngine;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class SkillDataList
+{
+    public List<SkillData> skillList;
+}
 
 [System.Serializable]
 public class SkillData
