@@ -52,6 +52,7 @@ public class SkillJsonCreator : EditorWindow
 
         skill.id = EditorGUILayout.TextField("스킬 ID", skill.id);
         skill.name = EditorGUILayout.TextField("스킬 명칭", skill.name);
+        skill.spriteName = EditorGUILayout.TextField("이미지 이름", skill.spriteName);
         skill.explain = EditorGUILayout.TextField("스킬 설명", skill.explain);
         skill.effect = EditorGUILayout.TextField("스킬 효과", skill.effect);
 

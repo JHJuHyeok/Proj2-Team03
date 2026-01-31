@@ -12,6 +12,7 @@ public class SkillData
 {
     public string id;               // 스킬 ID
     public string name;             // 스킬 명칭
+    public string spriteName;       // 이미지 이름
     public string explain;          // 설명 텍스트
     public string effect;           // 효과 텍스트
 
