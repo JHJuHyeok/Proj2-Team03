@@ -8,7 +8,6 @@ ScrollScript
 -세로 드래그만 허용하고 가로 드래그는 무시
 -가로 페이지 이동은 버튼 클릭으로만 처리
 */
-
 public class ScrollScript : ScrollRect
 {
     [SerializeField] private float lockThreshold = 8f;//방향 고정 임계치(픽셀)
