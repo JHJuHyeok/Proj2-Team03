@@ -2,9 +2,10 @@ using Newtonsoft.Json;
 using System.Numerics;
 using System.Collections.Generic;
 
-public class MonsterDataList
+public class MonsterDataList : IDataList<MonsterData>
 {
     public List<MonsterData> monsterList;
+    public List<MonsterData> GetList() => monsterList;
 }
 
 [System.Serializable]

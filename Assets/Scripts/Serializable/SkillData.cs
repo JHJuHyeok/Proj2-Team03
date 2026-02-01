@@ -2,9 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class SkillDataList
+public class SkillDataList : IDataList<SkillData>
 {
     public List<SkillData> skillList;
+    public List<SkillData> GetList() => skillList;
 }
 
 [System.Serializable]

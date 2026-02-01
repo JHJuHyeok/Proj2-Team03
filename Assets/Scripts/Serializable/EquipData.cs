@@ -2,10 +2,11 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class EquipDataList
+public class EquipDataList : IDataList<EquipData>
 {
     public EquipType listType;
     public List<EquipData> equipList;
+    public List<EquipData> GetList() => equipList;
 }
 
 public enum EquipType
