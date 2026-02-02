@@ -1,4 +1,5 @@
-﻿public enum PopupId
+﻿//[승문]
+public enum PopupId
 {
     None = 0,
 

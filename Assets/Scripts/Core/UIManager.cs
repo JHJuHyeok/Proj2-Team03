@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-/*
+/*[승문]
 UIManager
 - 모든 UI의 표시 / 숨김 / 전환 담당
 - GameManager 상태 변경에 반응

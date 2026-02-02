@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-/*
+/*[승문]
 BottomPanelSlideToggle
 -하단 UI 루트(bottomRoot)를 아래로 내려 숨기기/올리기
 -중요: "높이만큼 이동"이 아니라, 코너 계산으로 "부모 화면 밖"으로 완전히 빼는 방식

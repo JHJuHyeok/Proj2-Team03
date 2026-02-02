@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-/*
+/*[승문]
 PopupManager
 -팝업 등록(프리팹) / 생성 / 스택 관리
 -뒤 팝업은 비활성화하고, 닫으면 이전 팝업 복귀

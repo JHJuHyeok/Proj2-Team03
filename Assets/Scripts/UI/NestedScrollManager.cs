@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-/*
+/*[승문]
 NestedScrollManager
 -하단 BTN Tab 버튼 클릭으로만 탭을 전환
 -탭 개수는 btnRect.Length 기준으로 자동 결정
