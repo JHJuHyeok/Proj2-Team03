@@ -1,4 +1,4 @@
-using SlayerLegend.Data;
+﻿using UnityEngine;
 
 namespace SlayerLegend.Skill
 {
@@ -36,5 +36,11 @@ namespace SlayerLegend.Skill
         void RemoveCriticalRateModifier(object source);
         void RemoveCriticalDamageModifier(object source);
         void RemoveGoldGainPercentModifier(object source);
+    }
+
+    // 데미지를 받을 수 있는 대상 인터페이스
+    public interface IDamageable
+    {
+        void TakeDamage(float damage);
     }
 }

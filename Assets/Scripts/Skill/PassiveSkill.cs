@@ -1,5 +1,4 @@
-using UnityEngine;
-using SlayerLegend.Data;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
 
@@ -41,9 +40,17 @@ namespace SlayerLegend.Skill
         // 현재 레벨의 버프 효과량
         public float GetBuffValue()
         {
-            float baseValue = skillData.buffValue;
-            float levelBonus = baseValue * 0.1f * (currentLevel - 1); // 레벨당 10% 증가
-            return baseValue + levelBonus;
+            return SkillCalculator.GetBuffValue(skillData, currentLevel);
+        }
+
+        // 버프 타입 (JSON 데이터에 없으므로 기본값 반환, 필요 시 확장)
+        private PassiveBuffType BuffType
+        {
+            get
+            {
+                // TODO: 팀원과 협의하여 JSON에 buffType 추가
+                return PassiveBuffType.AttackDamagePercent; // 임시 기본값
+            }
         }
 
         // 버프 활성화
@@ -51,13 +58,13 @@ namespace SlayerLegend.Skill
         {
             if (isActive)
             {
-                Debug.Log($"{skillData.skillName}은(는) 이미 활성화되어 있습니다.");
+                Debug.Log($"{skillData.name}은(는) 이미 활성화되어 있습니다.");
                 return;
             }
 
             isActive = true;
             ApplyPassiveEffect();
-            Debug.Log($"{skillData.skillName} 패시브 활성화! 효과: {GetBuffValue():F1}");
+            Debug.Log($"{skillData.name} 패시브 활성화! 효과: {GetBuffValue():F1}");
         }
 
         // 버프 비활성화
@@ -67,7 +74,7 @@ namespace SlayerLegend.Skill
 
             isActive = false;
             RemovePassiveEffect();
-            Debug.Log($"{skillData.skillName} 패시브 비활성화");
+            Debug.Log($"{skillData.name} 패시브 비활성화");
         }
 
         // IStatsProvider에 버프 적용
@@ -80,13 +87,13 @@ namespace SlayerLegend.Skill
                 return;
             }
 
-            if (ApplyActions.TryGetValue(skillData.buffType, out var applyAction))
+            if (ApplyActions.TryGetValue(BuffType, out var applyAction))
             {
                 applyAction(stats, this, GetBuffValue());
             }
             else
             {
-                Debug.LogWarning($"지원하지 않는 버프 타입: {skillData.buffType}");
+                Debug.LogWarning($"지원하지 않는 버프 타입: {BuffType}");
             }
         }
 
@@ -96,7 +103,7 @@ namespace SlayerLegend.Skill
             var stats = GetComponentInParent<IStatsProvider>();
             if (stats == null) return;
 
-            if (RemoveActions.TryGetValue(skillData.buffType, out var removeAction))
+            if (RemoveActions.TryGetValue(BuffType, out var removeAction))
             {
                 removeAction(stats, this);
             }
@@ -111,7 +118,7 @@ namespace SlayerLegend.Skill
             {
                 RemovePassiveEffect();
                 ApplyPassiveEffect();
-                Debug.Log($"{skillData.skillName} 패시브 레벨업! 새로운 효과: {GetBuffValue():F1}");
+                Debug.Log($"{skillData.name} 패시브 레벨업! 새로운 효과: {GetBuffValue():F1}");
             }
         }
 

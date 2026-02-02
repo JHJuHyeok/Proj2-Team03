@@ -1,6 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
-using SlayerLegend.Data;
 
 namespace SlayerLegend.Skill
 {
@@ -10,9 +9,6 @@ namespace SlayerLegend.Skill
     // - 게임 시작 시 자동 활성화
     public class SkillController : MonoBehaviour
     {
-        [Header("스킬 데이터베이스")]
-        [SerializeField] private SkillDatabase skillDatabase;
-
         [Header("장착된 스킬")]
         [SerializeField] private List<ActiveSkill> activeSkills = new List<ActiveSkill>();
         [SerializeField] private List<PassiveSkill> passiveSkills = new List<PassiveSkill>();
@@ -24,8 +20,9 @@ namespace SlayerLegend.Skill
 
         private void Awake()
         {
-            if (skillDatabase == null)
-                Debug.LogWarning("SkillDatabase가 설정되지 않았습니다!");
+            // DataManager에서 스킬 데이터 로드 확인
+            if (DataManager.Instance == null || DataManager.Instance.skills == null)
+                Debug.LogWarning("DataManager가 초기화되지 않았습니다!");
         }
 
         private void Start()
@@ -63,14 +60,14 @@ namespace SlayerLegend.Skill
 
             if (activeSkills.Contains(skill))
             {
-                Debug.Log($"{skill.Data.skillName}은(는) 이미 장착되어 있습니다.");
+                Debug.Log($"{skill.Data.name}은(는) 이미 장착되어 있습니다.");
                 return false;
             }
 
             activeSkills.Add(skill);
             skill.SetActive(true);
             skill.transform.SetParent(transform);
-            Debug.Log($"{skill.Data.skillName} 스킬 장착 완료!");
+            Debug.Log($"{skill.Data.name} 스킬 장착 완료!");
             return true;
         }
 
@@ -79,26 +76,26 @@ namespace SlayerLegend.Skill
         {
             if (passiveSkills.Contains(skill))
             {
-                Debug.Log($"{skill.Data.skillName}은(는) 이미 장착되어 있습니다.");
+                Debug.Log($"{skill.Data.name}은(는) 이미 장착되어 있습니다.");
                 return false;
             }
 
             passiveSkills.Add(skill);
             skill.Activate();
             skill.transform.SetParent(transform);
-            Debug.Log($"{skill.Data.skillName} 패시브 장착 완료!");
+            Debug.Log($"{skill.Data.name} 패시브 장착 완료!");
             return true;
         }
 
         // 액티브 스킬 제거
         public bool RemoveActiveSkill(string skillId)
         {
-            var skill = activeSkills.Find(s => s.Data.skillId == skillId);
+            var skill = activeSkills.Find(s => s.Data.id == skillId);
             if (skill != null)
             {
                 skill.SetActive(false);
                 activeSkills.Remove(skill);
-                Debug.Log($"{skill.Data.skillName} 스킬 장착 해제");
+                Debug.Log($"{skill.Data.name} 스킬 장착 해제");
                 return true;
             }
             return false;
@@ -107,12 +104,12 @@ namespace SlayerLegend.Skill
         // 패시브 스킬 제거
         public bool RemovePassiveSkill(string skillId)
         {
-            var skill = passiveSkills.Find(s => s.Data.skillId == skillId);
+            var skill = passiveSkills.Find(s => s.Data.id == skillId);
             if (skill != null)
             {
                 skill.Deactivate();
                 passiveSkills.Remove(skill);
-                Debug.Log($"{skill.Data.skillName} 패시브 장착 해제");
+                Debug.Log($"{skill.Data.name} 패시브 장착 해제");
                 return true;
             }
             return false;
@@ -121,13 +118,13 @@ namespace SlayerLegend.Skill
         // 액티브 스킬 생성
         public ActiveSkill CreateActiveSkill(SkillData data)
         {
-            if (data.skillType != SkillType.Active)
+            if (data.type != SkillType.Active)
             {
-                Debug.LogWarning($"{data.skillName}은(는) 액티브 스킬이 아닙니다.");
+                Debug.LogWarning($"{data.name}은(는) 액티브 스킬이 아닙니다.");
                 return null;
             }
 
-            var skillObj = new GameObject($"ActiveSkill_{data.skillName}");
+            var skillObj = new GameObject($"ActiveSkill_{data.name}");
             var skill = skillObj.AddComponent<ActiveSkill>();
             skill.Initialize(data);
             return skill;
@@ -136,13 +133,13 @@ namespace SlayerLegend.Skill
         // 패시브 스킬 생성
         public PassiveSkill CreatePassiveSkill(SkillData data)
         {
-            if (data.skillType != SkillType.Passive)
+            if (data.type != SkillType.Passive)
             {
-                Debug.LogWarning($"{data.skillName}은(는) 패시브 스킬이 아닙니다.");
+                Debug.LogWarning($"{data.name}은(는) 패시브 스킬이 아닙니다.");
                 return null;
             }
 
-            var skillObj = new GameObject($"PassiveSkill_{data.skillName}");
+            var skillObj = new GameObject($"PassiveSkill_{data.name}");
             var skill = skillObj.AddComponent<PassiveSkill>();
             skill.Initialize(data);
             return skill;

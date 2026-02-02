@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using SlayerLegend.Data;
+using SlayerLegend.Resource;
 using SlayerLegend.Skill;
 
 namespace SlayerLegend.UI
@@ -35,9 +35,9 @@ namespace SlayerLegend.UI
             _skillData = _skill.Data;
 
             // UI 초기화
-            iconImage.sprite = _skillData.icon;
-            nameText.text = _skillData.skillName;
-            descriptionText.text = _skillData.description;
+            iconImage.sprite = ResourceManager.Instance.LoadSprite(_skillData.spriteName);
+            nameText.text = _skillData.name;
+            descriptionText.text = _skillData.explain;
             UpdateLevelInfo();
 
             // 버튼 이벤트
@@ -51,7 +51,8 @@ namespace SlayerLegend.UI
 
         private void UpdateLevelInfo()
         {
-            levelText.text = $"Lv.{_skill.CurrentLevel}/{_skillData.maxLevel}";
+            int maxLevel = SkillCalculator.GetMaxLevel(_skillData);
+            levelText.text = $"Lv.{_skill.CurrentLevel}/{maxLevel}";
 
             if (_skill.IsMaxLevel)
             {
@@ -60,7 +61,7 @@ namespace SlayerLegend.UI
             }
             else
             {
-                int cost = _skillData.GetLevelUpCost(_skill.CurrentLevel);
+                int cost = SkillCalculator.GetLevelUpCost(_skillData, _skill.CurrentLevel);
                 levelUpCostText.text = $"{cost:N0} G";
                 levelUpButton.interactable = true;
             }

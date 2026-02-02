@@ -1,8 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using SlayerLegend.Skill;
-using SlayerLegend.Data;
 
 namespace SlayerLegend.UI
 {
@@ -14,7 +13,6 @@ namespace SlayerLegend.UI
     {
         [Header("참조")]
         [SerializeField] private SkillController skillController;
-        [SerializeField] private SkillDatabase skillDatabase;
         [SerializeField] private IGoldProvider goldManager;
 
         [Header("UI")]
@@ -88,7 +86,7 @@ namespace SlayerLegend.UI
         {
             if (skill == null) return;
 
-            int cost = skill.Data.GetLevelUpCost(skill.CurrentLevel);
+            int cost = SkillCalculator.GetLevelUpCost(skill.Data, skill.CurrentLevel);
 
             if (goldManager != null && goldManager.CurrentGold >= cost)
             {
@@ -97,7 +95,7 @@ namespace SlayerLegend.UI
 
                 FindSkillSlotUI(skill)?.RefreshUI();
                 UpdateGoldDisplay();
-                Debug.Log($"{skill.Data.skillName} 레벨업 성공! 현재 레벨: {skill.CurrentLevel}");
+                Debug.Log($"{skill.Data.name} 레벨업 성공! 현재 레벨: {skill.CurrentLevel}");
             }
             else
             {
