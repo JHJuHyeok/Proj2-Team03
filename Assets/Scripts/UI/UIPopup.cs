@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-/*
+/*[승문]
 UIPopup
 -팝업 베이스
 -PopupManager가 Open/Close를 호출

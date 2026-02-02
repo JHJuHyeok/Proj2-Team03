@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-/*
+/*[승문]
 TabManager
 -서브탭(강화/성장/승급) 버튼 클릭으로 패널을 전환
 -Idle/Select 스프라이트로 버튼 상태 표시

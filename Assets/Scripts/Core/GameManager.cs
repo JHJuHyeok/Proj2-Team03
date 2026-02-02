@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-/*
+/*[승문]
 GameManager
 - 게임의 "상태"만 관리
 - UI, 사운드, 연출 직접 제어 X

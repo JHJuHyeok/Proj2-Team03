@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-/*
+/*[승문]
 ScrollScript
 -자식(세로) ScrollRect 전용 스크립트
 -세로 드래그만 허용하고 가로 드래그는 무시

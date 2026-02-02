@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-/*
+/*[승문]
 UIScreen
 -로비/전투HUD/결과 같은 큰 화면의 베이스
 -UIManager가 Show/Hide를 호출
