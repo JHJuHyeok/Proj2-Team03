@@ -34,8 +34,8 @@
       "id": "poison",
       "name": "독",
       "spriteName": "poison_icon",
-      "explain": "적을 중독시켜 지속적으로 데미지를 입힙니다.",
-      "effect": "5초간 1초마다 데미지",
+      "explain": "적을 중독시켜 지속적으로 데미지를 입힙니다. 최대 체력의 1%만큼 데미지를 입힙니다.",
+      "effect": "5초간 1초마다 최대HP의 1% 데미지",
       "grade": 0,
       "type": 0,
       "request": 0,
@@ -46,15 +46,16 @@
       "levelUpValue": 5,
       "isDot": true,
       "dotDuration": 5,
-      "dotDamagePerTick": 10,
-      "dotTickInterval": 1
+      "dotDamagePerTick": 1,
+      "dotTickInterval": 1,
+      "dotIsPercentage": true
     },
     {
       "id": "burn",
       "name": "화상",
       "spriteName": "burn_icon",
       "explain": "적을 불태워 지속적으로 큰 데미지를 입힙니다.",
-      "effect": "3초간 0.5초마다 데미지",
+      "effect": "3초간 1초마다 고정 데미지",
       "grade": 1,
       "type": 0,
       "request": 0,
@@ -65,8 +66,9 @@
       "levelUpValue": 8,
       "isDot": true,
       "dotDuration": 3,
-      "dotDamagePerTick": 20,
-      "dotTickInterval": 0.5
+      "dotDamagePerTick": 25,
+      "dotTickInterval": 1,
+      "dotIsPercentage": false
     },
     {
       "id": "attack_boost",
@@ -97,6 +99,57 @@
       "needMp": 0,
       "initialRate": 5,
       "levelUpValue": 1
+    },
+    {
+      "id": "stun_bash",
+      "name": "기절 공격",
+      "spriteName": "stun_icon",
+      "explain": "적의 머리를 가격하여 기절시킵니다.",
+      "effect": "1초간 기절",
+      "grade": 1,
+      "type": 0,
+      "request": 0,
+      "element": 1,
+      "maxLevel": 10,
+      "needMp": 20,
+      "initialRate": 60,
+      "levelUpValue": 10,
+      "isStun": true,
+      "stunDuration": 1
+    },
+    {
+      "id": "freeze_blast",
+      "name": "빙결 폭발",
+      "spriteName": "freeze_icon",
+      "explain": "차가운 기운으로 적을 얼려 이동 속도를 감소시킵니다.",
+      "effect": "2초간 이속 50% 감소",
+      "grade": 1,
+      "type": 0,
+      "request": 0,
+      "element": 2,
+      "maxLevel": 10,
+      "needMp": 25,
+      "initialRate": 70,
+      "levelUpValue": 12,
+      "isFreeze": true,
+      "freezeDuration": 2
+    },
+    {
+      "id": "root_vine",
+      "name": "속박 덩굴",
+      "spriteName": "root_icon",
+      "explain": "땅에서 솟아난 덩굴이 적을 속박합니다.",
+      "effect": "1.5초간 이동 불가",
+      "grade": 0,
+      "type": 0,
+      "request": 0,
+      "element": 3,
+      "maxLevel": 10,
+      "needMp": 15,
+      "initialRate": 50,
+      "levelUpValue": 8,
+      "isRoot": true,
+      "rootDuration": 1.5
     }
   ]
 }

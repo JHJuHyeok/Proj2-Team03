@@ -1,6 +1,6 @@
 ﻿﻿using UnityEngine;
 using SlayerLegend.Resource;
-// using SlayerLegend.Skill.StatusEffects; // TODO: StatusEffects 시스템 완료 후 해제
+using SlayerLegend.Skill.StatusEffects;
 
 namespace SlayerLegend.Skill
 {
@@ -118,37 +118,30 @@ namespace SlayerLegend.Skill
                 totalDamage = stats.CalculateFinalDamage(isCritical);
                 string critText = isCritical ? " [치명타!]" : "";
 
-                // 적에게 데미지 입히기
-                enemy.TakeDamage(totalDamage);
+                // 적에게 데미지 입히기 (스킬 이름 포함)
+                DealDamageWithSkillName(enemyObject, totalDamage, skillData.name);
                 Debug.Log($"{caster.name}이(가) {skillData.name} 발동!{critText} → 적에게 {totalDamage:F1} 데미지");
             }
             else
             {
-                enemy.TakeDamage(totalDamage);
+                DealDamageWithSkillName(enemyObject, totalDamage, skillData.name);
                 Debug.Log($"{caster.name}이(가) {skillData.name} 발동! → 적에게 {totalDamage:F1} 데미지");
             }
 
-            // 도트 데미지 적용 (TODO: StatusEffects 시스템 완료 후 해제)
-            // ApplyDotEffect(enemyObject);
+            // 도트 데미지 적용
+            ApplyDotEffect(enemyObject);
+
+            // CC 상태이상 적용
+            ApplyCCEffect(enemyObject);
         }
 
         /// <summary>
         /// 도트 데미지 상태이상 적용
-        /// TODO: StatusEffects 시스템 완료 후 해제
         /// </summary>
-        /*
         private void ApplyDotEffect(GameObject enemyObject)
         {
             if (!skillData.IsDotSkill()) return;
 
-            var statusEffectAble = enemyObject.GetComponent<IStatusEffectAble>();
-            if (statusEffectAble == null)
-            {
-                Debug.Log("[Skill] 적이 상태이상을 받을 수 없습니다 (IStatusEffectAble 필요)");
-                return;
-            }
-
-            // IDamageable 캐싱 및 null 체크
             var damageable = enemyObject.GetComponent<IDamageable>();
             if (damageable == null)
             {
@@ -156,25 +149,100 @@ namespace SlayerLegend.Skill
                 return;
             }
 
-            // 도트 데미지 효과 생성 (임시 컴포넌트 사용)
-            var dotEffect = gameObject.AddComponent<DotEffect>();
+            // 체력 비례 데미지를 위해 IStatusEffectAble 확인
+            var statusTarget = enemyObject.GetComponent<IStatusEffectAble>();
+            float targetMaxHp = statusTarget?.MaxHealth ?? 0f;
+            bool isPercentage = skillData.GetDotIsPercentage();
+
+            // 체력 비례 데미지인 경우 레벨업 보정을 %에 적용
+            float damageValue = skillData.GetDotDamagePerTick();
+            if (isPercentage)
+            {
+                damageValue += skillData.levelUpValue * (currentLevel - 1) * 0.1f; // 0.1%씩 증가
+            }
+            else
+            {
+                damageValue += skillData.levelUpValue * (currentLevel - 1) * 0.5f; // 고정값 증가
+            }
+
+            // 적에게 직접 컴포넌트 추가 (불필요한 임시 생성 제거)
+            var dotEffect = enemyObject.AddComponent<DotEffect>();
             dotEffect.Initialize(
                 skillData.GetDotDuration(),
-                skillData.GetDotDamagePerTick() + (skillData.levelUpValue * (currentLevel - 1) * 0.5f), // 레벨에 비례 증가
+                damageValue,
                 skillData.GetDotTickInterval(),
                 damageable,
-                transform.parent?.gameObject
+                transform.parent?.gameObject,
+                isPercentage,
+                targetMaxHp
             );
 
-            // 상태이상 적용
-            statusEffectAble.ApplyStatusEffect(dotEffect);
-
-            // 효과 컴포넌트는 ApplyStatusEffect 내에서 다시 생성되므로 제거
-            Destroy(dotEffect);
-
-            Debug.Log($"[Skill] 도트 데미지 적용! {skillData.GetDotDuration()}초간 {skillData.GetDotTickInterval()}초마다 데미지");
+            Debug.Log($"[Skill] 도트 데미지 적용! {skillData.GetDotDuration()}초간 {skillData.GetDotTickInterval()}초마다 {(isPercentage ? $"최대HP의 {damageValue:F1}%" : $"{damageValue:F1}데미지")}");
         }
-        */
+
+        /// <summary>
+        /// CC 상태이상 적용
+        /// </summary>
+        private void ApplyCCEffect(GameObject enemyObject)
+        {
+            // 기절 (Stun)
+            if (skillData.IsStunSkill())
+            {
+                var stunTarget = enemyObject.GetComponent<IStunnable>();
+                if (stunTarget != null)
+                {
+                    // 적에게 직접 컴포넌트 추가 (불필요한 임시 생성 제거)
+                    var stunEffect = enemyObject.AddComponent<StunEffect>();
+                    stunEffect.Initialize(skillData.GetStunDuration(), stunTarget);
+                    Debug.Log($"[Skill] 기절 적용! {skillData.GetStunDuration()}초간 행동 불가");
+                }
+            }
+
+            // 빙결 (Freeze)
+            if (skillData.IsFreezeSkill())
+            {
+                var freezeTarget = enemyObject.GetComponent<IFreezable>();
+                if (freezeTarget != null)
+                {
+                    // 적에게 직접 컴포넌트 추가
+                    var freezeEffect = enemyObject.AddComponent<FreezeEffect>();
+                    // FreezeStacks는 Initialize 내부에서 계산하도록 변경 (중복 관리 제거)
+                    freezeEffect.Initialize(skillData.GetFreezeDuration(), freezeTarget);
+                    Debug.Log($"[Skill] 빙결 적용! {skillData.GetFreezeDuration()}초간 이속 감소");
+                }
+            }
+
+            // 속박 (Root)
+            if (skillData.IsRootSkill())
+            {
+                var rootTarget = enemyObject.GetComponent<IRootable>();
+                if (rootTarget != null)
+                {
+                    // 적에게 직접 컴포넌트 추가
+                    var rootEffect = enemyObject.AddComponent<RootEffect>();
+                    rootEffect.Initialize(skillData.GetRootDuration(), rootTarget);
+                    Debug.Log($"[Skill] 속박 적용! {skillData.GetRootDuration()}초간 이동 불가");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 스킬 이름과 함께 데미지를 입힘 (테스트용 로그 개선)
+        /// </summary>
+        private void DealDamageWithSkillName(GameObject enemyObject, float damage, string skillName)
+        {
+            // DummyEnemy 테스트 클래스인 경우 스킬 이름 포함 메서드 사용
+            var dummyEnemy = enemyObject.GetComponent<Testing.DummyEnemy>();
+            if (dummyEnemy != null)
+            {
+                dummyEnemy.TakeDamage(damage, skillName);
+                return;
+            }
+
+            // DummyEnemy가 아닌 경우 기본 TakeDamage 사용
+            var damageable = enemyObject.GetComponent<IDamageable>();
+            damageable?.TakeDamage(damage);
+        }
 
         public void ResetCooldown() => currentCooldown = 0f;
 

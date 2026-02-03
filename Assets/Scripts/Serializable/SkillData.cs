@@ -11,21 +11,36 @@ public class SkillDataList : IDataList<SkillData>
 [System.Serializable]
 public class SkillData
 {
-    public string id;               // ½ºÅ³ ID
-    public string name;             // ½ºÅ³ ¸íÄª
-    public string spriteName;       // ÀÌ¹ÌÁö ÀÌ¸§
-    public string explain;          // ¼³¸í ÅØ½ºÆ®
-    public string effect;           // È¿°ú ÅØ½ºÆ®
+    public string id;               // ï¿½ï¿½Å³ ID
+    public string name;             // ï¿½ï¿½Å³ ï¿½ï¿½Äª
+    public string spriteName;       // ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
+    public string explain;          // ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ®
+    public string effect;           // È¿ï¿½ï¿½ ï¿½Ø½ï¿½Æ®
 
-    public SkillGrade grade;        // ½ºÅ³ µî±Ş
-    public SkillType type;          // ½ºÅ³ Å¸ÀÔ
-    public SkillRequest request;    // »ç¿ë Á¶°Ç
-    public SkillElement element;    // ½ºÅ³ ¼Ó¼º
+    public SkillGrade grade;        // ï¿½ï¿½Å³ ï¿½ï¿½ï¿½
+    public SkillType type;          // ï¿½ï¿½Å³ Å¸ï¿½ï¿½
+    public SkillRequest request;    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public SkillElement element;    // ï¿½ï¿½Å³ ï¿½Ó¼ï¿½
 
-    public int maxLevel;            // ÃÖ´ë ·¹º§
-    public int needMp;              // ¼Ò¸ğ MP
-    public int initialRate;         // ±âº» ¼öÄ¡ °ª
-    public float levelUpValue;      // ·¹º§ ´ç ¼öÄ¡ »ó½Â°ª
+    public int maxLevel;            // ìµœëŒ€ ë ˆë²¨
+    public int needMp;              // ì†Œë¹„ MP
+    public int initialRate;         // ê¸°ë³¸ ìˆ˜ì¹˜ %
+    public float levelUpValue;      // ë ˆë²¨ì—… ìˆ˜ì¹˜ ì¦ê°€
+
+    // DoT (Damage over Time) ê´€ë ¨
+    public bool isDot;              // ë„íŠ¸ ë°ë¯¸ì§€ ì—¬ë¶€
+    public float dotDuration;       // ë„íŠ¸ ì§€ì† ì‹œê°„
+    public float dotDamagePerTick;  // í‹±ë‹¹ ë°ë¯¸ì§€
+    public float dotTickInterval;   // í‹± ê°„ê²©
+    public bool dotIsPercentage;    // ì²´ë ¥ ë¹„ë¡€ ì—¬ë¶€ (trueë©´ % ë°ë¯¸ì§€)
+
+    // CC (Crowd Control) ê´€ë ¨
+    public bool isStun;             // ê¸°ì ˆ ì—¬ë¶€
+    public float stunDuration;      // ê¸°ì ˆ ì§€ì† ì‹œê°„
+    public bool isFreeze;           // ë¹™ê²° ì—¬ë¶€
+    public float freezeDuration;    // ë¹™ê²° ì§€ì† ì‹œê°„
+    public bool isRoot;             // ì†ë°• ì—¬ë¶€
+    public float rootDuration;      // ì†ë°• ì§€ì† ì‹œê°„
 }
 
 public enum SkillGrade
