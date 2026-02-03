@@ -13,7 +13,7 @@ public static class SourceKey
     public const string Buddy = "Buddy";
 }
 
-public class StatController : MonoBehaviour
+public class StatController : Singleton<StatController>
 {
     // 각 소스별 스탯 저장소
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
@@ -44,6 +44,7 @@ public class StatController : MonoBehaviour
             BigInteger sumBase = 0;
             double sumMultiplier = 1.0f;
 
+            // 각 소스의 type 별 계산
             foreach (var source in _statSources.Values)
             {
                 var match = source.Find(s => s.type == type);
