@@ -1,6 +1,6 @@
 ﻿﻿using UnityEngine;
 using SlayerLegend.Skill;
-using SlayerLegend.Skill.StatusEffects;
+// using SlayerLegend.Skill.StatusEffects; // TODO: StatusEffects 시스템 완료 후 해제
 using System.Collections.Generic;
 
 namespace SlayerLegend.Skill.Testing
@@ -8,19 +8,22 @@ namespace SlayerLegend.Skill.Testing
     /// <summary>
     /// 테스트용 더미 적 캐릭터
     /// 체력을 가지고 액티브 스킬의 데미지를 받음
-    /// 상태이상 시스템 지원
+    /// TODO: 상태이상 시스템 완료 후 IStatusEffectAble 복구
     /// </summary>
-    public class DummyEnemy : MonoBehaviour, IDamageable, IStatusEffectAble
+    public class DummyEnemy : MonoBehaviour, IDamageable //, IStatusEffectAble
     {
         [Header("스탯")]
         [SerializeField] private float maxHealth = 500f;
 
+        // TODO: StatusEffects 시스템 완료 후 해제
+        /*
         [Header("상태이상")]
         [SerializeField] private List<StatusEffect> activeEffects = new List<StatusEffect>();
+        public List<StatusEffect> ActiveEffects => activeEffects;
+        */
 
         public float CurrentHealth { get; private set; }
         public float MaxHealth => maxHealth;
-        public List<StatusEffect> ActiveEffects => activeEffects;
 
         private void Awake()
         {
@@ -34,6 +37,8 @@ namespace SlayerLegend.Skill.Testing
 
         private void Update()
         {
+            // TODO: StatusEffects 시스템 완료 후 해제
+            /*
             // 만료된 상태이상 제거
             for (int i = activeEffects.Count - 1; i >= 0; i--)
             {
@@ -42,6 +47,7 @@ namespace SlayerLegend.Skill.Testing
                     activeEffects.RemoveAt(i);
                 }
             }
+            */
         }
 
         /// <summary>
@@ -61,8 +67,8 @@ namespace SlayerLegend.Skill.Testing
         private void Die()
         {
             Debug.Log($"[DummyEnemy] 적 처치!");
-            // 모든 상태이상 제거
-            ClearAllStatusEffects();
+            // TODO: 모든 상태이상 제거 - StatusEffects 시스템 완료 후 해제
+            // ClearAllStatusEffects();
             // 테스트를 위해 3초 후 부활
             Invoke(nameof(Respawn), 3f);
         }
@@ -70,10 +76,13 @@ namespace SlayerLegend.Skill.Testing
         private void Respawn()
         {
             CurrentHealth = maxHealth;
-            ClearAllStatusEffects();
+            // TODO: StatusEffects 시스템 완료 후 해제
+            // ClearAllStatusEffects();
             Debug.Log($"[DummyEnemy] 적 리스폰 - HP: {CurrentHealth}");
         }
 
+        // TODO: StatusEffects 시스템 완료 후 해제
+        /*
         #region IStatusEffectAble 구현
         public void ApplyStatusEffect(StatusEffect effect)
         {
@@ -146,6 +155,7 @@ namespace SlayerLegend.Skill.Testing
             activeEffects.Clear();
         }
         #endregion
+        */
 
         private void OnGUI()
         {
@@ -158,6 +168,8 @@ namespace SlayerLegend.Skill.Testing
                 $"Enemy HP: {hpPercent * 100:F0}% ({CurrentHealth:F0}/{MaxHealth:F0})");
             yOffset += 25;
 
+            // TODO: StatusEffects 시스템 완료 후 해제
+            /*
             // 활성화된 상태이상 표시
             if (activeEffects.Count > 0)
             {
@@ -175,11 +187,13 @@ namespace SlayerLegend.Skill.Testing
                     }
                 }
             }
+            */
         }
 
         private void OnDestroy()
         {
-            ClearAllStatusEffects();
+            // TODO: StatusEffects 시스템 완료 후 해제
+            // ClearAllStatusEffects();
         }
     }
 }

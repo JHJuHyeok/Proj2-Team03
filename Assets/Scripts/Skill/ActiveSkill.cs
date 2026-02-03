@@ -1,6 +1,6 @@
 ﻿﻿using UnityEngine;
 using SlayerLegend.Resource;
-using SlayerLegend.Skill.StatusEffects;
+// using SlayerLegend.Skill.StatusEffects; // TODO: StatusEffects 시스템 완료 후 해제
 
 namespace SlayerLegend.Skill
 {
@@ -128,13 +128,15 @@ namespace SlayerLegend.Skill
                 Debug.Log($"{caster.name}이(가) {skillData.name} 발동! → 적에게 {totalDamage:F1} 데미지");
             }
 
-            // 도트 데미지 적용
-            ApplyDotEffect(enemyObject);
+            // 도트 데미지 적용 (TODO: StatusEffects 시스템 완료 후 해제)
+            // ApplyDotEffect(enemyObject);
         }
 
         /// <summary>
         /// 도트 데미지 상태이상 적용
+        /// TODO: StatusEffects 시스템 완료 후 해제
         /// </summary>
+        /*
         private void ApplyDotEffect(GameObject enemyObject)
         {
             if (!skillData.IsDotSkill()) return;
@@ -172,6 +174,7 @@ namespace SlayerLegend.Skill
 
             Debug.Log($"[Skill] 도트 데미지 적용! {skillData.GetDotDuration()}초간 {skillData.GetDotTickInterval()}초마다 데미지");
         }
+        */
 
         public void ResetCooldown() => currentCooldown = 0f;
 
