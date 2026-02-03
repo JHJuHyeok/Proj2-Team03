@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Numerics;
 
 [System.Serializable]
-public class Cost
+public class Currency
 {
     public CurrencyType type;       // 재화 타입
     public BigInteger value;        // 값
