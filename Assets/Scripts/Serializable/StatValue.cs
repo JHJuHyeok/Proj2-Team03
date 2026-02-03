@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Numerics;
 
+//===============스탯 기본형===============//
+
 [System.Serializable]
 public class StatValue
 {

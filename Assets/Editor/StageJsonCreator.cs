@@ -31,6 +31,8 @@ public class StageJsonCreator : EditorWindow
         {
             DrawAreaItem(areaDatas[i], i);
         }
+
+        EditorGUILayout.EndScrollView();
     }
 
     private void DrawAreaItem(AreaData area, int index)
@@ -42,7 +44,7 @@ public class StageJsonCreator : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         areaFoldouts[area.id] = EditorGUILayout.Foldout(areaFoldouts[area.id],
-            $"Area: {area.name} ({area.id})", true, EditorStyles.foldoutHeader);
+            $"Area: {area.id}", true, EditorStyles.foldoutHeader);
 
         if (GUILayout.Button("Remove Area", GUILayout.Width(100))) 
         { 
@@ -94,18 +96,18 @@ public class StageJsonCreator : EditorWindow
 
         stage.id = EditorGUILayout.TextField("스테이지 ID", stage.id);
         stage.name = EditorGUILayout.TextField("스테이지 이름", stage.name);
-
-        EditorGUILayout.BeginHorizontal();
+        GUILayout.Space(5);
         stage.monsterId = EditorGUILayout.TextField("등장 몬스터 ID", stage.monsterId);
+        stage.monsterCount = EditorGUILayout.IntField("등장 몬스터 수", stage.monsterCount);
+        GUILayout.Space(5);
         stage.minGoldDrop = EditorGUILayout.LongField("최소 골드", stage.minGoldDrop);
         stage.maxGoldDrop = EditorGUILayout.LongField("최대 골드", stage.maxGoldDrop);
         stage.expDrop = EditorGUILayout.IntField("경험치 획득량", stage.expDrop);
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
+        GUILayout.Space(5);
         stage.dropEquipID = EditorGUILayout.TextField("드랍 장비 ID", stage.dropEquipID);
         stage.dropPercent = EditorGUILayout.FloatField("드랍 확률", stage.dropPercent);
-        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.EndVertical();
     }
 
     private void AddNewArea()
