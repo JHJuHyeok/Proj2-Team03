@@ -11,21 +11,21 @@ public class SkillDataList : IDataList<SkillData>
 [System.Serializable]
 public class SkillData
 {
-    public string id;               // ½ºÅ³ ID
-    public string name;             // ½ºÅ³ ¸íÄª
-    public string spriteName;       // ÀÌ¹ÌÁö ÀÌ¸§
-    public string explain;          // ¼³¸í ÅØ½ºÆ®
-    public string effect;           // È¿°ú ÅØ½ºÆ®
+    public string id;               // ï¿½ï¿½Å³ ID
+    public string name;             // ï¿½ï¿½Å³ ï¿½ï¿½Äª
+    public string spriteName;       // ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
+    public string explain;          // ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Æ®
+    public string effect;           // È¿ï¿½ï¿½ ï¿½Ø½ï¿½Æ®
 
-    public SkillGrade grade;        // ½ºÅ³ µî±Þ
-    public SkillType type;          // ½ºÅ³ Å¸ÀÔ
-    public SkillRequest request;    // »ç¿ë Á¶°Ç
-    public SkillElement element;    // ½ºÅ³ ¼Ó¼º
+    public SkillGrade grade;        // ï¿½ï¿½Å³ ï¿½ï¿½ï¿½
+    public SkillType type;          // ï¿½ï¿½Å³ Å¸ï¿½ï¿½
+    public SkillRequest request;    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public SkillElement element;    // ï¿½ï¿½Å³ ï¿½Ó¼ï¿½
 
-    public int maxLevel;            // ÃÖ´ë ·¹º§
-    public int needMp;              // ¼Ò¸ð MP
-    public int initialRate;         // ±âº» ¼öÄ¡ °ª
-    public float levelUpValue;      // ·¹º§ ´ç ¼öÄ¡ »ó½Â°ª
+    public int maxLevel;            // ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public int needMp;              // ï¿½Ò¸ï¿½ MP
+    public int initialRate;         // ï¿½âº» ï¿½ï¿½Ä¡ ï¿½ï¿½
+    public float levelUpValue;      // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½Â°ï¿½
 }
 
 public enum SkillGrade
