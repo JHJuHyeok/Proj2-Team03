@@ -4,7 +4,7 @@ using UnityEngine;
 public class BossMonster : MonsterBase
 {
     private float _lastAttackTime = -999f;
-    private float _attackRange = 2.0f; // 공격 범위
+    private float _attackRange = 4f; // 공격 범위
 
     public override bool IsBoss => true;
     public override bool IsRewardBox => false;
@@ -26,7 +26,6 @@ public class BossMonster : MonsterBase
         float distance = Vector3.Distance(transform.position, _target.position);
 
         // 공격 범위 안에 있는지 확인
-
         if (distance <= _attackRange)
         {
             // 공격 쿨다운 확인

@@ -30,6 +30,12 @@ public class CombatManager : MonoBehaviour
 
     public CombatState CurrentState { get; private set; } = CombatState.Farming;
 
+    // 보스전 타이머
+    public const float BOSS_TIME_LIMIT = 30f; // 고정 제한 시간 (초)
+    private float _bossTimeRemaining = 0f;
+    private bool _isBossTimerActive = false;
+    public float BossTimeRemaining => _bossTimeRemaining;
+
     private void Awake()
     {
         Instance = this;
@@ -62,9 +68,16 @@ public class CombatManager : MonoBehaviour
     
     private void Update()
     {
-        if (CurrentState == CombatState.Farming)
+        // 보스전 타이머 체크
+        if (CurrentState == CombatState.BossBattle && _isBossTimerActive)
         {
-            // 이벤트 방식으로 전환 권장
+            _bossTimeRemaining -= Time.deltaTime;
+            if (_bossTimeRemaining <= 0f)
+            {
+                _isBossTimerActive = false;
+                Debug.Log("[CombatManager] 보스전 시간 초과!");
+                HandleBossFail();
+            }
         }
     }
 
@@ -94,14 +107,20 @@ public class CombatManager : MonoBehaviour
     // 보스전 시작
     public void StartBossBattle()
     {
-        Debug.Log("Starting Boss Battle!");
+        Debug.Log("[CombatManager] 보스전 시작!");
         CurrentState = CombatState.BossBattle;
+
+        // 제한 시간 타이머 시작
+        _bossTimeRemaining = BOSS_TIME_LIMIT;
+        _isBossTimerActive = true;
+
         spawnManager.SpawnBoss();
     }
 
     private void HandleBossWin()
     {
-        Debug.Log("보스 처치! 스테이지 클리어.");
+        _isBossTimerActive = false;
+        Debug.Log("[CombatManager] 보스 처치! 스테이지 클리어.");
         // TODO: 다음 스테이지 로드 로직
         StartFarming();
     }
@@ -109,7 +128,9 @@ public class CombatManager : MonoBehaviour
     // 보스전 실패 처리
     public void HandleBossFail()
     {
-        Debug.Log("보스전 실패...");
+        _isBossTimerActive = false;
+        spawnManager.CleanUpEnemies();
+        Debug.Log("[CombatManager] 보스전 실패. 일반 스테이지로 복귀.");
         stageManager.ResetProgress();
         StartFarming();
     }

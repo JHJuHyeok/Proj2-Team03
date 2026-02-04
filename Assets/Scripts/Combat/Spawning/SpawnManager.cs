@@ -13,6 +13,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private float queueSpacing = 2f;
     [SerializeField] private float queueBaseOffset = 1.5f;
     [SerializeField] private string commonMonsterAddress = "CommonMonster"; // 공통 몬스터 Addressable 키
+    [SerializeField] private string bossMonsterAddress = "BossMonster"; // 보스 몬스터 Addressable 키
     [SerializeField] private string rewardBoxId = "REWARD_BOX"; // 보상 상자 몬스터 ID
 
     private Coroutine _spawnCoroutine;
@@ -48,8 +49,14 @@ public class SpawnManager : MonoBehaviour
             yield return LoadPrefabAsync(commonMonsterAddress, 10);
         }
 
+        // 보스 몬스터 프리팹 로드
+        if (!string.IsNullOrEmpty(bossMonsterAddress))
+        {
+            yield return LoadPrefabAsync(bossMonsterAddress, 2);
+        }
+
         _poolsInitialized = true;
-        Debug.Log("[SpawnManager] 풀 초기화됨 (공통 몬스터)");
+        Debug.Log("[SpawnManager] 풀 초기화됨 (공통 몬스터 + 보스 몬스터)");
     }
 
     private IEnumerator LoadPrefabAsync(string address, int poolSize)
@@ -151,9 +158,47 @@ public class SpawnManager : MonoBehaviour
         StopSpawning();
         CleanUpEnemies();
 
-        // StageData에서 bossId가 제거됨. 
-        // 만약 보스전이 필요하다면 별도의 로직이 필요.
-        Debug.LogWarning("[SpawnManager] SpawnBoss 호출됨 그러나 StageData에 bossId 없음.");
+        if (_currentStageData == null || string.IsNullOrEmpty(_currentStageData.bossId))
+        {
+            Debug.LogWarning("[SpawnManager] 보스 ID가 설정되지 않음.");
+            return;
+        }
+
+        MonsterData bossData = DataManager.Instance.monsters.Get(_currentStageData.bossId);
+        if (bossData == null)
+        {
+            Debug.LogError($"[SpawnManager] 보스 데이터 없음: {_currentStageData.bossId}");
+            return;
+        }
+
+        // 보스 전용 프리팹 사용
+        if (!_loadedPrefabs.TryGetValue(bossMonsterAddress, out GameObject prefab))
+        {
+            Debug.LogWarning($"[SpawnManager] 보스 프리팹 로드 안됨: {bossMonsterAddress}");
+            return;
+        }
+
+        MonsterBase prefabMonster = prefab.GetComponent<MonsterBase>();
+        if (prefabMonster == null)
+        {
+            Debug.LogError($"[SpawnManager] 보스 프리팹에 MonsterBase 컴포넌트 없음: {bossMonsterAddress}");
+            return;
+        }
+
+        MonsterBase boss = PoolManager.Instance.GetFromPool(prefabMonster);
+        if (boss != null)
+        {
+            boss.transform.position = GetSpawnPosition() + Vector3.right * 3;
+            boss.Initialize(bossData, _playerTransform);
+
+            if (boss.gameObject.layer != LayerMask.NameToLayer("Enemy"))
+            {
+                boss.gameObject.layer = LayerMask.NameToLayer("Enemy");
+            }
+
+            _enemyQueue.Add(boss);
+            Debug.Log($"[SpawnManager] 보스 소환: {bossData.name} ({bossData.id})");
+        }
     }
 
     public void CleanUpEnemies()
@@ -198,7 +243,7 @@ public class SpawnManager : MonoBehaviour
     {
         // 풀 초기화 대기
         yield return new WaitUntil(() => _poolsInitialized);
-        Debug.Log("test");
+
         // 초기 스폰 배치: 큐를 즉시 채움
         int initialNeeded = maxQueueSize - _enemyQueue.Count;
 
