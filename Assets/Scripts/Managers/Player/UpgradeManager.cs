@@ -10,7 +10,7 @@ public class UpgradeManager : MonoBehaviour
 
 
     //☆☆☆ 강화 비용 테이블 Json 데이터 불러올 것 ☆☆☆//
-    private UpgradeCostList costList;
+    private UpgradeConfigList costList;
 
 
 
@@ -37,6 +37,7 @@ public class UpgradeManager : MonoBehaviour
             });
         }
 
+        // 스탯 컨트롤러에 소스 갱신 요청
         StatController.Instance.UpdateStatSource(SourceKey.Upgrade, currentUpgradeStats);
     }
 
@@ -48,7 +49,7 @@ public class UpgradeManager : MonoBehaviour
     /// <returns></returns>
     private BigInteger GetCost(StatType type, int level)
     {
-        UpgradeCostData data = FindCostData(type);
+        UpgradeConfigData data = FindCostData(type);
 
         BigInteger value = data.baseCost * (BigInteger)Mathf.Pow(data.growth, level);
 
@@ -56,7 +57,7 @@ public class UpgradeManager : MonoBehaviour
     }
 
     // 업그레이드 비용 리스트 탐색
-    private UpgradeCostData FindCostData(StatType type)
+    private UpgradeConfigData FindCostData(StatType type)
     {
         foreach (var costData in costList.upgradeCostList)
         {
