@@ -25,5 +25,6 @@ public class MonsterData
 public enum MonsterType
 {
     normal,
-    Boss
+    Boss,
+    RewardBox
 }
