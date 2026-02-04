@@ -26,6 +26,7 @@ public class StageData
 
     public string monsterId;    // 등장 몬스터 ID
     public int monsterCount;    // 등장 몬스터 수
+    public string bossId;       // 등장 보스 ID
     public long minGoldDrop;    // 드랍 골드 최소치
     public long maxGoldDrop;    // 드랍 골드 최대치
     public int expDrop;         // 획득 경험치 수치

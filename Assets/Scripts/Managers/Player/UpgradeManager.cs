@@ -51,7 +51,7 @@ public class UpgradeManager : MonoBehaviour
     {
         UpgradeConfigData data = FindCostData(type);
 
-        BigInteger value = data.baseCost * (BigInteger)Mathf.Pow(data.growth, level);
+        BigInteger value = data.startCost * (BigInteger)Mathf.Pow(data.costIncreseRatio, level);
 
         return value;
     }
@@ -59,7 +59,7 @@ public class UpgradeManager : MonoBehaviour
     // 업그레이드 비용 리스트 탐색
     private UpgradeConfigData FindCostData(StatType type)
     {
-        foreach (var costData in costList.upgradeCostList)
+        foreach (var costData in costList.upgradeConfigs)
         {
             if (costData.type == type)
             {

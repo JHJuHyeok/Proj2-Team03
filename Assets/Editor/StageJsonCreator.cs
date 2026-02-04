@@ -99,6 +99,7 @@ public class StageJsonCreator : EditorWindow
         GUILayout.Space(5);
         stage.monsterId = EditorGUILayout.TextField("등장 몬스터 ID", stage.monsterId);
         stage.monsterCount = EditorGUILayout.IntField("등장 몬스터 수", stage.monsterCount);
+        stage.bossId = EditorGUILayout.TextField("등장 보스 ID", stage.bossId);
         GUILayout.Space(5);
         stage.minGoldDrop = EditorGUILayout.LongField("최소 골드", stage.minGoldDrop);
         stage.maxGoldDrop = EditorGUILayout.LongField("최대 골드", stage.maxGoldDrop);
