@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
-using System.Numerics;
 using Newtonsoft.Json;
 
 public class MonsterJsonCreator : EditorWindow
@@ -10,27 +9,27 @@ public class MonsterJsonCreator : EditorWindow
     private List<MonsterData> monsters = new List<MonsterData>();
     private UnityEngine.Vector2 scrollPos;
 
-    // ¿¡µğÅÍ Ã¢ Ç¥½Ã
+    // ì—ë””í„° ì°½ í‘œì‹œ
     [MenuItem("Tools/JSON/Monster JSON Creator")]
     public static void ShowWindow()
     {
         GetWindow<MonsterJsonCreator>("MonsterDatabase Creator");
     }
 
-    // ½ºÅ©·Ñ º¯¼ö
+    // ìŠ¤í¬ë¡¤ ë³€ìˆ˜
     [SerializeField] bool boolBar = true;
 
     private void OnGUI()
     {
-        GUILayout.Label("¸ó½ºÅÍ JSON µ¥ÀÌÅÍ »ı¼º±â");
+        GUILayout.Label("ëª¬ìŠ¤í„° JSON ë°ì´í„° ìƒì„±ê¸°");
 
-        // »ó´Ü ¹öÆ°µé
+        // ìƒë‹¨ ë²„íŠ¼ë“¤
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("¸ó½ºÅÍ Ãß°¡"))
+        if (GUILayout.Button("ëª¬ìŠ¤í„° ì¶”ê°€"))
         {
             monsters.Add(new MonsterData());
         }
-        if (GUILayout.Button("JSON ÆÄÀÏ »ı¼º"))
+        if (GUILayout.Button("JSON íŒŒì¼ ìƒì„±"))
         {
             ExportToJson();
         }
@@ -51,18 +50,18 @@ public class MonsterJsonCreator : EditorWindow
         MonsterData monster = monsters[index];
         EditorGUILayout.BeginVertical("box");
 
-        monster.id = EditorGUILayout.TextField("¸ó½ºÅÍ ID", monster.id);
-        monster.name = EditorGUILayout.TextField("¸ó½ºÅÍ ¸íÄª", monster.name);
-        monster.spriteName = EditorGUILayout.TextField("ÀÌ¹ÌÁö ÀÌ¸§", monster.spriteName);
+        monster.id = EditorGUILayout.TextField("ëª¬ìŠ¤í„° ID", monster.id);
+        monster.name = EditorGUILayout.TextField("ëª¬ìŠ¤í„° ëª…ì¹­", monster.name);
+        monster.spriteName = EditorGUILayout.TextField("ì´ë¯¸ì§€ ì´ë¦„", monster.spriteName);
 
-        // BigInteger ÀÔ·Â ÇÊµå
-        monster.maxHp = ConvertBigIntField("ÃÖ´ë Ã¼·Â", monster.maxHp);
-        monster.Attack = ConvertBigIntField("°ø°İ·Â", monster.Attack);
+        // Double ì…ë ¥ í•„ë“œ
+        monster.maxHp = ConvertDoubleField("ìµœëŒ€ ì²´ë ¥", monster.maxHp);
+        monster.Attack = ConvertDoubleField("ê³µê²©ë ¥", monster.Attack);
 
-        monster.type = (MonsterType)EditorGUILayout.EnumPopup("¸ó½ºÅÍ Å¸ÀÔ", monster.type);
-        monster.weakElement = (SkillElement)EditorGUILayout.EnumPopup("¾àÇÑ ¼Ó¼º", monster.weakElement);
+        monster.type = (MonsterType)EditorGUILayout.EnumPopup("ëª¬ìŠ¤í„° íƒ€ì…", monster.type);
+        monster.weakElement = (SkillElement)EditorGUILayout.EnumPopup("ì•½í•œ ì†ì„±", monster.weakElement);
 
-        if (GUILayout.Button("ÀÌ ÇÊµå »èÁ¦", GUILayout.Width(100)))
+        if (GUILayout.Button("ì´ í•„ë“œ ì‚­ì œ", GUILayout.Width(100)))
         {
             monsters.RemoveAt(index);
         }
@@ -71,27 +70,27 @@ public class MonsterJsonCreator : EditorWindow
         EditorGUILayout.Space(5);
     }
 
-    /// BigInteger °ªÀ» stringÀ¸·Î ÀÔ·Â ¹Ş±â
-    private BigInteger ConvertBigIntField(string label, BigInteger value)
+    /// Double ê°’ì„ stringìœ¼ë¡œ ì…ë ¥ ë°›ê¸°
+    private double ConvertDoubleField(string label, double value)
     {
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PrefixLabel(label);
 
-        // BigInteger °ªÀ» stringÀ¸·Î º¯È¯
+        // Double ê°’ì„ stringìœ¼ë¡œ ë³€í™˜
         string currentStringValue = value.ToString();
         string input = EditorGUILayout.TextField(currentStringValue);
 
-        BigInteger resultValue = value;
+        double resultValue = value;
 
-        // À¯È¿¼º °ËÁõ
-        if (BigInteger.TryParse(input, out BigInteger parsedValue))
+        // ìœ íš¨ì„± ê²€ì¦
+        if (double.TryParse(input, out double parsedValue))
         {
             resultValue = parsedValue;
         }
         else
         {
             GUI.color = Color.red;
-            GUILayout.Label("À¯È¿ÇÏÁö ¾ÊÀº °ªÀÔ´Ï´Ù.", EditorStyles.miniLabel);
+            GUILayout.Label("ìœ íš¨í•˜ì§€ ì•Šì€ ê°’ì…ë‹ˆë‹¤.", EditorStyles.miniLabel);
             GUI.color = Color.white;
         }
         EditorGUILayout.EndHorizontal();
@@ -106,7 +105,7 @@ public class MonsterJsonCreator : EditorWindow
             monsterList = monsters
         };
 
-        // ÀúÀåµÉ ÁÖ¼Ò
+        // ì €ì¥ë  ì£¼ì†Œ
         string folder = "Assets/Resources/Json/Monster";
         if (!Directory.Exists(folder))
         {
@@ -122,7 +121,7 @@ public class MonsterJsonCreator : EditorWindow
                 ObjectCreationHandling = ObjectCreationHandling.Replace
             };
 
-            // Json ÆÄÀÏ·Î º¯È¯
+            // Json íŒŒì¼ë¡œ ë³€í™˜
             string json = JsonConvert.SerializeObject(dataList, settings);
 
             string path = Path.Combine(folder, "MonsterList.json");
@@ -130,11 +129,11 @@ public class MonsterJsonCreator : EditorWindow
             File.WriteAllText(path, json);
 
             AssetDatabase.Refresh();
-            Debug.Log("¸ó½ºÅÍ ¸®½ºÆ® »ı¼º ¿Ï·á");
+            Debug.Log("ëª¬ìŠ¤í„° ë¦¬ìŠ¤íŠ¸ ìƒì„± ì™„ë£Œ");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"¿À·ù ¹ß»ı: {e.Message}");
+            Debug.LogError($"ì˜¤ë¥˜ ë°œìƒ: {e.Message}");
         }
     }
 }

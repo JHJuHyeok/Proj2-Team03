@@ -1,25 +1,24 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Numerics;
 
-//===============°­È­ ½ºÅ©¸³Æ®==============//
+//===============ê°•í™” ìŠ¤í¬ë¦½íŠ¸==============//
 
 public class UpgradeManager : MonoBehaviour
 {
-    private Dictionary<StatType, int> _upgradeLevels = new();       // °¢ ½ºÅÈ ·¹º§
+    private Dictionary<StatType, int> _upgradeLevels = new();       // ê° ìŠ¤íƒ¯ ë ˆë²¨
 
 
-    //¡Ù¡Ù¡Ù °­È­ ºñ¿ë Å×ÀÌºí Json µ¥ÀÌÅÍ ºÒ·¯¿Ã °Í ¡Ù¡Ù¡Ù//
+    //â˜†â˜†â˜† ê°•í™” ë¹„ìš© í…Œì´ë¸” Json ë°ì´í„° ë¶ˆëŸ¬ì˜¬ ê²ƒ â˜†â˜†â˜†//
     private UpgradeConfigList costList;
 
 
 
-    // ½ºÅÈ ·¹º§¾÷
+    // ìŠ¤íƒ¯ ë ˆë²¨ì—…
     public void UpgradeStat(StatType type)
     {
-        // ·¹º§¾÷
+        // ë ˆë²¨ì—…
         _upgradeLevels[type]++;
-        // ÀçÈ­ ¼Ò¸ğ
+        // ì¬í™” ì†Œëª¨
         CurrencyManager.Instance.ConsumeCurrency(CurrencyType.Gold, GetCost(type, _upgradeLevels[type]));
 
         List<StatValue> currentUpgradeStats = new();
@@ -32,31 +31,31 @@ public class UpgradeManager : MonoBehaviour
             currentUpgradeStats.Add(new StatValue()
             {
                 type = level.Key,
-                baseValue = (BigInteger)level.Value * (int)row.perLevelValue,
+                baseValue = level.Value * row.perLevelValue,
                 multiplier = level.Value * row.perLevelMul
             });
         }
 
-        // ½ºÅÈ ÄÁÆ®·Ñ·¯¿¡ ¼Ò½º °»½Å ¿äÃ»
+        // ìŠ¤íƒ¯ ì»¨íŠ¸ë¡¤ëŸ¬ì— ì†ŒìŠ¤ ê°±ì‹  ìš”ì²­
         StatController.Instance.UpdateStatSource(SourceKey.Upgrade, currentUpgradeStats);
     }
 
     /// <summary>
-    /// ¾÷±×·¹ÀÌµå ºñ¿ë »êÃâ
+    /// ì—…ê·¸ë ˆì´ë“œ ë¹„ìš© ì‚°ì¶œ
     /// </summary>
-    /// <param name="type"> ½ºÅÈ Å¸ÀÔ </param>
-    /// <param name="level"> ½ºÅÈ ·¹º§ </param>
+    /// <param name="type"> ìŠ¤íƒ¯ íƒ€ì… </param>
+    /// <param name="level"> ìŠ¤íƒ¯ ë ˆë²¨ </param>
     /// <returns></returns>
-    private BigInteger GetCost(StatType type, int level)
+    private double GetCost(StatType type, int level)
     {
         UpgradeConfigData data = FindCostData(type);
 
-        BigInteger value = data.startCost * (BigInteger)Mathf.Pow(data.costIncreseRatio, level);
+        double value = data.startCost * Mathf.Pow(data.costIncreseRatio, level);
 
         return value;
     }
 
-    // ¾÷±×·¹ÀÌµå ºñ¿ë ¸®½ºÆ® Å½»ö
+    // ì—…ê·¸ë ˆì´ë“œ ë¹„ìš© ë¦¬ìŠ¤íŠ¸ íƒìƒ‰
     private UpgradeConfigData FindCostData(StatType type)
     {
         foreach (var costData in costList.upgradeConfigs)
@@ -73,11 +72,11 @@ public class UpgradeManager : MonoBehaviour
 public struct StatUpgradeRow
 {
     public int maxLevel;
-    public float perLevelValue;     // ÇÕ¿¬»ê Áõ°¡·®
-    public float perLevelMul;       // °ö¿¬»ê Áõ°¡·®
+    public float perLevelValue;     // í•©ì—°ì‚° ì¦ê°€ëŸ‰
+    public float perLevelMul;       // ê³±ì—°ì‚° ì¦ê°€ëŸ‰
 }
 
-// ½ºÅÈ ¾÷±×·¹ÀÌµå ¼öÄ¡
+// ìŠ¤íƒ¯ ì—…ê·¸ë ˆì´ë“œ ìˆ˜ì¹˜
 public static class StatUpgradeTable
 {
     public static readonly Dictionary<StatType, StatUpgradeRow> Table = new()

@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerCombat : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private PlayerCombatStats playerStats;
     [SerializeField] private PlayerTargeting playerTargeting;
 
     [Header("Settings")]
@@ -19,7 +19,7 @@ public class PlayerCombat : MonoBehaviour
     {
         // 할당되지 않은 경우 컴포넌트 자동 찾기
         if (playerStats == null)
-            playerStats = GetComponent<PlayerStats>();
+            playerStats = GetComponent<PlayerCombatStats>();
 
         if (playerTargeting == null)
             playerTargeting = GetComponent<PlayerTargeting>();
@@ -102,7 +102,7 @@ public class PlayerCombat : MonoBehaviour
         // 치명타를 포함한 데미지 계산
         bool isCritical = DamageCalculator.RollCritical(playerStats.CriticalRate);
 
-        float damage = DamageCalculator.CalculateDamage(
+        double damage = DamageCalculator.CalculateDamage(
             baseDamage: playerStats.AttackDamage,
             critRate: playerStats.CriticalRate,
             critDamage: playerStats.CriticalDamage,

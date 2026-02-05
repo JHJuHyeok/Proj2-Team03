@@ -1,13 +1,12 @@
 using UnityEngine;
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 
 public class CurrencyManager : Singleton<CurrencyManager>
 {
-    private Dictionary<CurrencyType, BigInteger> _currencies = new Dictionary<CurrencyType, BigInteger>();
+    private Dictionary<CurrencyType, double> _currencies = new Dictionary<CurrencyType, double>();
 
-    public event Action<CurrencyType, BigInteger> OnCurrencyChanged;
+    public event Action<CurrencyType, double> OnCurrencyChanged;
 
     protected override void Awake()
     {
@@ -21,7 +20,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <param name="type"> 소모하려는 재화 </param>
     /// <param name="amount"> 재화량 </param>
     /// <returns> type이 일치하지 않으면 false, 있다면 재화량 비교 </returns>
-    public bool HasEnoughCurrency(CurrencyType type, BigInteger amount)
+    public bool HasEnoughCurrency(CurrencyType type, double amount)
     {
         if (!_currencies.ContainsKey(type)) return false;
         return _currencies[type] >= amount;
@@ -32,7 +31,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// </summary>
     /// <param name="type"> 재화 타입 </param>
     /// <param name="amount"> 획득한 재화량 </param>
-    public void AddCurrency(CurrencyType type, BigInteger amount)
+    public void AddCurrency(CurrencyType type, double amount)
     {
         if (!_currencies.ContainsKey(type)) return;
 
@@ -46,7 +45,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// </summary>
     /// <param name="type"> 재화 타입 </param>
     /// <param name="amount"> 소모 재화량 </param>
-    public void ConsumeCurrency(CurrencyType type, BigInteger amount)
+    public void ConsumeCurrency(CurrencyType type, double amount)
     {
         if (HasEnoughCurrency(type, amount))
         {
@@ -60,6 +59,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// </summary>
     /// <param name="type"> 재화 타입 </param>
     /// <returns> 재화 수량 </returns>
-    public BigInteger GetAmount(CurrencyType type) =>
+    public double GetAmount(CurrencyType type) =>
         _currencies.GetValueOrDefault(type, 0);
 }
+

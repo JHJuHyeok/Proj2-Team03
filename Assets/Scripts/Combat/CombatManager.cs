@@ -23,7 +23,7 @@ public class CombatManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private Transform playerTransform;
-    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private PlayerCombatStats playerStats;
 
     [Header("Initial Stage")]
     [SerializeField] private string initialStageId = "Stage_1";

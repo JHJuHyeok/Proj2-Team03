@@ -10,15 +10,15 @@ public static class DamageCalculator
     // skillMultiplier: 추가 스킬 배율
     // isCritical: 출력: 치명타 발생 여부
     // 반환값: 최종 계산된 데미지
-    public static float CalculateDamage(
-        float baseDamage,
-        float critRate,
-        float critDamage,
-        float skillMultiplier,
+    public static double CalculateDamage(
+        double baseDamage,
+        double critRate,
+        double critDamage,
+        double skillMultiplier,
         out bool isCritical)
     {
         // 스킬 배율 적용
-        float damage = baseDamage * skillMultiplier;
+        double damage = baseDamage * skillMultiplier;
 
         // 치명타 확인
         isCritical = Random.value < critRate;
@@ -31,17 +31,8 @@ public static class DamageCalculator
         return damage;
     }
 
-    // 방어력 감소를 적용한 데미지 계산
-    public static float CalculateDamageWithDefense(float damage, float defense)
-    {
-        // 간단한 방어 공식: damage = damage * (100 / (100 + defense))
-        // 방어력이 높을수록 효율이 감소함
-        float reduction = 100f / (100f + defense);
-        return damage * reduction;
-    }
-
     // 치명타 여부 빠른 확인
-    public static bool RollCritical(float critRate)
+    public static bool RollCritical(double critRate)
     {
         return Random.value < critRate;
     }

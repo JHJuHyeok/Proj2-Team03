@@ -40,16 +40,16 @@ public class BossMonster : MonsterBase
 
     private void ExecuteAttack()
     {
-        // 타겟의 PlayerStats 컴포넌트 찾기
-        var playerStats = _target.GetComponent<PlayerStats>();
+        // 타겟의 PlayerCombatStats 컴포넌트 찾기
+        var playerStats = _target.GetComponent<PlayerCombatStats>();
         if (playerStats != null)
         {
-            playerStats.TakeDamage((float)_data.Attack);
+            playerStats.TakeDamage((double)_data.Attack);
             Debug.Log($"[{_data.name}] 플레이어에게 {(float)_data.Attack:F1} 데미지 공격");
         }
         else
         {
-            Debug.LogWarning($"[{_data.name}] 공격 불가: 플레이어에게 PlayerStats 컴포넌트 없음");
+            Debug.LogWarning($"[{_data.name}] 공격 불가: 플레이어에게 PlayerCombatStats 컴포넌트 없음");
         }
 
         // 선택사항: 여기서 공격 애니메이션/이펙트 재생
