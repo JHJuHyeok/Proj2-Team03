@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using SlayerLegend.Equipment;  // 장비 시스템 네임스페이스
 
 namespace SlayerLegend.Skill.Testing
 {
     /// <summary>
     /// 테스트용 더미 캐릭터
-    /// IStatsProvider와 IGoldProvider를 구현하여 스킬 시스템 테스트
+    /// IStatsProvider, IGoldProvider, IEquippable를 구현하여 스킬/장비 시스템 테스트
     /// </summary>
-    public class DummyCharacter : MonoBehaviour, IStatsProvider, IGoldProvider
+    public class DummyCharacter : MonoBehaviour, IStatsProvider, IGoldProvider, IEquippable
     {
         [Header("스탯")]
         [SerializeField] private float maxHealth = 1000f;
@@ -16,6 +17,11 @@ namespace SlayerLegend.Skill.Testing
         [SerializeField] private float defense = 20f;
         [SerializeField] private float criticalRate = 0.2f;  // 20%
         [SerializeField] private float criticalDamage = 1.5f; // 150%
+
+        // 재계산된 스탯 (버프 반영)
+        private float _maxHealth;
+        private float _criticalRate;
+        private float _criticalDamage;
 
         [Header("회복")]
         [SerializeField] private float manaRegenPerSecond = 30f;
@@ -26,12 +32,12 @@ namespace SlayerLegend.Skill.Testing
         // 현재 값
         public float CurrentHealth { get; private set; }
         public float CurrentMana { get; private set; }
-        public float MaxHealth => maxHealth;
+        public float MaxHealth => _maxHealth;
         public float MaxMana => maxMana;
         public float AttackDamage { get; private set; }
         public float Defense => defense;
-        public float CriticalRate => criticalRate;
-        public float CriticalDamage => criticalDamage;
+        public float CriticalRate => _criticalRate;
+        public float CriticalDamage => _criticalDamage;
 
         public long CurrentGold { get; private set; }
 
@@ -48,7 +54,12 @@ namespace SlayerLegend.Skill.Testing
 
         private void Awake()
         {
-            CurrentHealth = maxHealth;
+            // 기본값 초기화
+            _maxHealth = maxHealth;
+            _criticalRate = criticalRate;
+            _criticalDamage = criticalDamage;
+
+            CurrentHealth = _maxHealth;
             CurrentMana = maxMana;
             CurrentGold = startingGold;
             AttackDamage = attackDamage;
@@ -200,14 +211,33 @@ namespace SlayerLegend.Skill.Testing
 
             AttackDamage = baseAttack * (1 + percentBonus / 100f) + flatBonus;
 
+            // 체력 재계산
+            float baseHealth = maxHealth;
+            float healthPercentBonus = 0f;
+            foreach (var mod in _maxHealthPercentModifiers.Values)
+                healthPercentBonus += mod;
+
+            float healthFlatBonus = 0f;
+            foreach (var mod in _maxHealthModifiers.Values)
+                healthFlatBonus += mod;
+
+            _maxHealth = baseHealth * (1 + healthPercentBonus / 100f) + healthFlatBonus;
+
+            // 현재 체력이 최대 체력을 초과하면 조정
+            if (CurrentHealth > _maxHealth)
+                CurrentHealth = _maxHealth;
+
             // 크리율 재계산
-            float critRate = criticalRate;
+            _criticalRate = criticalRate;
             foreach (var mod in _criticalRateModifiers.Values)
-                critRate += mod;
+                _criticalRate += mod;
 
-            // 나머지 스탯도 필요시 재계산...
+            // 크리티컬 데미지 재계산
+            _criticalDamage = criticalDamage;
+            foreach (var mod in _criticalDamageModifiers.Values)
+                _criticalDamage += mod;
 
-            Debug.Log($"[DummyCharacter] 스탯 재계산 - ATK: {AttackDamage}");
+            Debug.Log($"[DummyCharacter] 스탯 재계산 - ATK: {AttackDamage:F1}, HP: {_maxHealth:F1}, CRIT: {_criticalRate:P2}, CRIT_DMG: {_criticalDamage:F2}");
         }
         #endregion
 
@@ -252,5 +282,75 @@ namespace SlayerLegend.Skill.Testing
             CurrentMana = MaxMana;
             Debug.Log("[DummyCharacter] 체력/마나 완전 회복");
         }
+
+        #region IEquippable 구현
+        /// <summary>
+        /// 장비 효과 적용
+        /// 기존 버프 모디파이어 시스템을 활용하여 장비 효과 적용
+        /// </summary>
+        public void ApplyEquipmentEffect(ItemEffect effect, int level, bool equip)
+        {
+            if (effect == null) return;
+
+            // 레벨에 따른 최종 값 계산
+            float finalValue = effect.initValue + effect.levelUpValue * (level - 1);
+
+            // 장비를 소스로 사용 (객체 참조)
+            object equipmentSource = effect;  // 각 효과를 고유한 소스로 사용
+
+            switch (effect.type)
+            {
+                case EffectType.AttackBoost:
+                    // 공격력 % 증가
+                    if (equip)
+                        AddAttackDamagePercentModifier(equipmentSource, finalValue);
+                    else
+                        RemoveAttackDamagePercentModifier(equipmentSource);
+                    Debug.Log($"[DummyCharacter] 공격력 {(equip ? "+" : "-")}{finalValue}% = {AttackDamage:F1}");
+                    break;
+
+                case EffectType.CriticalDamage:
+                    // 크리티컬 데미지 증가
+                    if (equip)
+                        AddCriticalDamageModifier(equipmentSource, finalValue);
+                    else
+                        RemoveCriticalDamageModifier(equipmentSource);
+                    Debug.Log($"[DummyCharacter] 크리뎀 {(equip ? "+" : "-")}{finalValue:F2} = {CriticalDamage:F2}");
+                    break;
+
+                case EffectType.HealthBoost:
+                    // 체력 증가
+                    if (equip)
+                        AddMaxHealthModifier(equipmentSource, finalValue);
+                    else
+                        RemoveMaxHealthModifier(equipmentSource);
+                    Debug.Log($"[DummyCharacter] 체력 {(equip ? "+" : "-")}{finalValue} = {MaxHealth:F1}");
+                    break;
+
+                case EffectType.GoldGain:
+                    // 골드 획득 % 증가
+                    if (equip)
+                        AddGoldGainPercentModifier(equipmentSource, finalValue);
+                    else
+                        RemoveGoldGainPercentModifier(equipmentSource);
+                    Debug.Log($"[DummyCharacter] 골드 획득 {(equip ? "+" : "-")}{finalValue}%");
+                    break;
+
+                case EffectType.ExpGain:
+                    // 경험치 획득 % 증가 (현재는 로그만)
+                    Debug.Log($"[DummyCharacter] 경험치 획득 {(equip ? "+" : "-")}{finalValue}%");
+                    break;
+
+                case EffectType.ManaBoost:
+                    // 마나 증가 (추후 구현)
+                    Debug.Log($"[DummyCharacter] 마나 증가 {finalValue} (미구현)");
+                    break;
+
+                default:
+                    Debug.LogWarning($"[DummyCharacter] 알 수 없는 장비 효과: {effect.type}");
+                    break;
+            }
+        }
+        #endregion
     }
 }
