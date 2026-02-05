@@ -1,11 +1,10 @@
 using UnityEngine;
-using System.Numerics;
 
 [System.Serializable]
 public class Currency
 {
-    public CurrencyType type;       // ÀçÈ­ Å¸ÀÔ
-    public BigInteger value;        // °ª
+    public CurrencyType type;       // ìž¬í™” íƒ€ìž…
+    public double value;            // ê°’
 }
 
 public enum CurrencyType

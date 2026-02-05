@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Numerics;
 using System.Collections.Generic;
 
 public static class SourceKey
@@ -15,16 +14,16 @@ public static class SourceKey
 
 public class StatController : Singleton<StatController>
 {
-    // °¢ ¼Ò½ºº° ½ºÅÈ ÀúÀå¼Ò
+    // ê° ì†ŒìŠ¤ë³„ ìŠ¤íƒ¯ ì €ì¥ì†Œ
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
-    // ÃÖÁ¾ ÇÕ»ê ½ºÅÈµé
-    private Dictionary<StatType, BigInteger> _finalStats = new Dictionary<StatType, BigInteger>();
+    // ìµœì¢… í•©ì‚° ìŠ¤íƒ¯ë“¤
+    private Dictionary<StatType, double> _finalStats = new Dictionary<StatType, double>();
 
     /// <summary>
-    /// ½ºÅÈ ¼Ò½º °»½Å
+    /// ìŠ¤íƒ¯ ì†ŒìŠ¤ ê°±ì‹ 
     /// </summary>
-    /// <param name="sourceName"> ¼Ò½º ±¸ºĞ ¸íÄª </param>
-    /// <param name="stats"> ³»ºÎ ½ºÅÈµé </param>
+    /// <param name="sourceName"> ì†ŒìŠ¤ êµ¬ë¶„ ëª…ì¹­ </param>
+    /// <param name="stats"> ë‚´ë¶€ ìŠ¤íƒ¯ë“¤ </param>
     public void UpdateStatSource(string sourceName, List<StatValue> stats)
     {
         _statSources[sourceName] = stats;
@@ -32,19 +31,19 @@ public class StatController : Singleton<StatController>
     }
 
     /// <summary>
-    /// ÃÖÁ¾ ½ºÅÈ °è»ê
+    /// ìµœì¢… ìŠ¤íƒ¯ ê³„ì‚°
     /// </summary>
     private void RefreshFinalStats()
     {
         _finalStats.Clear();
 
-        // Å¸ÀÔº° ÀÏ°ı °è»ê
+        // íƒ€ì…ë³„ ì¼ê´„ ê³„ì‚°
         foreach (StatType type in System.Enum.GetValues(typeof(StatType)))
         {
-            BigInteger sumBase = 0;
-            double sumMultiplier = 1.0f;
+            double sumBase = 0;
+            double sumMultiplier = 1.0;
 
-            // °¢ ¼Ò½ºÀÇ type º° °è»ê
+            // ê° ì†ŒìŠ¤ì˜ type ë³„ ê³„ì‚°
             foreach (var source in _statSources.Values)
             {
                 var match = source.Find(s => s.type == type);
@@ -55,14 +54,15 @@ public class StatController : Singleton<StatController>
                 }
             }
 
-            _finalStats[type] = (BigInteger)((double)sumBase * sumMultiplier);
+            _finalStats[type] = sumBase * sumMultiplier;
         }
     }
 
     /// <summary>
-    /// ÃÖÁ¾°ª ¹İÈ¯
+    /// ìµœì¢…ê°’ ë°˜í™˜
     /// </summary>
-    /// <param name="type"> ¹İÈ¯ ½ºÅÈ </param>
-    /// <returns> °ª ¹İÈ¯ </returns>
-    public BigInteger GetFinalStat(StatType type) => _finalStats.GetValueOrDefault(type, 0);
+    /// <param name="type"> ë°˜í™˜ ìŠ¤íƒ¯ </param>
+    /// <returns> ê°’ ë°˜í™˜ </returns>
+    public double GetFinalStat(StatType type) => _finalStats.GetValueOrDefault(type, 0);
 }
+

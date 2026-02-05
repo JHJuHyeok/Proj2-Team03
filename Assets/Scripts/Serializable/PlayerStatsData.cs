@@ -14,10 +14,6 @@ public class PlayerStatsData
     // 기본 스탯
     public float maxHp;                     // 최대 체력
     public float attackDamage;              // 공격력
-    public float defense;                   // 방어력
-    public float attackSpeed;               // 공격 속도
-    public float attackRange;               // 공격 사거리
-    public float detectionRange;            // 탐지 범위
 
     // 마나 시스템
     public float maxMana;                   // 최대 마나

@@ -6,11 +6,11 @@ public class PlayerTargeting : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private float detectionRadius = 15f;
 
-    private PlayerStats _playerStats;
+    private PlayerCombatStats _playerStats;
 
     private void Awake()
     {
-        _playerStats = GetComponent<PlayerStats>();
+        _playerStats = GetComponent<PlayerCombatStats>();
         if (_playerStats != null)
         {
             detectionRadius = _playerStats.DetectionRange;

@@ -1,27 +1,26 @@
 using UnityEngine;
-using System.Numerics;
 
-//===============½ºÅÈ ±âº»Çü===============//
+//===============ìŠ¤íƒ¯ ê¸°ë³¸í˜•===============//
 
 [System.Serializable]
 public class StatValue
 {
     public StatType type;
-    public BigInteger baseValue;    // ±âº» ¼öÄ¡(ÇÕ¿¬»ê)
-    public double multiplier;       // Áõ°¡ ÆÛ¼¾Æ®(°ö¿¬»ê)
+    public double baseValue;        // ê¸°ë³¸ ìˆ˜ì¹˜(í•©ì—°ì‚°)
+    public double multiplier;       // ì¦ê°€ í¼ì„¼íŠ¸(ê³±ì—°ì‚°)
 }
 
 public enum StatType
 {
-    STR,            // °ø°İ·Â
-    HP,             // Ã¼·Â
-    VIT_HP,         // Ã¼·Â È¸º¹·®
-    CTI_DMG,        // Å©¸®Æ¼ÄÃ µ¥¹ÌÁö
-    CRI_Per,        // Å©¸®Æ¼ÄÃ È®·ü
-    MANA,           // ¸¶³ª
-    VIT_MANA,       // ¸¶³ª È¸º¹·®
-    ACC,            // ¸íÁß
-    DODGE,          // È¸ÇÇ
-    ADD_GOLD,       // Ãß°¡ °ñµå È¹µæ·®
-    ADD_EXP         // Ãß°¡ °æÇèÄ¡
+    STR,            // ê³µê²©ë ¥
+    HP,             // ì²´ë ¥
+    VIT_HP,         // ì²´ë ¥ íšŒë³µëŸ‰
+    CTI_DMG,        // í¬ë¦¬í‹°ì»¬ ë°ë¯¸ì§€
+    CRI_Per,        // í¬ë¦¬í‹°ì»¬ í™•ë¥ 
+    MANA,           // ë§ˆë‚˜
+    VIT_MANA,       // ë§ˆë‚˜ íšŒë³µëŸ‰
+    ACC,            // ëª…ì¤‘
+    DODGE,          // íšŒí”¼
+    ADD_GOLD,       // ì¶”ê°€ ê³¨ë“œ íšë“ëŸ‰
+    ADD_EXP         // ì¶”ê°€ ê²½í—˜ì¹˜
 }

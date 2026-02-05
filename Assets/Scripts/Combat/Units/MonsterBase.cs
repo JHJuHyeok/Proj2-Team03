@@ -6,8 +6,8 @@ public abstract class MonsterBase : MonoBehaviour
     protected MonsterData _data;
     protected Transform _target;
     protected bool _isDead = false;
-    protected float _currentHp;
-    protected float _maxHp;
+    protected double _currentHp;
+    protected double _maxHp;
 
     public virtual void Initialize(MonsterData data, Transform target)
     {
@@ -15,8 +15,8 @@ public abstract class MonsterBase : MonoBehaviour
         _target = target;
         _isDead = false;
 
-        // HP 초기화 (BigInteger를 float로 변환)
-        _maxHp = (float)data.maxHp;
+        // HP 초기화
+        _maxHp = data.maxHp;
         _currentHp = _maxHp;
 
         // Sprite Load
@@ -77,12 +77,12 @@ public abstract class MonsterBase : MonoBehaviour
         }
     }
 
-    public virtual void TakeDamage(float damage)
+    public virtual void TakeDamage(double damage)
     {
         if (_isDead) return;
 
         _currentHp -= damage;
-        _currentHp = Mathf.Max(0, _currentHp);
+        _currentHp = System.Math.Max(0, _currentHp);
 
         Debug.Log($"[{gameObject.name}] took {damage:F1} damage. HP: {_currentHp:F0}/{_maxHp:F0}");
 
@@ -132,8 +132,8 @@ public abstract class MonsterBase : MonoBehaviour
     public virtual bool IsRewardBox => _data != null && _data.type == MonsterType.RewardBox;
 
     // UI/디버깅용 공개 프로퍼티
-    public float CurrentHP => _currentHp;
-    public float MaxHP => _maxHp;
-    public float HPRatio => _maxHp > 0 ? _currentHp / _maxHp : 0f;
+    public double CurrentHP => _currentHp;
+    public double MaxHP => _maxHp;
+    public double HPRatio => _maxHp > 0 ? _currentHp / _maxHp : 0;
     public MonsterData Data => _data;
 }
