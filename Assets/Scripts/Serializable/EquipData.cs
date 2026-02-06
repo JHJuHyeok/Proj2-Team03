@@ -18,13 +18,14 @@ public enum EquipType
 [System.Serializable]
 public class EquipData
 {
-    public string id;                           // Àåºñ ID
-    public string name;                         // Àåºñ ¸íÄª
-    public string spriteName;                   // ÀÌ¹ÌÁö ÀÌ¸§
+    public string id;                           // ï¿½ï¿½ï¿½ ID
+    public string name;                         // ï¿½ï¿½ï¿½ ï¿½ï¿½Äª
+    public string spriteName;                   // ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
 
-    public EquipGrade grade;                    // Àåºñ µî±Ş
-    public ItemEffect equipEffect;              // ÀåÂø È¿°ú
-    public List<ItemEffect> holdEffects;        // º¸À¯ È¿°ú ¸ñ·Ï
+    public EquipGrade grade;
+    public int level = 1;  // ì¡°ë¯¼í¬ ì¶”ê°€: ì¥ë¹„ ë ˆë²¨ (ê¸°ë³¸ê°’ 1)
+    public ItemEffect equipEffect;              // ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½
+    public List<ItemEffect> holdEffects;        // ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ ï¿½ï¿½ï¿½
 }
 
 public enum EquipGrade
@@ -41,17 +42,17 @@ public enum EquipGrade
 [System.Serializable]
 public class ItemEffect
 {
-    public EffectType type;     // È¿°ú Á¾·ù
-    public float initValue;     // ÃÊ±â ¼öÄ¡
-    public float levelUpValue;  // ·¹º§ ´ç Áõ°¡ ¼öÄ¡
+    public EffectType type;     // È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public float initValue;     // ï¿½Ê±ï¿½ ï¿½ï¿½Ä¡
+    public float levelUpValue;  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
 }
 
 public enum EffectType
 {
-    AttackBoost,        // °ø°İ·Â Áõ°¡ (%)
-    CriticalDamage,     // Ãß°¡ Ä¡¸íÅ¸ µ¥¹ÌÁö
-    GoldGain,           // Ãß°¡ °ñµå È¹µæ·®
-    HealthBoost,        // Ã¼·Â/Ã¼·Â È¸º¹·® Áõ°¡
-    ManaBoost,          // ÀüÃ¼ ¸¶³ª/¸¶³ª È¸º¹·®
-    ExpGain             // Ãß°¡ °æÇèÄ¡
+    AttackBoost,        // ï¿½ï¿½ï¿½İ·ï¿½ ï¿½ï¿½ï¿½ï¿½ (%)
+    CriticalDamage,     // ï¿½ß°ï¿½ Ä¡ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    GoldGain,           // ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ È¹ï¿½æ·®
+    HealthBoost,        // Ã¼ï¿½ï¿½/Ã¼ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    ManaBoost,          // ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½
+    ExpGain             // ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡
 }

@@ -11,12 +11,6 @@ namespace SlayerLegend.Equipment
         [Header("장착 대상")]
         [SerializeField] private IEquippable equipTarget;
 
-        [Header("레벨 관리")]
-        [SerializeField] private EquipmentLevelManager levelManager;
-
-        // 레벨 매니저 접근 (외부에서 사용)
-        public EquipmentLevelManager LevelManager => levelManager;
-
         // 장비 슬롯들 (슬롯 타입별로 관리)
         private Dictionary<EquipType, EquipmentSlot> equipmentSlots;
 
@@ -54,68 +48,6 @@ namespace SlayerLegend.Equipment
         private void Awake()
         {
             InitializeSlots();
-
-            // EquipmentLevelManager 자동 생성
-            if (levelManager == null)
-            {
-                GameObject obj = new GameObject("EquipmentLevelManager");
-                levelManager = obj.AddComponent<EquipmentLevelManager>();
-                DontDestroyOnLoad(obj);
-            }
-        }
-
-        private void OnEnable()
-        {
-            if (levelManager != null)
-            {
-                levelManager.OnLevelChanged += HandleLevelChanged;
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (levelManager != null)
-            {
-                levelManager.OnLevelChanged -= HandleLevelChanged;
-            }
-        }
-
-        // 장비 레벨 변경 이벤트 핸들러
-        private void HandleLevelChanged(string equipmentId, int oldLevel, int newLevel)
-        {
-            // 인벤토리 내 모든 해당 장비 레벨 업데이트
-            foreach (var kvp in inventory)
-            {
-                foreach (var item in kvp.Value)
-                {
-                    if (item.equipment != null && item.equipment.GetId() == equipmentId)
-                    {
-                        item.level = newLevel;
-                    }
-                }
-            }
-
-            // 장착된 슬롯 업데이트
-            foreach (var kvp in equipmentSlots)
-            {
-                var slot = kvp.Value;
-                if (!slot.IsEmpty && slot.EquippedItem.GetId() == equipmentId)
-                {
-                    SetEquipmentLevel(kvp.Key, newLevel);
-                }
-            }
-
-            RefreshHoldEffects();
-        }
-
-        // EquipmentLevelManager에서 공유 레벨 조회
-        private int GetSharedLevel(EquipData equipment, int defaultLevel = 1)
-        {
-            if (levelManager != null)
-            {
-                return levelManager.GetLevel(equipment.GetId());
-            }
-            return defaultLevel;
         }
 
         // 슬롯 초기화
@@ -452,13 +384,11 @@ namespace SlayerLegend.Equipment
                 inventory[slotType] = new List<InventoryItem>();
             }
 
-            // EquipmentLevelManager에서 공유 레벨 사용
-            int actualLevel = GetSharedLevel(equipment, level);
-
-            inventory[slotType].Add(new InventoryItem(equipment, actualLevel));
+            // 장비의 자체 레벨 사용 (EquipData.level 필드)
+            inventory[slotType].Add(new InventoryItem(equipment, equipment.level));
 
             string equipName = equipment.GetName();
-            Debug.Log($"[EquipmentManager] 인벤토리에 추가: {equipName} (Lv.{actualLevel}) - 현재 보유량: {GetEquipmentCount(equipment)}");
+            Debug.Log($"[EquipmentManager] 인벤토리에 추가: {equipName} (Lv.{equipment.level}) - 현재 보유량: {GetEquipmentCount(equipment)}");
 
             // 보유 효과 재계산
             RefreshHoldEffects();

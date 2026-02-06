@@ -723,23 +723,9 @@ namespace SlayerLegend.Skill.Testing
             if (cachedWeapons == null || index >= cachedWeapons.Length) return;
             EquipData weapon = cachedWeapons[index];
 
-            var levelManager = equipmentManager?.LevelManager;
-            if (levelManager != null)
-            {
-                string equipId = weapon.GetId();
-                int currentLevel = levelManager.GetLevel(equipId);
-                long cost = levelManager.GetLevelUpCost(equipId);
-
-                if (levelManager.LevelUp(equipId))
-                {
-                    int newLevel = levelManager.GetLevel(equipId);
-                    Debug.Log($"[레벨업 성공] {weapon.GetName()}: Lv.{currentLevel} → Lv.{newLevel} (비용: {cost}G)");
-                }
-                else
-                {
-                    Debug.Log($"[레벨업 실패] {weapon.GetName()} - 최대 레벨 도달 또는 오류");
-                }
-            }
+            int currentLevel = weapon.level;
+            weapon.level++;
+            Debug.Log($"[레벨업 성공] {weapon.GetName()}: Lv.{currentLevel} → Lv.{weapon.level}");
         }
 
         private void TryLevelUpAccessory(int index)
@@ -747,31 +733,15 @@ namespace SlayerLegend.Skill.Testing
             if (cachedAccessories == null || index >= cachedAccessories.Length) return;
             EquipData accessory = cachedAccessories[index];
 
-            var levelManager = equipmentManager?.LevelManager;
-            if (levelManager != null)
-            {
-                string equipId = accessory.GetId();
-                int currentLevel = levelManager.GetLevel(equipId);
-                long cost = levelManager.GetLevelUpCost(equipId);
-
-                if (levelManager.LevelUp(equipId))
-                {
-                    int newLevel = levelManager.GetLevel(equipId);
-                    Debug.Log($"[레벨업 성공] {accessory.GetName()}: Lv.{currentLevel} → Lv.{newLevel} (비용: {cost}G)");
-                }
-                else
-                {
-                    Debug.Log($"[레벨업 실패] {accessory.GetName()} - 최대 레벨 도달 또는 오류");
-                }
-            }
+            int currentLevel = accessory.level;
+            accessory.level++;
+            Debug.Log($"[레벨업 성공] {accessory.GetName()}: Lv.{currentLevel} → Lv.{accessory.level}");
         }
 
         private void DrawLevelUpMenu()
         {
             GUILayout.Box("=== 장비 레벨업 ===");
-            GUILayout.Box("같은 ID의 모든 장비가 레벨을 공유합니다\n레벨업하면 해당 ID의 모든 장비가 함께 레벨업됩니다");
-
-            var levelManager = equipmentManager?.LevelManager;
+            GUILayout.Box("장비의 레벨을 직접 올립니다");
 
             // 무기 레벨업
             GUILayout.Space(5);
@@ -779,13 +749,7 @@ namespace SlayerLegend.Skill.Testing
             for (int i = 0; i < 6; i++)
             {
                 EquipData weapon = cachedWeapons[i];
-                string equipId = weapon.GetId();
-                int level = levelManager != null ? levelManager.GetLevel(equipId) : 1;
-                long cost = levelManager != null ? levelManager.GetLevelUpCost(equipId) : 0;
-                bool isMax = levelManager != null && levelManager.IsMaxLevel(equipId);
-                string costText = isMax ? "MAX" : $"{cost}G";
-
-                GUILayout.Label($"{i + 1}: {weapon.GetName()} ({weapon.GetGrade()}) - Lv.{level} - 다음 레벨: {costText}");
+                GUILayout.Label($"{i + 1}: {weapon.GetName()} ({weapon.GetGrade()}) - Lv.{weapon.level}");
             }
 
             // 악세서리 레벨업
@@ -795,13 +759,7 @@ namespace SlayerLegend.Skill.Testing
             for (int i = 0; i < 6; i++)
             {
                 EquipData acc = cachedAccessories[i];
-                string equipId = acc.GetId();
-                int level = levelManager != null ? levelManager.GetLevel(equipId) : 1;
-                long cost = levelManager != null ? levelManager.GetLevelUpCost(equipId) : 0;
-                bool isMax = levelManager != null && levelManager.IsMaxLevel(equipId);
-                string costText = isMax ? "MAX" : $"{cost}G";
-
-                GUILayout.Label($"{keys[i]}: {acc.GetName()} ({acc.GetGrade()}) - Lv.{level} - 다음 레벨: {costText}");
+                GUILayout.Label($"{keys[i]}: {acc.GetName()} ({acc.GetGrade()}) - Lv.{acc.level}");
             }
 
             // 플레이어 스탯 표시

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using SlayerLegend.Skill.Data;
 
 [System.Serializable]
 public class SkillDataList : IDataList<SkillData>
@@ -26,6 +27,8 @@ public class SkillData
     public int needMp;              // �Ҹ� MP
     public int initialRate;         // �⺻ ��ġ ��
     public float levelUpValue;      // ���� �� ��ġ ��°�
+
+    public SkillEffectData effectData;  // 조민희 추가: DoT/CC 효과 데이터
 }
 
 public enum SkillGrade
