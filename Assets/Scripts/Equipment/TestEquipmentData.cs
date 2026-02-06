@@ -2,15 +2,11 @@ using UnityEngine;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// 테스트용 장비 데이터 생성기
-    /// JSON 없이 코드로 더미 장비 생성
-    /// </summary>
+    // 테스트용 장비 데이터 생성기
+    // JSON 없이 코드로 더미 장비 생성
     public static class TestEquipmentData
     {
-        /// <summary>
-        /// 테스트용 무기 목록 생성
-        /// </summary>
+        // 테스트용 무기 목록 생성
         public static EquipData[] CreateTestWeapons()
         {
             return new EquipData[]
@@ -64,9 +60,7 @@ namespace SlayerLegend.Equipment
             };
         }
 
-        /// <summary>
-        /// 테스트용 악세서리 목록 생성
-        /// </summary>
+        // 테스트용 악세서리 목록 생성
         public static EquipData[] CreateTestAccessories()
         {
             return new EquipData[]

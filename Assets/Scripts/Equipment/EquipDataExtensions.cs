@@ -3,11 +3,9 @@ using System.Reflection;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// EquipData 확장 메서드
-    /// 리플렉션을 사용하여 팀원의 EquipData 필드에 안전하게 접근
-    /// 팀원 코드를 직접 수정하지 않고 데이터 읽기
-    /// </summary>
+    // EquipData 확장 메서드
+    // 리플렉션을 사용하여 팀원의 EquipData 필드에 안전하게 접근
+    // 팀원 코드를 직접 수정하지 않고 데이터 읽기
     public static class EquipDataExtensions
     {
         private static readonly Type _equipDataType;
@@ -31,36 +29,28 @@ namespace SlayerLegend.Equipment
             _holdEffectsField = _equipDataType.GetField("holdEffects", flags);
         }
 
-        /// <summary>
-        /// 장비 ID 가져오기
-        /// </summary>
+        // 장비 ID 가져오기
         public static string GetId(this EquipData data)
         {
             if (data == null || _idField == null) return string.Empty;
             return _idField.GetValue(data) as string;
         }
 
-        /// <summary>
-        /// 장비 이름 가져오기
-        /// </summary>
+        // 장비 이름 가져오기
         public static string GetName(this EquipData data)
         {
             if (data == null || _nameField == null) return string.Empty;
             return _nameField.GetValue(data) as string;
         }
 
-        /// <summary>
-        /// 스프라이트 이름 가져오기
-        /// </summary>
+        // 스프라이트 이름 가져오기
         public static string GetSpriteName(this EquipData data)
         {
             if (data == null || _spriteNameField == null) return string.Empty;
             return _spriteNameField.GetValue(data) as string;
         }
 
-        /// <summary>
-        /// 장비 등급 가져오기
-        /// </summary>
+        // 장비 등급 가져오기
         public static EquipGrade GetGrade(this EquipData data)
         {
             if (data == null || _gradeField == null) return EquipGrade.Common;
@@ -68,36 +58,28 @@ namespace SlayerLegend.Equipment
             return value is EquipGrade ? (EquipGrade)value : EquipGrade.Common;
         }
 
-        /// <summary>
-        /// 메인 효과 가져오기
-        /// </summary>
+        // 메인 효과 가져오기
         public static ItemEffect GetEquipEffect(this EquipData data)
         {
             if (data == null || _equipEffectField == null) return null;
             return _equipEffectField.GetValue(data) as ItemEffect;
         }
 
-        /// <summary>
-        /// 추가 효과 리스트 가져오기
-        /// </summary>
+        // 추가 효과 리스트 가져오기
         public static System.Collections.Generic.List<ItemEffect> GetHoldEffects(this EquipData data)
         {
             if (data == null || _holdEffectsField == null) return null;
             return _holdEffectsField.GetValue(data) as System.Collections.Generic.List<ItemEffect>;
         }
 
-        /// <summary>
-        /// 등급을 문자열로 변환
-        /// </summary>
+        // 등급을 문자열로 변환
         public static string GetGradeString(this EquipData data)
         {
             EquipGrade grade = GetGrade(data);
             return grade.ToString();
         }
 
-        /// <summary>
-        /// 등급에 따른 색상 코드 반환 (UI용)
-        /// </summary>
+        // 등급에 따른 색상 코드 반환 (UI용)
         public static string GetGradeColor(this EquipData data)
         {
             EquipGrade grade = GetGrade(data);

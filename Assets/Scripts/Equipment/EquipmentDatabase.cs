@@ -2,30 +2,21 @@ using System;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// 장비 데이터베이스
-    /// 등급별 장비 조회 기능 제공
-    /// </summary>
+    // 장비 데이터베이스
+    // 등급별 장비 조회 기능 제공
     public class EquipmentDatabase
     {
         private static EquipData[] cachedWeapons;
         private static EquipData[] cachedAccessories;
 
-        /// <summary>
-        /// 데이터베이스 초기화
-        /// </summary>
+        // 데이터베이스 초기화
         public static void Initialize()
         {
             cachedWeapons = TestEquipmentData.CreateTestWeapons();
             cachedAccessories = TestEquipmentData.CreateTestAccessories();
         }
 
-        /// <summary>
-        /// 등급으로 장비 찾기
-        /// </summary>
-        /// <param name="type">장비 타입</param>
-        /// <param name="grade">장비 등급</param>
-        /// <returns>해당 등급의 장비 (없으면 null)</returns>
+        // 등급으로 장비 찾기
         public static EquipData GetEquipmentByGrade(EquipType type, EquipGrade grade)
         {
             EquipData[] source = type == EquipType.Weapon ? cachedWeapons : cachedAccessories;
@@ -38,11 +29,7 @@ namespace SlayerLegend.Equipment
             return null;
         }
 
-        /// <summary>
-        /// 다음 등급 장비 찾기 (융합용)
-        /// </summary>
-        /// <param name="current">현재 장비</param>
-        /// <returns>다음 등급 장비 (없거나 최고 등급이면 null)</returns>
+        // 다음 등급 장비 찾기 (융합용)
         public static EquipData GetNextGradeEquipment(EquipData current)
         {
             if (current == null) return null;
@@ -56,9 +43,7 @@ namespace SlayerLegend.Equipment
             return GetEquipmentByGrade(type, nextGrade);
         }
 
-        /// <summary>
-        /// 장비 타입 결정
-        /// </summary>
+        // 장비 타입 결정
         private static EquipType GetEquipmentType(EquipData equipment)
         {
             if (equipment == null) return EquipType.Accessorie;

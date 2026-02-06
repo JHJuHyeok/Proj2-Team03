@@ -2,12 +2,8 @@ using System;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// 인벤토리에 보관할 장비 아이템
-    /// 장비 데이터와 레벨을 함께 저장
-    /// </summary>
     [Serializable]
-    public struct InventoryItem : IEquatable<InventoryItem>
+    public class InventoryItem : IEquatable<InventoryItem>
     {
         public EquipData equipment;
         public int level;
@@ -20,7 +16,9 @@ namespace SlayerLegend.Equipment
 
         public bool Equals(InventoryItem other)
         {
-            return equipment == other.equipment && level == other.level;
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(equipment, other.equipment) && level == other.level;
         }
 
         public override bool Equals(object obj)
@@ -35,12 +33,13 @@ namespace SlayerLegend.Equipment
 
         public static bool operator ==(InventoryItem left, InventoryItem right)
         {
+            if (left is null) return right is null;
             return left.Equals(right);
         }
 
         public static bool operator !=(InventoryItem left, InventoryItem right)
         {
-            return !left.Equals(right);
+            return !(left == right);
         }
     }
 }

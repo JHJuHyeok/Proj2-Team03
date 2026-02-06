@@ -3,9 +3,7 @@ using SlayerLegend.Equipment;  // 장비 시스템
 
 namespace SlayerLegend.Skill.Testing
 {
-    /// <summary>
-    /// 메뉴 상태 열거형
-    /// </summary>
+    // 메뉴 상태 열거형
     public enum MenuState
     {
         Main,           // 메인 메뉴
@@ -14,12 +12,11 @@ namespace SlayerLegend.Skill.Testing
         Equipment,      // 장비 테스트 메인
         WeaponTest,     // 무기 테스트
         AccessoryTest,  // 악세서리 테스트
-        Fusion          // 장비 융합
+        Fusion,         // 장비 융합
+        LevelUp         // 장비 레벨업
     }
 
-    /// <summary>
-    /// 간단한 스킬 테스트 - 계층형 메뉴 시스템
-    /// </summary>
+    // 간단한 스킬 테스트 - 계층형 메뉴 시스템
     public class SimpleSkillTest : MonoBehaviour
     {
         [Header("참조")]
@@ -87,6 +84,9 @@ namespace SlayerLegend.Skill.Testing
             }
             fusionManager.Initialize(equipmentManager);
 
+            // EquipmentLevelManager는 EquipmentManager가 이미 생성하므로 제거
+            // EquipmentManager.Awake()에서 자동 생성됨
+
             Debug.Log("[SimpleSkillTest] 초기화 완료 - EquipmentManager 연결됨");
         }
 
@@ -137,6 +137,9 @@ namespace SlayerLegend.Skill.Testing
                 case MenuState.Fusion:
                     HandleFusionMenuInput();
                     break;
+                case MenuState.LevelUp:
+                    HandleLevelUpMenuInput();
+                    break;
             }
         }
 
@@ -157,6 +160,11 @@ namespace SlayerLegend.Skill.Testing
             {
                 currentMenu = MenuState.Equipment;
                 Debug.Log("[Menu] 장비 테스트 메뉴로 진입");
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                currentMenu = MenuState.LevelUp;
+                Debug.Log("[Menu] 장비 레벨업 메뉴로 진입");
             }
         }
         #endregion
@@ -291,6 +299,9 @@ namespace SlayerLegend.Skill.Testing
                 case MenuState.Fusion:
                     DrawFusionMenu();
                     break;
+                case MenuState.LevelUp:
+                    DrawLevelUpMenu();
+                    break;
             }
 
             GUILayout.EndArea();
@@ -302,7 +313,8 @@ namespace SlayerLegend.Skill.Testing
             GUILayout.Box(
                 "1: 일반 스킬 테스트\n  (파이어볼, 얼음창, 버프)\n\n" +
                 "2: 상태이상 스킬 테스트\n  (도트, 기절, 빙결, 속박)\n\n" +
-                "3: 장비 테스트\n  (무기, 악세서리 장착)");
+                "3: 장비 테스트\n  (무기, 악세서리 장착)\n\n" +
+                "4: 장비 레벨업\n  (같은 ID 장비 레벨 공유)");
             GUILayout.Box($"현재 상태: [메인 메뉴]");
         }
 
@@ -677,5 +689,127 @@ namespace SlayerLegend.Skill.Testing
 
             Debug.Log("[SimpleSkillTest] 모든 장비 +1씩 추가됨");
         }
+
+        #region 장비 레벨업 메뉴
+        private void HandleLevelUpMenuInput()
+        {
+            // 무기 레벨업 (1-6)
+            for (int i = 0; i < 6; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    TryLevelUpWeapon(i);
+                }
+            }
+
+            // 악세서리 레벨업 (Q-Y: 1-6)
+            if (Input.GetKeyDown(KeyCode.Q)) TryLevelUpAccessory(0);
+            else if (Input.GetKeyDown(KeyCode.W)) TryLevelUpAccessory(1);
+            else if (Input.GetKeyDown(KeyCode.E)) TryLevelUpAccessory(2);
+            else if (Input.GetKeyDown(KeyCode.R)) TryLevelUpAccessory(3);
+            else if (Input.GetKeyDown(KeyCode.T)) TryLevelUpAccessory(4);
+            else if (Input.GetKeyDown(KeyCode.Y)) TryLevelUpAccessory(5);
+
+            // 메인 복귀
+            if (Input.GetKeyDown(KeyCode.Alpha9))
+            {
+                currentMenu = MenuState.Main;
+                Debug.Log("[Menu] 메인 메뉴로 돌아감");
+            }
+        }
+
+        private void TryLevelUpWeapon(int index)
+        {
+            if (cachedWeapons == null || index >= cachedWeapons.Length) return;
+            EquipData weapon = cachedWeapons[index];
+
+            var levelManager = equipmentManager?.LevelManager;
+            if (levelManager != null)
+            {
+                string equipId = weapon.GetId();
+                int currentLevel = levelManager.GetLevel(equipId);
+                long cost = levelManager.GetLevelUpCost(equipId);
+
+                if (levelManager.LevelUp(equipId))
+                {
+                    int newLevel = levelManager.GetLevel(equipId);
+                    Debug.Log($"[레벨업 성공] {weapon.GetName()}: Lv.{currentLevel} → Lv.{newLevel} (비용: {cost}G)");
+                }
+                else
+                {
+                    Debug.Log($"[레벨업 실패] {weapon.GetName()} - 최대 레벨 도달 또는 오류");
+                }
+            }
+        }
+
+        private void TryLevelUpAccessory(int index)
+        {
+            if (cachedAccessories == null || index >= cachedAccessories.Length) return;
+            EquipData accessory = cachedAccessories[index];
+
+            var levelManager = equipmentManager?.LevelManager;
+            if (levelManager != null)
+            {
+                string equipId = accessory.GetId();
+                int currentLevel = levelManager.GetLevel(equipId);
+                long cost = levelManager.GetLevelUpCost(equipId);
+
+                if (levelManager.LevelUp(equipId))
+                {
+                    int newLevel = levelManager.GetLevel(equipId);
+                    Debug.Log($"[레벨업 성공] {accessory.GetName()}: Lv.{currentLevel} → Lv.{newLevel} (비용: {cost}G)");
+                }
+                else
+                {
+                    Debug.Log($"[레벨업 실패] {accessory.GetName()} - 최대 레벨 도달 또는 오류");
+                }
+            }
+        }
+
+        private void DrawLevelUpMenu()
+        {
+            GUILayout.Box("=== 장비 레벨업 ===");
+            GUILayout.Box("같은 ID의 모든 장비가 레벨을 공유합니다\n레벨업하면 해당 ID의 모든 장비가 함께 레벨업됩니다");
+
+            var levelManager = equipmentManager?.LevelManager;
+
+            // 무기 레벨업
+            GUILayout.Space(5);
+            GUILayout.Box("=== 무기 레벨업 (키 1~6) ===");
+            for (int i = 0; i < 6; i++)
+            {
+                EquipData weapon = cachedWeapons[i];
+                string equipId = weapon.GetId();
+                int level = levelManager != null ? levelManager.GetLevel(equipId) : 1;
+                long cost = levelManager != null ? levelManager.GetLevelUpCost(equipId) : 0;
+                bool isMax = levelManager != null && levelManager.IsMaxLevel(equipId);
+                string costText = isMax ? "MAX" : $"{cost}G";
+
+                GUILayout.Label($"{i + 1}: {weapon.GetName()} ({weapon.GetGrade()}) - Lv.{level} - 다음 레벨: {costText}");
+            }
+
+            // 악세서리 레벨업
+            GUILayout.Space(5);
+            GUILayout.Box("=== 악세서리 레벨업 (키 Q~Y) ===");
+            string[] keys = { "Q", "W", "E", "R", "T", "Y" };
+            for (int i = 0; i < 6; i++)
+            {
+                EquipData acc = cachedAccessories[i];
+                string equipId = acc.GetId();
+                int level = levelManager != null ? levelManager.GetLevel(equipId) : 1;
+                long cost = levelManager != null ? levelManager.GetLevelUpCost(equipId) : 0;
+                bool isMax = levelManager != null && levelManager.IsMaxLevel(equipId);
+                string costText = isMax ? "MAX" : $"{cost}G";
+
+                GUILayout.Label($"{keys[i]}: {acc.GetName()} ({acc.GetGrade()}) - Lv.{level} - 다음 레벨: {costText}");
+            }
+
+            // 플레이어 스탯 표시
+            DrawPlayerStats();
+
+            GUILayout.Space(5);
+            GUILayout.Box("9: 메인 메뉴로 돌아가기");
+        }
+        #endregion
     }
 }

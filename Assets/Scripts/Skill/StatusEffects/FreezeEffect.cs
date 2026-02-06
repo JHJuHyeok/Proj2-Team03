@@ -2,11 +2,9 @@ using UnityEngine;
 
 namespace SlayerLegend.Skill.StatusEffects
 {
-    /// <summary>
-    /// 빙결 (Freeze) - 이동 속도 감소
-    /// Water 속성 효과
-    /// 2중첩 시 75% 감소
-    /// </summary>
+    // 빙결 (Freeze) - 이동 속도 감소
+    // Water 속성 효과
+    // 2중첩 시 75% 감소
     public class FreezeEffect : StatusEffect
     {
         [Header("빙결 설정")]
@@ -18,9 +16,7 @@ namespace SlayerLegend.Skill.StatusEffects
         public float SlowPercent => slowPercent;
         public int StackCount => stackCount;
 
-        /// <summary>
-        /// 빙결 효과 초기화
-        /// </summary>
+        // 빙결 효과 초기화
         public void Initialize(float freezeDuration, IFreezable target)
         {
             duration = freezeDuration;
@@ -57,9 +53,7 @@ namespace SlayerLegend.Skill.StatusEffects
             Debug.Log($"[FreezeEffect] 빙결 해제");
         }
 
-        /// <summary>
-        /// 빙결 효과 강제 종료
-        /// </summary>
+        // 빙결 효과 강제 종료
         public override void EndEffect()
         {
             freezeTarget?.RemoveFreeze(slowPercent);
@@ -68,36 +62,22 @@ namespace SlayerLegend.Skill.StatusEffects
         }
     }
 
-    /// <summary>
-    /// 빙결 상태가 될 수 있는 대상 인터페이스
-    /// </summary>
+    // 빙결 상태가 될 수 있는 대상 인터페이스
     public interface IFreezable
     {
-        /// <summary>
-        /// 빙결 상태 적용 (이속 감소)
-        /// </summary>
-        /// <param name="slowPercent">감소할 속도 비율 (0.5 = 50% 감소)</param>
+        // 빙결 상태 적용 (이속 감소)
         void ApplyFreeze(float slowPercent);
 
-        /// <summary>
-        /// 빙결 상태 해제
-        /// </summary>
-        /// <param name="slowPercent">복구할 속도 비율</param>
+        // 빙결 상태 해제
         void RemoveFreeze(float slowPercent);
 
-        /// <summary>
-        /// 빙결 중첩 증가 (FreezeEffect에서 직접 호출)
-        /// </summary>
+        // 빙결 중첩 증가 (FreezeEffect에서 직접 호출)
         void IncrementFreezeStacks();
 
-        /// <summary>
-        /// 빙결 중첩 감소 (FreezeEffect에서 직접 호출)
-        /// </summary>
+        // 빙결 중첩 감소 (FreezeEffect에서 직접 호출)
         void DecrementFreezeStacks();
 
-        /// <summary>
-        /// 현재 빙결 중첩 수
-        /// </summary>
+        // 현재 빙결 중첩 수
         int FreezeStacks { get; }
     }
 }

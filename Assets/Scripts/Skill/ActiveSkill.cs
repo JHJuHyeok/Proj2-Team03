@@ -135,9 +135,7 @@ namespace SlayerLegend.Skill
             ApplyCCEffect(enemyObject);
         }
 
-        /// <summary>
-        /// 도트 데미지 상태이상 적용
-        /// </summary>
+        // 도트 데미지 상태이상 적용
         private void ApplyDotEffect(GameObject enemyObject)
         {
             if (!skillData.IsDotSkill()) return;
@@ -158,11 +156,11 @@ namespace SlayerLegend.Skill
             float damageValue = skillData.GetDotDamagePerTick();
             if (isPercentage)
             {
-                damageValue += skillData.levelUpValue * (currentLevel - 1) * 0.1f; // 0.1%씩 증가
+                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.1f; // 0.1%씩 증가
             }
             else
             {
-                damageValue += skillData.levelUpValue * (currentLevel - 1) * 0.5f; // 고정값 증가
+                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.5f; // 고정값 증가
             }
 
             // 적에게 직접 컴포넌트 추가 (불필요한 임시 생성 제거)
@@ -180,9 +178,7 @@ namespace SlayerLegend.Skill
             Debug.Log($"[Skill] 도트 데미지 적용! {skillData.GetDotDuration()}초간 {skillData.GetDotTickInterval()}초마다 {(isPercentage ? $"최대HP의 {damageValue:F1}%" : $"{damageValue:F1}데미지")}");
         }
 
-        /// <summary>
-        /// CC 상태이상 적용
-        /// </summary>
+        // CC 상태이상 적용
         private void ApplyCCEffect(GameObject enemyObject)
         {
             // 기절 (Stun)
@@ -226,9 +222,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        /// <summary>
-        /// 스킬 이름과 함께 데미지를 입힘 (테스트용 로그 개선)
-        /// </summary>
+        // 스킬 이름과 함께 데미지를 입힘 (테스트용 로그 개선)
         private void DealDamageWithSkillName(GameObject enemyObject, float damage, string skillName)
         {
             // DummyEnemy 테스트 클래스인 경우 스킬 이름 포함 메서드 사용

@@ -3,9 +3,7 @@ using UnityEngine.UI;
 
 namespace SlayerLegend.Skill.Testing
 {
-    /// <summary>
-    /// 스킬 시스템 테스트용 UI
-    /// </summary>
+    // 스킬 시스템 테스트용 UI
     public class SkillTestUI : MonoBehaviour
     {
         [Header("참조")]

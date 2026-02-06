@@ -2,10 +2,8 @@
 
 namespace SlayerLegend.Skill.StatusEffects
 {
-    /// <summary>
-    /// 상태이상 기반 클래스
-    /// 모든 상태이상(도트 데미지, CC, 버프 등)이 상속받음
-    /// </summary>
+    // 상태이상 기반 클래스
+    // 모든 상태이상(도트 데미지, CC, 버프 등)이 상속받음
     public abstract class StatusEffect : MonoBehaviour
     {
         [Header("상태이상 설정")]
@@ -44,25 +42,19 @@ namespace SlayerLegend.Skill.StatusEffects
             }
         }
 
-        /// <summary>
-        /// 매 프레임 호출됨 (지속 효과 처리)
-        /// </summary>
+        // 매 프레임 호출됨 (지속 효과 처리)
         protected virtual void OnTick()
         {
             // 하위 클래스에서 오버라이드
         }
 
-        /// <summary>
-        /// 상태이상 만료 시 호출
-        /// </summary>
+        // 상태이상 만료 시 호출
         protected virtual void OnExpire()
         {
             Debug.Log($"[{effectName}] 상태이상 만료");
         }
 
-        /// <summary>
-        /// 상태이상 강제 종료
-        /// </summary>
+        // 상태이상 강제 종료
         public virtual void EndEffect()
         {
             OnExpire();
@@ -70,9 +62,7 @@ namespace SlayerLegend.Skill.StatusEffects
             Destroy(this);
         }
 
-        /// <summary>
-        /// 남은 시간 설정 (디버그/테스트용)
-        /// </summary>
+        // 남은 시간 설정 (디버그/테스트용)
         public void SetRemainingTime(float time)
         {
             remainingTime = Mathf.Clamp(time, 0f, duration);

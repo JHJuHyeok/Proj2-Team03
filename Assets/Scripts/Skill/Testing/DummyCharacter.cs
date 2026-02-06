@@ -4,10 +4,8 @@ using SlayerLegend.Equipment;  // 장비 시스템 네임스페이스
 
 namespace SlayerLegend.Skill.Testing
 {
-    /// <summary>
-    /// 테스트용 더미 캐릭터
-    /// IStatsProvider, IGoldProvider, IEquippable를 구현하여 스킬/장비 시스템 테스트
-    /// </summary>
+    // 테스트용 더미 캐릭터
+    // IStatsProvider, IGoldProvider, IEquippable를 구현하여 스킬/장비 시스템 테스트
     public class DummyCharacter : MonoBehaviour, IStatsProvider, IGoldProvider, IEquippable
     {
         [Header("스탯")]
@@ -284,10 +282,8 @@ namespace SlayerLegend.Skill.Testing
         }
 
         #region IEquippable 구현
-        /// <summary>
-        /// 장비 효과 적용
-        /// 기존 버프 모디파이어 시스템을 활용하여 장비 효과 적용
-        /// </summary>
+        // 장비 효과 적용
+        // 기존 버프 모디파이어 시스템을 활용하여 장비 효과 적용
         public void ApplyEquipmentEffect(ItemEffect effect, int level, bool equip)
         {
             if (effect == null) return;

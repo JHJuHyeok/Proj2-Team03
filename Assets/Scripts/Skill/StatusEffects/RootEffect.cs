@@ -2,19 +2,15 @@ using UnityEngine;
 
 namespace SlayerLegend.Skill.StatusEffects
 {
-    /// <summary>
-    /// 속박 (Root) - 이동 불가 (제자리에서만 공격 가능)
-    /// CC (Crowd Control) - 속성 무관
-    /// </summary>
+    // 속박 (Root) - 이동 불가 (제자리에서만 공격 가능)
+    // CC (Crowd Control) - 속성 무관
     public class RootEffect : StatusEffect
     {
         private IRootable rootTarget;
 
         public bool IsRooted => remainingTime > 0;
 
-        /// <summary>
-        /// 속박 효과 초기화
-        /// </summary>
+        // 속박 효과 초기화
         public void Initialize(float rootDuration, IRootable target)
         {
             duration = rootDuration;
@@ -42,9 +38,7 @@ namespace SlayerLegend.Skill.StatusEffects
             Debug.Log($"[RootEffect] 속박 해제");
         }
 
-        /// <summary>
-        /// 속박 효과 강제 종료
-        /// </summary>
+        // 속박 효과 강제 종료
         public override void EndEffect()
         {
             rootTarget?.ApplyRoot(false);
@@ -52,20 +46,13 @@ namespace SlayerLegend.Skill.StatusEffects
         }
     }
 
-    /// <summary>
-    /// 속박 상태가 될 수 있는 대상 인터페이스
-    /// </summary>
+    // 속박 상태가 될 수 있는 대상 인터페이스
     public interface IRootable
     {
-        /// <summary>
-        /// 속박 상태 적용/해제
-        /// </summary>
-        /// <param name="isRooted">true면 속박, false면 해제</param>
+        // 속박 상태 적용/해제
         void ApplyRoot(bool isRooted);
 
-        /// <summary>
-        /// 현재 속박 상태인지 확인
-        /// </summary>
+        // 현재 속박 상태인지 확인
         bool IsRooted { get; }
     }
 }
