@@ -2,10 +2,8 @@
 
 namespace SlayerLegend.Skill.StatusEffects
 {
-    /// <summary>
-    /// 도트 데미지 (Damage over Time)
-    /// 일정 간격으로 지속 데미지를 입히는 상태이상
-    /// </summary>
+    // 도트 데미지 (Damage over Time)
+    // 일정 간격으로 지속 데미지를 입히는 상태이상
     public class DotEffect : StatusEffect
     {
         [Header("도트 데미지 설정")]
@@ -24,16 +22,7 @@ namespace SlayerLegend.Skill.StatusEffects
         public bool IsPercentageBased => isPercentageBased;
         public float TargetMaxHp => targetMaxHp;
 
-        /// <summary>
-        /// 도트 데미지 초기화
-        /// </summary>
-        /// <param name="totalDuration">총 지속 시간</param>
-        /// <param name="perTickDamage">틱당 데미지 (비율인 경우 %로 입력, 예: 1 = 1%)</param>
-        /// <param name="interval">틱 간격</param>
-        /// <param name="damageTarget">데미지 대상</param>
-        /// <param name="damageSource">데미지 출처</param>
-        /// <param name="percentageBased">체력 비례 여부</param>
-        /// <param name="maxHp">대상 최대 체력 (비율 계산용)</param>
+        // 도트 데미지 초기화
         public void Initialize(float totalDuration, float perTickDamage, float interval, IDamageable damageTarget, GameObject damageSource, bool percentageBased = false, float maxHp = 0f)
         {
             duration = totalDuration;

@@ -4,47 +4,39 @@ using UnityEngine;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// 장비 관리자
-    /// 모든 장비 상태를 관리하는 단일 소스 (Single Source of Truth)
-    /// </summary>
+    // 장비 관리자
+    // 모든 장비 상태를 관리하는 단일 소스 (Single Source of Truth)
     public class EquipmentManager : MonoBehaviour
     {
         [Header("장착 대상")]
         [SerializeField] private IEquippable equipTarget;
 
-        /// <summary>
-        /// 장비 슬롯들 (슬롯 타입별로 관리)
-        /// </summary>
+        [Header("레벨 관리")]
+        [SerializeField] private EquipmentLevelManager levelManager;
+
+        // 레벨 매니저 접근 (외부에서 사용)
+        public EquipmentLevelManager LevelManager => levelManager;
+
+        // 장비 슬롯들 (슬롯 타입별로 관리)
         private Dictionary<EquipType, EquipmentSlot> equipmentSlots;
 
-        /// <summary>
-        /// 인벤토리 (소유한 장비 목록)
-        /// 같은 장비를 여러 개 보유 가능
-        /// </summary>
+        // 인벤토리 (소유한 장비 목록)
+        // 같은 장비를 여러 개 보유 가능
         private readonly Dictionary<EquipType, List<InventoryItem>> inventory = new Dictionary<EquipType, List<InventoryItem>>();
 
-        /// <summary>
-        /// 현재 적용된 보유 효과 추적 (장비 ID -> 적용됨)
-        /// 같은 장비를 여러 개 보유해도 중첩 방지
-        /// </summary>
+        // 현재 적용된 보유 효과 추적 (장비 ID -> 적용됨)
+        // 같은 장비를 여러 개 보유해도 중첩 방지
         private readonly HashSet<string> appliedHoldEffects = new HashSet<string>();
 
-        /// <summary>
-        /// 인벤토리 변경 이벤트
-        /// </summary>
+        // 인벤토리 변경 이벤트
         public event Action<EquipType> OnInventoryChanged;
 
-        /// <summary>
-        /// 장비 변경 이벤트
-        /// </summary>
+        // 장비 변경 이벤트
         public event Action<EquipData, EquipType, int> OnEquipmentChanged;
         public event Action<EquipData, EquipType> OnEquipmentEquipped;
         public event Action<EquipData, EquipType> OnEquipmentUnequipped;
 
-        /// <summary>
-        /// 장착 대상
-        /// </summary>
+        // 장착 대상
         public IEquippable EquipTarget
         {
             get => equipTarget;
@@ -62,11 +54,71 @@ namespace SlayerLegend.Equipment
         private void Awake()
         {
             InitializeSlots();
+
+            // EquipmentLevelManager 자동 생성
+            if (levelManager == null)
+            {
+                GameObject obj = new GameObject("EquipmentLevelManager");
+                levelManager = obj.AddComponent<EquipmentLevelManager>();
+                DontDestroyOnLoad(obj);
+            }
         }
 
-        /// <summary>
-        /// 슬롯 초기화
-        /// </summary>
+        private void OnEnable()
+        {
+            if (levelManager != null)
+            {
+                levelManager.OnLevelChanged += HandleLevelChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (levelManager != null)
+            {
+                levelManager.OnLevelChanged -= HandleLevelChanged;
+            }
+        }
+
+        // 장비 레벨 변경 이벤트 핸들러
+        private void HandleLevelChanged(string equipmentId, int oldLevel, int newLevel)
+        {
+            // 인벤토리 내 모든 해당 장비 레벨 업데이트
+            foreach (var kvp in inventory)
+            {
+                foreach (var item in kvp.Value)
+                {
+                    if (item.equipment != null && item.equipment.GetId() == equipmentId)
+                    {
+                        item.level = newLevel;
+                    }
+                }
+            }
+
+            // 장착된 슬롯 업데이트
+            foreach (var kvp in equipmentSlots)
+            {
+                var slot = kvp.Value;
+                if (!slot.IsEmpty && slot.EquippedItem.GetId() == equipmentId)
+                {
+                    SetEquipmentLevel(kvp.Key, newLevel);
+                }
+            }
+
+            RefreshHoldEffects();
+        }
+
+        // EquipmentLevelManager에서 공유 레벨 조회
+        private int GetSharedLevel(EquipData equipment, int defaultLevel = 1)
+        {
+            if (levelManager != null)
+            {
+                return levelManager.GetLevel(equipment.GetId());
+            }
+            return defaultLevel;
+        }
+
+        // 슬롯 초기화
         private void InitializeSlots()
         {
             equipmentSlots = new Dictionary<EquipType, EquipmentSlot>
@@ -80,12 +132,7 @@ namespace SlayerLegend.Equipment
             inventory[EquipType.Accessorie] = new List<InventoryItem>();
         }
 
-        /// <summary>
-        /// 장비 장착
-        /// </summary>
-        /// <param name="equipment">장착할 장비</param>
-        /// <param name="level">장비 레벨 (기본값: 1)</param>
-        /// <returns>장착 성공 여부</returns>
+        // 장비 장착
         public bool EquipItem(EquipData equipment, int level = 1)
         {
             if (equipment == null)
@@ -135,11 +182,7 @@ namespace SlayerLegend.Equipment
             return true;
         }
 
-        /// <summary>
-        /// 장비 해제
-        /// </summary>
-        /// <param name="slotType">해제할 슬롯 타입</param>
-        /// <returns>해제된 장비 (없으면 null)</returns>
+        // 장비 해제
         public EquipData UnequipItem(EquipType slotType)
         {
             if (!equipmentSlots.ContainsKey(slotType))
@@ -174,11 +217,7 @@ namespace SlayerLegend.Equipment
             return equipment;
         }
 
-        /// <summary>
-        /// 특정 장비 해제 (ID 기반 비교)
-        /// </summary>
-        /// <param name="equipment">해제할 장비</param>
-        /// <returns>해제 성공 여부</returns>
+        // 특정 장비 해제 (ID 기반 비교)
         public bool UnequipItem(EquipData equipment)
         {
             if (equipment == null) return false;
@@ -205,9 +244,7 @@ namespace SlayerLegend.Equipment
             return false;
         }
 
-        /// <summary>
-        /// 모든 장비 해제
-        /// </summary>
+        // 모든 장비 해제
         public void UnequipAll()
         {
             foreach (EquipType slotType in equipmentSlots.Keys)
@@ -216,11 +253,7 @@ namespace SlayerLegend.Equipment
             }
         }
 
-        /// <summary>
-        /// 슬롯의 장비 조회
-        /// </summary>
-        /// <param name="slotType">슬롯 타입</param>
-        /// <returns>착용 중인 장비 (없으면 null)</returns>
+        // 슬롯의 장비 조회
         public EquipData GetEquipment(EquipType slotType)
         {
             if (!equipmentSlots.ContainsKey(slotType))
@@ -231,28 +264,20 @@ namespace SlayerLegend.Equipment
             return equipmentSlots[slotType].EquippedItem;
         }
 
-        /// <summary>
-        /// 슬롯 조회
-        /// </summary>
-        /// <param name="slotType">슬롯 타입</param>
-        /// <returns>슬롯 객체 (없으면 null)</returns>
+        // 슬롯 조회
         public EquipmentSlot GetSlot(EquipType slotType)
         {
             return equipmentSlots.ContainsKey(slotType) ? equipmentSlots[slotType] : null;
         }
 
-        /// <summary>
-        /// 모든 슬롯 조회 (읽기 전용)
-        /// </summary>
+        // 모든 슬롯 조회 (읽기 전용)
         public IReadOnlyDictionary<EquipType, EquipmentSlot> GetAllSlots()
         {
             return equipmentSlots;
         }
 
-        /// <summary>
-        /// 장비 슬롯 타입 결정
-        /// ID 접두사를 기준으로 판단 (weapon_* = Weapon, 나머지 = Accessorie)
-        /// </summary>
+        // 장비 슬롯 타입 결정
+        // ID 접두사를 기준으로 판단 (weapon_* = Weapon, 나머지 = Accessorie)
         private EquipType DetermineSlotType(EquipData equipment)
         {
             if (equipment == null) return EquipType.Accessorie;
@@ -269,9 +294,7 @@ namespace SlayerLegend.Equipment
             return EquipType.Accessorie;
         }
 
-        /// <summary>
-        /// 장비 효과 적용/해제
-        /// </summary>
+        // 장비 효과 적용/해제
         private void ApplyEffects(EquipData equipment, int level, bool equip)
         {
             if (equipment == null || equipTarget == null) return;
@@ -294,12 +317,7 @@ namespace SlayerLegend.Equipment
             }
         }
 
-        /// <summary>
-        /// 장비 레벨 설정
-        /// </summary>
-        /// <param name="slotType">슬롯 타입</param>
-        /// <param name="level">새 레벨</param>
-        /// <returns>성공 여부</returns>
+        // 장비 레벨 설정
         public bool SetEquipmentLevel(EquipType slotType, int level)
         {
             if (!equipmentSlots.ContainsKey(slotType))
@@ -334,10 +352,8 @@ namespace SlayerLegend.Equipment
         }
 
         #region 보유 효과 관리
-        /// <summary>
-        /// 보유 효과 재계산
-        /// 인벤토리의 모든 장비 보유 효과를 적용 (중첩 없음)
-        /// </summary>
+        // 보유 효과 재계산
+        // 인벤토리의 모든 장비 보유 효과를 적용 (중첩 없음)
         private void RefreshHoldEffects()
         {
             if (equipTarget == null) return;
@@ -372,9 +388,7 @@ namespace SlayerLegend.Equipment
             }
         }
 
-        /// <summary>
-        /// 특정 장비의 보유 효과 적용
-        /// </summary>
+        // 특정 장비의 보유 효과 적용
         private void ApplyHoldEffects(EquipData equipment, int level)
         {
             if (equipment == null || equipTarget == null) return;
@@ -390,9 +404,7 @@ namespace SlayerLegend.Equipment
             }
         }
 
-        /// <summary>
-        /// 모든 보유 효과 해제
-        /// </summary>
+        // 모든 보유 효과 해제
         private void RemoveAllHoldEffects()
         {
             if (equipTarget == null) return;
@@ -417,10 +429,8 @@ namespace SlayerLegend.Equipment
         #endregion
 
         #region 인벤토리 관리
-        /// <summary>
-        /// 장비를 인벤토리에 추가
-        /// 같은 장비를 여러 개 보유 가능
-        /// </summary>
+        // 장비를 인벤토리에 추가
+        // 같은 장비를 여러 개 보유 가능
         public void AddToInventory(EquipData equipment, int level = 1)
         {
             if (equipment == null)
@@ -442,10 +452,13 @@ namespace SlayerLegend.Equipment
                 inventory[slotType] = new List<InventoryItem>();
             }
 
-            inventory[slotType].Add(new InventoryItem(equipment, level));
+            // EquipmentLevelManager에서 공유 레벨 사용
+            int actualLevel = GetSharedLevel(equipment, level);
+
+            inventory[slotType].Add(new InventoryItem(equipment, actualLevel));
 
             string equipName = equipment.GetName();
-            Debug.Log($"[EquipmentManager] 인벤토리에 추가: {equipName} (Lv.{level}) - 현재 보유량: {GetEquipmentCount(equipment)}");
+            Debug.Log($"[EquipmentManager] 인벤토리에 추가: {equipName} (Lv.{actualLevel}) - 현재 보유량: {GetEquipmentCount(equipment)}");
 
             // 보유 효과 재계산
             RefreshHoldEffects();
@@ -453,10 +466,7 @@ namespace SlayerLegend.Equipment
             OnInventoryChanged?.Invoke(slotType);
         }
 
-        /// <summary>
-        /// 인벤토리에서 장비 제거 (ID 기반 비교)
-        /// </summary>
-        /// <returns>제거 성공 여부</returns>
+        // 인벤토리에서 장비 제거 (ID 기반 비교)
         public bool RemoveFromInventory(EquipData equipment)
         {
             if (equipment == null) return false;
@@ -492,9 +502,7 @@ namespace SlayerLegend.Equipment
             return false;
         }
 
-        /// <summary>
-        /// 특정 장비의 보유 개수 조회 (ID 기반 비교)
-        /// </summary>
+        // 특정 장비의 보유 개수 조회 (ID 기반 비교)
         public int GetEquipmentCount(EquipData equipment)
         {
             if (equipment == null) return 0;
@@ -523,9 +531,7 @@ namespace SlayerLegend.Equipment
             return count;
         }
 
-        /// <summary>
-        /// 특정 슬롯 타입의 전체 인벤토리 조회 (읽기 전용)
-        /// </summary>
+        // 특정 슬롯 타입의 전체 인벤토리 조회 (읽기 전용)
         public IReadOnlyList<InventoryItem> GetInventory(EquipType slotType)
         {
             if (!inventory.ContainsKey(slotType))
@@ -536,9 +542,7 @@ namespace SlayerLegend.Equipment
             return inventory[slotType];
         }
 
-        /// <summary>
-        /// 인벤토리 비우기
-        /// </summary>
+        // 인벤토리 비우기
         public void ClearInventory(EquipType slotType)
         {
             if (!inventory.ContainsKey(slotType))
@@ -551,9 +555,7 @@ namespace SlayerLegend.Equipment
             OnInventoryChanged?.Invoke(slotType);
         }
 
-        /// <summary>
-        /// 전체 인벤토리 비우기
-        /// </summary>
+        // 전체 인벤토리 비우기
         public void ClearAllInventory()
         {
             foreach (EquipType slotType in inventory.Keys)

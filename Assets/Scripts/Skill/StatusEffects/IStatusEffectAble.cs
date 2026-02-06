@@ -3,56 +3,38 @@ using UnityEngine;
 
 namespace SlayerLegend.Skill.StatusEffects
 {
-    /// <summary>
-    /// 상태이상을 받을 수 있는 대상 인터페이스
-    /// </summary>
+    // 상태이상을 받을 수 있는 대상 인터페이스
     public interface IStatusEffectAble
     {
-        /// <summary>
-        /// 상태이상을 적용함
-        /// </summary>
+        // 상태이상을 적용함
         void ApplyStatusEffect(StatusEffect effect);
 
-        /// <summary>
-        /// 특정 타입의 상태이상 제거 (제네릭)
-        /// </summary>
+        // 특정 타입의 상태이상 제거 (제네릭)
         void RemoveStatusEffect<T>() where T : StatusEffect;
 
-        /// <summary>
-        /// 특정 타입의 상태이상 제거 (Type 파라미터)
-        /// </summary>
+        // 특정 타입의 상태이상 제거 (Type 파라미터)
         void RemoveStatusEffect(System.Type effectType);
 
-        /// <summary>
-        /// 모든 상태이상 제거
-        /// </summary>
+        // 모든 상태이상 제거
         void ClearAllStatusEffects();
 
-        /// <summary>
-        /// 현재 적용된 상태이상 목록
-        /// </summary>
+        // 현재 적용된 상태이상 목록
         List<StatusEffect> ActiveEffects { get; }
 
-        /// <summary>
-        /// 최대 체력 (체력 비례 데미지 계산용)
-        /// </summary>
+        // 최대 체력 (체력 비례 데미지 계산용)
         float MaxHealth { get; }
     }
 
-    /// <summary>
-    /// 상태이상 시스템을 위한 MonoBehaviour 확장
-    /// IStatusEffectAble을 구현하는 클래스에서 사용할 수 있는 기본 구현
-    /// </summary>
+    // 상태이상 시스템을 위한 MonoBehaviour 확장
+    // IStatusEffectAble을 구현하는 클래스에서 사용할 수 있는 기본 구현
     public abstract class StatusEffectContainer : MonoBehaviour, IStatusEffectAble
     {
         [SerializeField] protected List<StatusEffect> activeEffects = new List<StatusEffect>();
 
         public List<StatusEffect> ActiveEffects => activeEffects;
 
-        /// <summary>
-        /// 최대 체력 - 파생 클래스에서 반드시 구현해야 함
-        /// 체력 비례 데미지 계산에 사용됨
-        /// </summary>
+        // 최대 체력 - 파생 클래스에서 반드시 구현해야 함
+        // 체력 비례 데미지 계산에 사용됨
         public abstract float MaxHealth { get; }
 
         public virtual void ApplyStatusEffect(StatusEffect effect)

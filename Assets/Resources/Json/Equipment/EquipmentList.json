@@ -1,0 +1,52 @@
+{
+  "listType": "Weapon",
+  "equipList": [
+    {
+      "id": "weapon_wooden_sword",
+      "name": "나무 검",
+      "spriteName": "Icons/Equipment/weapon_wooden_sword",
+      "grade": "Common",
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 10,
+        "levelUpValue": 2
+      },
+      "holdEffects": []
+    },
+    {
+      "id": "weapon_iron_sword",
+      "name": "철 검",
+      "spriteName": "Icons/Equipment/weapon_iron_sword",
+      "grade": "Uncommon",
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 25,
+        "levelUpValue": 5
+      },
+      "holdEffects": []
+    },
+    {
+      "id": "weapon_flame_sword",
+      "name": "화염검",
+      "spriteName": "Icons/Equipment/weapon_flame_sword",
+      "grade": "Legend",
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 50,
+        "levelUpValue": 10
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 20,
+          "levelUpValue": 5
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 0.2,
+          "levelUpValue": 0.05
+        }
+      ]
+    }
+  ]
+}

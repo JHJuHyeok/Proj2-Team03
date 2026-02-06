@@ -3,10 +3,8 @@ using UnityEngine;
 
 namespace SlayerLegend.Equipment
 {
-    /// <summary>
-    /// 장비 융합 관리자
-    /// 같은 장비 5개를 합성하여 상위 등급 장비 1개로 변환
-    /// </summary>
+    // 장비 융합 관리자
+    // 같은 장비 5개를 합성하여 상위 등급 장비 1개로 변환
     public class FusionManager : MonoBehaviour
     {
         public static FusionManager Instance { get; private set; }
@@ -16,9 +14,7 @@ namespace SlayerLegend.Equipment
 
         private EquipmentManager equipmentManager;
 
-        /// <summary>
-        /// 융합 완료 이벤트 (재료 장비, 결과 장비)
-        /// </summary>
+        // 융합 완료 이벤트 (재료 장비, 결과 장비)
         public event Action<EquipData, EquipData> OnFusionComplete;
 
         private void Awake()
@@ -32,10 +28,7 @@ namespace SlayerLegend.Equipment
             Instance = this;
         }
 
-        /// <summary>
-        /// 융합 관리자 초기화
-        /// </summary>
-        /// <param name="equipmentManager">장비 관리자</param>
+        // 융합 관리자 초기화
         public void Initialize(EquipmentManager equipmentManager)
         {
             this.equipmentManager = equipmentManager;
@@ -43,11 +36,7 @@ namespace SlayerLegend.Equipment
             Debug.Log("[FusionManager] 초기화 완료");
         }
 
-        /// <summary>
-        /// 합성 가능 여부 확인
-        /// </summary>
-        /// <param name="equipment">확인할 장비</param>
-        /// <returns>합성 가능 여부</returns>
+        // 합성 가능 여부 확인
         public bool CanFuse(EquipData equipment)
         {
             if (equipment == null) return false;
@@ -66,12 +55,7 @@ namespace SlayerLegend.Equipment
             return nextGrade != null;
         }
 
-        /// <summary>
-        /// 합성 시도
-        /// </summary>
-        /// <param name="equipment">합성할 장비</param>
-        /// <param name="result">결과 장비</param>
-        /// <returns>성공 여부</returns>
+        // 합성 시도
         public bool TryFuse(EquipData equipment, out EquipData result)
         {
             result = null;
@@ -103,11 +87,7 @@ namespace SlayerLegend.Equipment
             return true;
         }
 
-        /// <summary>
-        /// 합성 불가 사유 메시지
-        /// </summary>
-        /// <param name="equipment">확인할 장비</param>
-        /// <returns>불가 사유</returns>
+        // 합성 불가 사유 메시지
         public string GetCannotFuseReason(EquipData equipment)
         {
             if (equipment == null) return "장비가 없습니다";

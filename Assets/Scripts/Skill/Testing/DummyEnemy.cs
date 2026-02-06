@@ -5,11 +5,9 @@ using System.Collections.Generic;
 
 namespace SlayerLegend.Skill.Testing
 {
-    /// <summary>
-    /// 테스트용 더미 적 캐릭터
-    /// 체력을 가지고 액티브 스킬의 데미지를 받음
-    /// CC 상태이상 테스트를 위한 IStunnable, IFreezable, IRootable 구현
-    /// </summary>
+    // 테스트용 더미 적 캐릭터
+    // 체력을 가지고 액티브 스킬의 데미지를 받음
+    // CC 상태이상 테스트를 위한 IStunnable, IFreezable, IRootable 구현
     public class DummyEnemy : MonoBehaviour, IDamageable, IStatusEffectAble, IStunnable, IFreezable, IRootable
     {
         [Header("스탯")]
@@ -63,9 +61,7 @@ namespace SlayerLegend.Skill.Testing
             }
         }
 
-        /// <summary>
-        /// 데미지를 입음
-        /// </summary>
+        // 데미지를 입음
         public void TakeDamage(float damage)
         {
             if (isStunned)
@@ -81,9 +77,7 @@ namespace SlayerLegend.Skill.Testing
             }
         }
 
-        /// <summary>
-        /// 스킬 이름과 함께 데미지를 입음 (테스트용)
-        /// </summary>
+        // 스킬 이름과 함께 데미지를 입음 (테스트용)
         public void TakeDamage(float damage, string skillName)
         {
             if (isStunned)

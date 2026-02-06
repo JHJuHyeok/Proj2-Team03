@@ -1,0 +1,64 @@
+{
+  "listType": "Accessorie",
+  "equipList": [
+    {
+      "id": "accessory_power_ring",
+      "name": "힘의 반지",
+      "spriteName": "Icons/Equipment/accessory_power_ring",
+      "grade": "Common",
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 5,
+        "levelUpValue": 1
+      },
+      "holdEffects": []
+    },
+    {
+      "id": "accessory_health_necklace",
+      "name": "생명의 목걸이",
+      "spriteName": "Icons/Equipment/accessory_health_necklace",
+      "grade": "Uncommon",
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 50,
+        "levelUpValue": 10
+      },
+      "holdEffects": []
+    },
+    {
+      "id": "accessory_critical_earring",
+      "name": "크리의 귀걸이",
+      "spriteName": "Icons/Equipment/accessory_critical_earring",
+      "grade": "Rare",
+      "equipEffect": {
+        "type": "CriticalDamage",
+        "initValue": 0.15,
+        "levelUpValue": 0.03
+      },
+      "holdEffects": []
+    },
+    {
+      "id": "accessory_dragon_earring",
+      "name": "용의 귀걸이",
+      "spriteName": "Icons/Equipment/accessory_dragon_earring",
+      "grade": "Legend",
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 20,
+        "levelUpValue": 5
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 100,
+          "levelUpValue": 20
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 0.3,
+          "levelUpValue": 0.05
+        }
+      ]
+    }
+  ]
+}
