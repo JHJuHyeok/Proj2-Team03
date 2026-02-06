@@ -1,4 +1,11 @@
 using UnityEngine;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class CurrencySaveData
+{
+    public List<Currency> currencies;
+}
 
 [System.Serializable]
 public class Currency

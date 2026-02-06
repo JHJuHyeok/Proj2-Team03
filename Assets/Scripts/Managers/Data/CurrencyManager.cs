@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 public class CurrencyManager : Singleton<CurrencyManager>
 {
@@ -8,10 +9,10 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
     public event Action<CurrencyType, double> OnCurrencyChanged;
 
-    protected override void Awake()
+    public void Init(string json)
     {
-        base.Awake();
-        // 재화 수치 불러오기
+        var currencyDict = JsonConvert.DeserializeObject<GameData>(json);
+        Debug.Log("재화 데이터 동기화 완료");
     }
 
     /// <summary>
