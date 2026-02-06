@@ -42,9 +42,15 @@ public class StageManager : MonoBehaviour
 
     private void UpdateProgress()
     {
-        // StageData에서 TargetKillCount 제거됨, 진행률 정의되지 않거나 무한함.
-        // 현재는 오류 방지를 위해 비율을 0으로 유지.
-        CurrentProgressRatio = 0f; 
+        if (CurrentStageData != null && CurrentStageData.monsterCount > 0)
+        {
+            CurrentProgressRatio = (float)_currentKillCount / CurrentStageData.monsterCount;
+            CurrentProgressRatio = Mathf.Clamp01(CurrentProgressRatio);
+        }
+        else
+        {
+            CurrentProgressRatio = 0f;
+        }
         OnProgressChanged?.Invoke(CurrentProgressRatio);
     }
 
