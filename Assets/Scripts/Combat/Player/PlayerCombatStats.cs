@@ -2,15 +2,10 @@ using UnityEngine;
 using System;
 
 // 플레이어의 전투 스탯을 관리하는 클래스
-// StatController에서 최종 계산된 스탯을 가져오고, JSON에서 기본 스탯을 로드함
+// StatController에서 최종 계산된 스탯을 가져옴
+// TODO: StatController 앞단 데이터 수집 완료 후 더미 데이터 제거
 public class PlayerCombatStats : MonoBehaviour
 {
-    [Header("설정")]
-    [SerializeField] private string playerStatsId = "Player_Default";
-
-    // 기본 데이터 (StatType에 없는 스탯용)
-    private PlayerStatsData _baseData;
-
     // 런타임 상태
     private double _currentHp;
     private double _currentMana;
@@ -45,8 +40,8 @@ public class PlayerCombatStats : MonoBehaviour
     public float AttackSpeed => 1f;
     public float AttackRange => 2f;
     public float DetectionRange => 15f;
-    public float BlowDamage => _baseData?.blowDamage ?? 0f;
-    public float BlowProbability => _baseData?.blowProbability ?? 0f;
+    public float BlowDamage => 3.0f;        // TODO: StatController 완성 후 GetStatValue로 변경
+    public float BlowProbability => 0.1f;   // TODO: StatController 완성 후 GetStatValue로 변경
 
     // === 런타임 상태 ===
     public double CurrentHealth => _currentHp;
@@ -55,24 +50,7 @@ public class PlayerCombatStats : MonoBehaviour
 
     private void Start()
     {
-        LoadBaseData();
         InitializeCurrentStats();
-    }
-
-    private void LoadBaseData()
-    {
-        if (DataManager.Instance == null)
-        {
-            Debug.LogError("[PlayerCombatStats] DataManager not found!");
-            return;
-        }
-
-        _baseData = DataManager.Instance.playerStats.Get(playerStatsId);
-
-        if (_baseData == null)
-        {
-            Debug.LogError($"[PlayerCombatStats] PlayerStatsData not found: {playerStatsId}");
-        }
     }
 
     private void InitializeCurrentStats()
@@ -108,16 +86,43 @@ public class PlayerCombatStats : MonoBehaviour
 
     /// <summary>
     /// StatController에서 스탯 값 조회
+    /// TODO: StatController 앞단 데이터 수집 완료 후 더미 데이터 제거
     /// </summary>
     private double GetStatValue(StatType type)
     {
+        // StatController가 준비되지 않았으면 더미 데이터 반환
         if (StatController.Instance == null)
         {
-            Debug.LogWarning("[PlayerCombatStats] StatController not initialized yet");
-            return 0;
+            return GetDummyStatValue(type);
         }
 
-        return StatController.Instance.GetFinalStat(type);
+        double value = StatController.Instance.GetFinalStat(type);
+        
+        // 값이 0이면 더미 데이터 사용 (아직 데이터가 수집되지 않은 경우)
+        return value > 0 ? value : GetDummyStatValue(type);
+    }
+
+    /// <summary>
+    /// 임시 더미 스탯 값 (StatController 완성 전까지 사용)
+    /// TODO: StatController 완성 후 이 메서드 제거
+    /// </summary>
+    private double GetDummyStatValue(StatType type)
+    {
+        return type switch
+        {
+            StatType.HP => 1000,           // 최대 체력
+            StatType.MANA => 100,          // 최대 마나
+            StatType.STR => 50,            // 공격력
+            StatType.CRI_Per => 10,        // 치명타 확률 (10%)
+            StatType.CTI_DMG => 200,       // 치명타 데미지 (200%)
+            StatType.ACC => 100,           // 명중률 (100%)
+            StatType.DODGE => 5,           // 회피율 (5%)
+            StatType.ADD_GOLD => 0,        // 추가 골드 획득량
+            StatType.ADD_EXP => 0,         // 추가 경험치 획득량
+            StatType.VIT_HP => 5,          // 초당 HP 회복량
+            StatType.VIT_MANA => 3,        // 초당 마나 회복량
+            _ => 0
+        };
     }
 
     /// <summary>
