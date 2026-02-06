@@ -10,6 +10,12 @@ public class SpriteManager : Singleton<SpriteManager>
     // Dictionary<호출 아틀라스 명칭, 아틀라스>
     private Dictionary<string, SpriteAtlas> _atlasCache = new();
 
+    /// <summary>
+    /// 로드된 아틀라스에서 스프라이트 탐색
+    /// </summary>
+    /// <param name="atlasAddress"> 아틀라스 주소 </param>
+    /// <param name="spriteName"> 스프라이트 명칭 </param>
+    /// <returns></returns>
     public async Task<Sprite> GetSprite(string atlasAddress, string spriteName)
     {
         // 이미 로드된 아틀라스가 있는지 확인
@@ -39,5 +45,10 @@ public class SpriteManager : Singleton<SpriteManager>
         }
 
         return targetSprite;
+    }
+
+    public async Task GetResources()
+    {
+        // 게임 시작 시 아틀라스 파일 불러오기
     }
 }
