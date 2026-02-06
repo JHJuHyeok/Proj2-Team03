@@ -1,5 +1,6 @@
 using UnityEngine;
 using Combat.Drop;
+using System;
 
 public enum CombatState
 {
@@ -35,6 +36,17 @@ public class CombatManager : MonoBehaviour
     private float _bossTimeRemaining = 0f;
     private bool _isBossTimerActive = false;
     public float BossTimeRemaining => _bossTimeRemaining;
+
+    // 이벤트
+    public event Action<CombatState> OnCombatStateChanged;
+
+    // 보스 HP 비율 (UI용)
+    public float BossHpRatio { get; private set; } = 1f;
+
+    public void UpdateBossHpRatio(float ratio)
+    {
+        BossHpRatio = Mathf.Clamp01(ratio);
+    }
 
     private void Awake()
     {
@@ -109,6 +121,8 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("[CombatManager] 보스전 시작!");
         CurrentState = CombatState.BossBattle;
+        BossHpRatio = 1f;
+        OnCombatStateChanged?.Invoke(CurrentState);
 
         // 제한 시간 타이머 시작
         _bossTimeRemaining = BOSS_TIME_LIMIT;
@@ -138,6 +152,7 @@ public class CombatManager : MonoBehaviour
     private void StartFarming()
     {
         CurrentState = CombatState.Farming;
+        OnCombatStateChanged?.Invoke(CurrentState);
 
         if (playerStats != null)
         {

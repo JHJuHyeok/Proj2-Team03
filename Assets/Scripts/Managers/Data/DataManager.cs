@@ -9,8 +9,6 @@ public class DataManager : Singleton<DataManager>
     
     // StageList actually contains AreaData
     public GameDB<AreaData, StageDataList> maps = new();
-    
-    public GameDB<PlayerStatsData, PlayerStatsDataList> playerStats = new();
 
     protected override void Awake()
     {
@@ -27,7 +25,6 @@ public class DataManager : Singleton<DataManager>
         
         maps.Load("Json/Stage/StageList");
         
-        playerStats.Load("Json/Player/PlayerStatsList");
         Debug.Log("데이터 로드 완료");
     }
 
