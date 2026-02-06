@@ -1,4 +1,7 @@
 using UnityEngine;
+using System.Collections.Generic;
+using BackEnd;
+using Newtonsoft.Json;
 
 public class DataManager : Singleton<DataManager>
 {
@@ -15,10 +18,16 @@ public class DataManager : Singleton<DataManager>
     protected override void Awake()
     {
         base.Awake();
-        LoadAllData();
+        LoadAllDatabase();
     }
 
-    private void LoadAllData()
+    public void Init(string json)
+    {
+        GameData loadedData = JsonConvert.DeserializeObject<GameData>(json);
+        Debug.Log("성장 데이터 동기화 완료");
+    }
+
+    private void LoadAllDatabase()
     {
         monsters.Load("Json/Monster/MonsterList");
         skills.Load("Json/Skill/SkillList");
