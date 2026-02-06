@@ -5,7 +5,7 @@ using UnityEngine;
 // 뒤끝 SDK namespace 추가
 using BackEnd;
 
-public class BackendManager : MonoBehaviour
+public class BackendManagerTemp : MonoBehaviour
 {
     void Start()
     {
