@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 7212476274861950501}
   - component: {fileID: 8288608346463904311}
   - component: {fileID: 1691997883917039288}
+  - component: {fileID: 4089588976299304410}
   m_Layer: 5
   m_Name: Skill Grid Image
   m_TagString: Untagged
@@ -151,3 +152,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4089588976299304410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6460435977946479102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51d51b16b023efd4980142af6f58a409, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellIndex: 0
+  unlockLevel: 1
+  lockIcon: {fileID: 1532009184936643601}

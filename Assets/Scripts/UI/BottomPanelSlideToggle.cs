@@ -29,6 +29,9 @@ public class BottomPanelSlideToggle : MonoBehaviour
     [SerializeField] private float hiddenExtra = 0f;//완전히 아래로 더 내리고 싶으면 +값(픽셀)
     [SerializeField] private float arriveEpsilon = 0.5f;//목표값 근처면 스냅(영원히 덜덜거리는 Lerp 방지)
 
+    [Header("Lock")]
+    [SerializeField] private bool lockWhenPopupOpen = true;
+
     private bool isShown = true;
     private int currentTabIndex = -1;
 
@@ -55,6 +58,13 @@ public class BottomPanelSlideToggle : MonoBehaviour
     {
         if (bottomRoot == null) return;
 
+        //팝업이 떠있으면 바텀 자동 숨김 금지
+        if (lockWhenPopupOpen && PopupManager.Instance != null && PopupManager.Instance.IsOpenAny())
+        {
+            SlideUpdate();
+            return;
+        }
+
         //바텀 영역 밖 터치/클릭하면 숨김(단, ignoreRoots는 제외)
         if (isShown && IsPointerDown())
         {
@@ -72,6 +82,7 @@ public class BottomPanelSlideToggle : MonoBehaviour
 
         SlideUpdate();
     }
+
 
     //레이아웃 확정 후 위치(Shown/Hidden) 재계산
     private void RebuildAndCachePositions()
