@@ -2,9 +2,13 @@ using UnityEngine;
 using System.Collections.Generic;
 using BackEnd;
 using Newtonsoft.Json;
+using System.IO;
 
 public class DataManager : Singleton<DataManager>
 {
+    // 실시간 데이터 임시 보관
+    public GameData currentSaveData { get; private set; }
+
     public GameDB<MonsterData, MonsterDataList> monsters = new();
     public GameDB<SkillData, SkillDataList> skills = new();
     public GameDB<EquipData, EquipDataList> weapons = new();
@@ -13,15 +17,36 @@ public class DataManager : Singleton<DataManager>
     // StageList actually contains AreaData
     public GameDB<AreaData, StageDataList> maps = new();
 
+    private bool _isDirty = false;              // 데이터 변경 여부
+    private float _saveTimer = 0f;
+    private const float saveInterval = 300f;    // 자동 저장 간격 5분
+
     protected override void Awake()
     {
         base.Awake();
         LoadAllDatabase();
     }
 
+    private void Update()
+    {
+        _saveTimer += Time.deltaTime;
+
+        // 5분 간격으로 자동 저장
+        if (_saveTimer >= saveInterval)
+        {
+            if (_isDirty)
+            {
+                SaveToRemote();
+            }
+            _saveTimer = 0f;
+        }
+    }
+
     public void Init(string json)
     {
-        GameData loadedData = JsonConvert.DeserializeObject<GameData>(json);
+        // Json 데이터를 GameData로 역직렬화
+        currentSaveData = JsonConvert.DeserializeObject<GameData>(json);
+
         Debug.Log("성장 데이터 동기화 완료");
     }
 
@@ -35,6 +60,30 @@ public class DataManager : Singleton<DataManager>
         maps.Load("Json/Stage/StageList");
         
         Debug.Log("데이터 로드 완료");
+    }
+
+    /// <summary>
+    /// 서버에 현재 데이터 원격 저장
+    /// </summary>
+    public async void SaveToRemote()
+    {
+        bool saveResult = await BackendManager.Instance.SaveDataAsync("UserSave", currentSaveData);
+        bool saveCurrency = await BackendManager.Instance.SaveDataAsync("UserCurrency", CurrencyManager.Instance.currencySave);
+
+        if (saveResult && saveCurrency)
+        {
+            _isDirty = false;
+            _saveTimer = 0f;
+        }
+    }
+
+    /// <summary>
+    /// 로컬 저장소에 임시 저장(변경사항 발생 시 호출)
+    /// </summary>
+    public void SaveDataToLocal()
+    {
+        string json = JsonConvert.SerializeObject(currentSaveData);
+        File.WriteAllText(Application.persistentDataPath + "/temp_save.json", json);
     }
 
     public StageData GetStage(string stageId)
