@@ -47,8 +47,26 @@ public class SpriteManager : Singleton<SpriteManager>
         return targetSprite;
     }
 
-    public async Task GetResources()
+    public async Task LoadAllAtlasAsync()
     {
-        // 게임 시작 시 아틀라스 파일 불러오기
+        // 1. 게임 시작 시 아틀라스 파일 불러오기
+        AsyncOperationHandle<IList<SpriteAtlas>> handle = 
+            Addressables.LoadAssetsAsync<SpriteAtlas>("Atlas", null);
+
+        await handle.Task;
+
+        // 2. 딕셔너리에 호출한 아틀라스들 삽입
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            _atlasCache.Clear();
+
+            foreach (var atlas in handle.Result)
+            {
+                if (!_atlasCache.ContainsKey(atlas.name))
+                {
+                    _atlasCache.Add(atlas.name, atlas);
+                }
+            }
+        }
     }
 }
