@@ -6,42 +6,76 @@ using Newtonsoft.Json;
 
 public class BackendManager : Singleton<BackendManager>
 {
+    /// <summary>
+    /// 데이터 호출
+    /// </summary>
+    /// <param name="tableName"> 데이터 테이블 명칭 </param>
+    /// <returns></returns>
     public async Task<string> GetDataAsync(string tableName)
     {
         return await Task.Run(() =>
         {
             var bro = Backend.GameData.GetMyData(tableName, new Where());
+
             if (bro.IsSuccess() && bro.FlattenRows().Count > 0)
             {
+                Debug.Log("게임 정보 조회 성공");
+
                 return bro.FlattenRows()[0].ToJson();
             }
             return null;
         });
     }
 
-    //public async Task<bool> UpdateDataAsync(string tableName, object dataObject)
-    //{
-    //    Param param = new Param();
+    /// <summary>
+    /// 서버에 유저 데이터 저장
+    /// </summary>
+    /// <param name="tableName"> 데이터 테이블 명칭 </param>
+    /// <param name="dataObject"> 저장할 데이터 </param>
+    /// <returns></returns>
+    public async Task<bool> SaveDataAsync(string tableName, object dataObject)
+    {
+        Param param = new Param();
 
-    //    string json = JsonConvert.SerializeObject(dataObject);
-    //    var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+        string json = JsonConvert.SerializeObject(dataObject);
+        var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
 
-    //    foreach (var item in dictionary)
-    //    {
-    //        param.Add(item.Key, item.Value);
-    //    }
+        foreach (var item in dictionary)
+        {
+            param.Add(item.Key, item.Value);
+        }
 
-    //    return await Task.Run(() =>
-    //    {
-    //        var getResult = Backend.GameData.GetMyData(tableName, new Where());
+        return await Task.Run(() =>
+        {
+            // 2. 먼저 해당 테이블에 내 데이터가 있는지 확인 (업데이트를 위해 inDate가 필요함)
+            var getResult = Backend.GameData.GetMyData(tableName, new Where());
 
-    //        BackendReturnObject bro;
+            BackendReturnObject bro = null;
 
-    //        if (getResult.IsSuccess() && getResult.FlattenRows().Count > 0)
-    //        {
-    //            string inDate = getResult.FlattenRows()[0]["inDate"].ToString();
-    //            bro = Backend.GameData.Update(tableName, inDate, param);
-    //        }
-    //    });
-    //}
+            if (getResult.IsSuccess() && getResult.FlattenRows().Count > 0)
+            {
+                // 데이터가 이미 존재함 -> 업데이트 (Update)
+                string inDate = getResult.FlattenRows()[0]["inDate"].ToString();
+                bro = Backend.GameData.UpdateV2(tableName, inDate, Backend.UserInDate , param);
+                Debug.Log($"[{tableName}] 데이터 업데이트 시도...");
+            }
+            else
+            {
+                // 데이터가 없음 -> 신규 생성 (Insert)
+                bro = Backend.GameData.Insert(tableName, param);
+                Debug.Log($"[{tableName}] 신규 데이터 생성 시도...");
+            }
+
+            if (bro.IsSuccess())
+            {
+                Debug.Log($"[{tableName}] 서버 저장 성공");
+                return true;
+            }
+            else
+            {
+                Debug.LogError($"[{tableName}] 서버 저장 실패: {bro.GetErrorCode()} - {bro.GetMessage()}");
+                return false;
+            }
+        });
+    }
 }
