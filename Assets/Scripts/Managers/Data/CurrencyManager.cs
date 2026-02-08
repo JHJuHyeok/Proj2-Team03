@@ -1,7 +1,9 @@
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.IO;
 
 public class CurrencyManager : Singleton<CurrencyManager>
 {
@@ -9,9 +11,20 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
     public event Action<CurrencyType, double> OnCurrencyChanged;
 
+    public CurrencySaveData currencySave;
+
     public void Init(string json)
     {
-        var currencyDict = JsonConvert.DeserializeObject<GameData>(json);
+        // 1. Json 데이터 CurrencySaveData로 역직렬화
+        var currencyDict = JsonConvert.DeserializeObject<CurrencySaveData>(json);
+
+        currencySave = currencyDict;
+
+        // 2. 딕셔너리에 삽입
+        foreach (var currency in currencyDict.currencies)
+        {
+            _currencies[currency.type] = currency.value;
+        }
         Debug.Log("재화 데이터 동기화 완료");
     }
 
@@ -62,5 +75,23 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <returns> 재화 수량 </returns>
     public double GetAmount(CurrencyType type) =>
         _currencies.GetValueOrDefault(type, 0);
+
+    /// <summary>
+    /// 로컬 저장소에 재화 데이터 임시 저장(재화 변경 시 호출)
+    /// </summary>
+    public void SaveCurrencyToLocal()
+    {
+        List<CurrencyType> types = _currencies.Keys.ToList();
+        List<double> values = _currencies.Values.ToList();
+
+        for (int i = 0; i < _currencies.Count; i++)
+        {
+            currencySave.currencies[i].type = types[i];
+            currencySave.currencies[i].value = values[i];
+        }
+
+        string json = JsonConvert.SerializeObject(currencySave);
+        File.WriteAllText(Application.persistentDataPath + "/temp_currency.json", json);
+    }
 }
 
