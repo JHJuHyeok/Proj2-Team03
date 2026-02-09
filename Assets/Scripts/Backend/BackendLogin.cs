@@ -22,20 +22,17 @@ public class BackendLogin
         }
     }
 
-    public void CustomSignUp(string id, string pw)
+    public void GuestSignUp()
     {
         Debug.Log("회원가입을 요청합니다.");
 
-        var bro = Backend.BMember.CustomSignUp(id, pw);
-
-        if (bro.IsSuccess())
+        Backend.BMember.GuestLogin("게스트 로그인으로 로그인함", (callback) =>
         {
-            Debug.Log("회원가입에 성공했습니다. : " + bro);
-        }
-        else
-        {
-            Debug.LogError("회원가입에 실패했습니다. : " + bro);
-        }
+            if (callback.IsSuccess())
+            {
+                Debug.Log("게스트 로그인에 성공했습니다.");
+            }
+        });
     }
 
     public void CustomLogin(string id, string pw)
