@@ -2,9 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class CurrencySaveData
+public class CurrencyData
 {
     public List<Currency> currencies;
+    public long lastSaveTime;
 }
 
 [System.Serializable]
