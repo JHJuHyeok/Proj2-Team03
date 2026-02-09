@@ -108,6 +108,7 @@ public class CombatManager : MonoBehaviour
             if (isRewardBox)
             {
                 spawnManager.StartFarmingSpawn(stageManager.CurrentStageData);
+                stageManager.ResetProgress();
             }
             else
             {
