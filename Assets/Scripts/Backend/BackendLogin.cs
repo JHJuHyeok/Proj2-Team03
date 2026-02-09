@@ -24,13 +24,32 @@ public class BackendLogin
 
     public void GuestSignUp()
     {
-        Debug.Log("회원가입을 요청합니다.");
+        Debug.Log("게스트 로그인을 요청합니다.");
 
         Backend.BMember.GuestLogin("게스트 로그인으로 로그인함", (callback) =>
         {
             if (callback.IsSuccess())
             {
-                Debug.Log("게스트 로그인에 성공했습니다.");
+                if (callback.GetStatusCode() == "201")
+                {
+                    Debug.Log("신규 게스트 계정 생성");
+
+                    string tempNickname = Backend.BMember.GetGuestID().Substring(0, 11);
+                    var bro = Backend.BMember.CreateNickname(tempNickname);
+
+                    if (bro.IsSuccess())
+                    {
+                        Debug.Log($"임시 닉네임 설정 완료 : {tempNickname}");
+                    }
+                }
+                else
+                {
+                    Debug.Log("게스트 로그인에 성공했습니다.");
+                }
+            }
+            else
+            {
+                Debug.LogError($"게스트 로그인 실패: {callback.GetMessage()}");
             }
         });
     }
