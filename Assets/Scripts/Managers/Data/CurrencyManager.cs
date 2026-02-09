@@ -11,17 +11,15 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
     public event Action<CurrencyType, double> OnCurrencyChanged;
 
-    public CurrencySaveData currencySave;
+    public CurrencyData currencySave;
 
-    public void Init(string json)
+    public void Init(CurrencyData data)
     {
-        // 1. Json 데이터 CurrencySaveData로 역직렬화
-        var currencyDict = JsonConvert.DeserializeObject<CurrencySaveData>(json);
-
-        currencySave = currencyDict;
+        // 1. 저장용 임시 프로퍼티 초기화
+        currencySave = data;
 
         // 2. 딕셔너리에 삽입
-        foreach (var currency in currencyDict.currencies)
+        foreach (var currency in data.currencies)
         {
             _currencies[currency.type] = currency.value;
         }

@@ -42,10 +42,10 @@ public class DataManager : Singleton<DataManager>
         }
     }
 
-    public void Init(string json)
+    public void Init(GameData data)
     {
-        // Json 데이터를 GameData로 역직렬화
-        currentSaveData = JsonConvert.DeserializeObject<GameData>(json);
+        // 현재 데이터 초기화
+        currentSaveData = data;
 
         Debug.Log("성장 데이터 동기화 완료");
     }
