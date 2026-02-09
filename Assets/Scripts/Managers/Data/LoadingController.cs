@@ -2,6 +2,7 @@ using UnityEngine;
 using BackEnd;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.IO;
 
 //===============게임 시작 시 로딩==============// 
 
@@ -11,7 +12,11 @@ public class LoadingController : MonoBehaviour
     {
         // 1. 로그인 스텝
         bool loginSuccess = await AuthStep();
-        if (!loginSuccess) return;
+        if (!loginSuccess)
+        {
+            BackendLogin.Instance.GuestSignUp();
+            return;
+        }
 
         // 2. 서버 데이터 통합 로드
         bool dataLoadSuccess = await LoadGameDataStep();
@@ -32,23 +37,56 @@ public class LoadingController : MonoBehaviour
 
     private async Task<bool> LoadGameDataStep()
     {
-        // 1. 각 테이블에서 데이터 호출
-        var currencyTask = BackendManager.Instance.GetDataAsync("UserCurrency");
-        var saveTask = BackendManager.Instance.GetDataAsync("UserSave");
+        // 1. 로컬 저장소의 데이터 호출
+        var localCurrency = LoadCurrencyFromLocal();
+        var localData = LoadDataFromLocal();
 
-        // 2. 데이터 불러올 때까지 대기
-        await Task.WhenAll(currencyTask, saveTask);
+        // 2. 서버 테이블에서 데이터 호출
+        var currencyResult = BackendManager.Instance.GetDataAsync("UserCurrency");
+        var dataResult = BackendManager.Instance.GetDataAsync("UserSave");
 
-        // 3. 각 매니저 초기화
-        if (currencyTask.Result != null && saveTask.Result != null)
+        // 3. 데이터 불러올 때까지 대기
+        await Task.WhenAll(currencyResult, dataResult);
+
+        // 4. 서버에서 호출한 데이터 역직렬화
+        CurrencyData serverCurrency = (currencyResult != null) ?
+            JsonConvert.DeserializeObject<CurrencyData>(currencyResult.Result) : null;
+        GameData serverData = (dataResult != null) ?
+            JsonConvert.DeserializeObject<GameData>(dataResult.Result) : null;
+
+        // 5. 최신 저장 데이터 비교
+        CurrencyData latestCurrency = DataSyncManager.ResolveLatestCurrency(localCurrency, serverCurrency);
+        GameData latestData = DataSyncManager.ResolveLatestData(localData, serverData);
+
+        // 6. 각 매니저 초기화
+        if (latestCurrency != null && latestData != null)
         {
-            CurrencyManager.Instance.Init(currencyTask.Result);
-            DataManager.Instance.Init(saveTask.Result);
+            CurrencyManager.Instance.Init(latestCurrency);
+            DataManager.Instance.Init(latestData);
+            Debug.Log("데이터 로드 완료");
             return true;
         }
 
         Debug.Log("데이터 로드 실패");
         return false;
+    }
+
+    private GameData LoadDataFromLocal()
+    {
+        string path = Application.persistentDataPath + "/temp_save.json";
+        if (!File.Exists(path)) return null;
+
+        string json = File.ReadAllText(path);
+        return JsonConvert.DeserializeObject<GameData>(json);
+    }
+
+    private CurrencyData LoadCurrencyFromLocal()
+    {
+        string path = Application.persistentDataPath + "/temp_currency.json";
+        if (!File.Exists(path)) return null;
+
+        string json = File.ReadAllText(path);
+        return JsonConvert.DeserializeObject<CurrencyData>(json);
     }
 
     private async Task ResourcesLoadStep()
