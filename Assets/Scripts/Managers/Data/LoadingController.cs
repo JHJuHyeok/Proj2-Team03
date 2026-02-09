@@ -58,11 +58,15 @@ public class LoadingController : MonoBehaviour
         CurrencyData latestCurrency = DataSyncManager.ResolveLatestCurrency(localCurrency, serverCurrency);
         GameData latestData = DataSyncManager.ResolveLatestData(localData, serverData);
 
-        // 6. 각 매니저 초기화
         if (latestCurrency != null && latestData != null)
         {
+            // 6. 각 매니저의 데이터 초기화
             CurrencyManager.Instance.Init(latestCurrency);
             DataManager.Instance.Init(latestData);
+
+            // 7. 아틀라스 스프라이트 로드
+            await ResourcesLoadStep();
+
             Debug.Log("데이터 로드 완료");
             return true;
         }
