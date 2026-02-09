@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using BackEnd;
 using Newtonsoft.Json;
+using System;
 using System.IO;
 
 public class DataManager : Singleton<DataManager>
@@ -20,12 +21,6 @@ public class DataManager : Singleton<DataManager>
     private bool _isDirty = false;              // 데이터 변경 여부
     private float _saveTimer = 0f;
     private const float saveInterval = 300f;    // 자동 저장 간격 5분
-
-    protected override void Awake()
-    {
-        base.Awake();
-        LoadAllDatabase();
-    }
 
     private void Update()
     {
@@ -50,7 +45,7 @@ public class DataManager : Singleton<DataManager>
         Debug.Log("성장 데이터 동기화 완료");
     }
 
-    private void LoadAllDatabase()
+    public void LoadAllDatabase()
     {
         monsters.Load("Json/Monster/MonsterList");
         skills.Load("Json/Skill/SkillList");
@@ -67,6 +62,10 @@ public class DataManager : Singleton<DataManager>
     /// </summary>
     public async void SaveToRemote()
     {
+        // 저장 시간 기록
+        PrepareForSave();
+        CurrencyManager.Instance.PrepareForSave();
+
         bool saveResult = await BackendManager.Instance.SaveDataAsync("UserSave", currentSaveData);
         bool saveCurrency = await BackendManager.Instance.SaveDataAsync("UserCurrency", CurrencyManager.Instance.currencySave);
 
@@ -82,9 +81,17 @@ public class DataManager : Singleton<DataManager>
     /// </summary>
     public void SaveDataToLocal()
     {
+        PrepareForSave();
+
         string json = JsonConvert.SerializeObject(currentSaveData);
         File.WriteAllText(Application.persistentDataPath + "/temp_save.json", json);
     }
+
+    /// <summary>
+    /// 저장 시간 기록
+    /// </summary>
+    public void PrepareForSave() =>
+        currentSaveData.lastSaveTime = DateTime.UtcNow.Ticks;
 
     public StageData GetStage(string stageId)
     {

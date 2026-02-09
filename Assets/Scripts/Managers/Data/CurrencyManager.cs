@@ -49,6 +49,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
         _currencies[type] += amount;
 
+        SaveCurrencyToLocal();
         OnCurrencyChanged?.Invoke(type, _currencies[type]);
     }
 
@@ -64,6 +65,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
             _currencies[type] -= amount;
             OnCurrencyChanged?.Invoke(type, _currencies[type]);
         }
+        SaveCurrencyToLocal();
     }
 
     /// <summary>
@@ -82,6 +84,8 @@ public class CurrencyManager : Singleton<CurrencyManager>
         List<CurrencyType> types = _currencies.Keys.ToList();
         List<double> values = _currencies.Values.ToList();
 
+        PrepareForSave();
+
         for (int i = 0; i < _currencies.Count; i++)
         {
             currencySave.currencies[i].type = types[i];
@@ -91,5 +95,11 @@ public class CurrencyManager : Singleton<CurrencyManager>
         string json = JsonConvert.SerializeObject(currencySave);
         File.WriteAllText(Application.persistentDataPath + "/temp_currency.json", json);
     }
+
+    /// <summary>
+    /// 저장 시간 기록
+    /// </summary>
+    public void PrepareForSave() =>
+        currencySave.lastSaveTime = DateTime.UtcNow.Ticks;
 }
 
