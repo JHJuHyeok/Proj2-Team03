@@ -24,6 +24,7 @@ public class LoadingController : MonoBehaviour
 
         // 3. 리소스 로드
         await ResourcesLoadStep();
+        DataManager.Instance.LoadAllDatabase();
 
         // 4. 씬 이동
     }
@@ -77,7 +78,7 @@ public class LoadingController : MonoBehaviour
 
     private GameData LoadDataFromLocal()
     {
-        string path = Application.persistentDataPath + "/temp_save.json";
+        string path = Application.persistentDataPath + "/temp_saveData.json";
         if (!File.Exists(path)) return null;
 
         string json = File.ReadAllText(path);
@@ -86,7 +87,7 @@ public class LoadingController : MonoBehaviour
 
     private CurrencyData LoadCurrencyFromLocal()
     {
-        string path = Application.persistentDataPath + "/temp_currency.json";
+        string path = Application.persistentDataPath + "/temp_saveCurrency.json";
         if (!File.Exists(path)) return null;
 
         string json = File.ReadAllText(path);
