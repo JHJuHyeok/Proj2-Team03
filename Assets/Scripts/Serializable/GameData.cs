@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 // 종합 성장 데이터
 [System.Serializable]
-public class GameData
+public class GameData : ISavable
 {
     public int level;                                           // 레벨
     public List<int> upgradeLevels = new();                     // 강화 레벨
@@ -15,7 +15,7 @@ public class GameData
     public Dictionary<string, applyOption> buddyOption = new(); // 각 동료 승급 옵션
     public List<int> gachaLevel = new();                        // 뽑기 레벨
 
-    public long lastSaveTime;           // 마지막 저장 시간
+    public long lastSaveTime { get; set; }           // 마지막 저장 시간
 }
 
 [System.Serializable]
