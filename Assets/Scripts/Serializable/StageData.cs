@@ -30,6 +30,8 @@ public class StageData
     public long minGoldDrop;    // 드랍 골드 최소치
     public long maxGoldDrop;    // 드랍 골드 최대치
     public int expDrop;         // 획득 경험치 수치
+    public int cubeCount;       // 강화 큐브 획득 수량
+    public float cubePercent;   // 강화큐브 획득 확률
 
     public string dropEquipID;  // 드랍 장비 ID
     public float dropPercent;   // 장비 드랍 확률
