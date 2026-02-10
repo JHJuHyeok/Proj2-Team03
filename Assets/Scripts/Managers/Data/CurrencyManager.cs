@@ -49,7 +49,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
         _currencies[type] += amount;
 
-        SaveCurrencyToLocal();
+        DictToCurrencyData();
         OnCurrencyChanged?.Invoke(type, _currencies[type]);
     }
 
@@ -65,7 +65,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
             _currencies[type] -= amount;
             OnCurrencyChanged?.Invoke(type, _currencies[type]);
         }
-        SaveCurrencyToLocal();
+        DictToCurrencyData();
     }
 
     /// <summary>
@@ -77,29 +77,18 @@ public class CurrencyManager : Singleton<CurrencyManager>
         _currencies.GetValueOrDefault(type, 0);
 
     /// <summary>
-    /// 로컬 저장소에 재화 데이터 임시 저장(재화 변경 시 호출)
+    /// 딕셔너리를 데이터 형태로 변환
     /// </summary>
-    public void SaveCurrencyToLocal()
+    public void DictToCurrencyData()
     {
         List<CurrencyType> types = _currencies.Keys.ToList();
         List<double> values = _currencies.Values.ToList();
-
-        PrepareForSave();
 
         for (int i = 0; i < _currencies.Count; i++)
         {
             currencySave.currencies[i].type = types[i];
             currencySave.currencies[i].value = values[i];
         }
-
-        string json = JsonConvert.SerializeObject(currencySave);
-        File.WriteAllText(Application.persistentDataPath + "/temp_currency.json", json);
     }
-
-    /// <summary>
-    /// 저장 시간 기록
-    /// </summary>
-    public void PrepareForSave() =>
-        currencySave.lastSaveTime = DateTime.UtcNow.Ticks;
 }
 
