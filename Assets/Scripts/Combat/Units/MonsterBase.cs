@@ -87,6 +87,11 @@ public abstract class MonsterBase : MonoBehaviour
 
         Debug.Log($"[{gameObject.name}] took {damage:F1} damage. HP: {_currentHp:F0}/{_maxHp:F0}");
 
+        if (IsBoss)
+        {
+            CombatManager.Instance?.UpdateBossHpRatio((float)HPRatio);
+        }
+
         if (_currentHp <= 0)
         {
             Die();
