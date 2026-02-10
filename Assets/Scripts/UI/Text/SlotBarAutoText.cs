@@ -14,8 +14,8 @@ public class SlotBarAutoText : MonoBehaviour
     [SerializeField] private EnumUI.SlotKey key;
 
     [Header("Text References")]
-    [SerializeField] private TMP_Text topLabelText;    // 상단: STR / HP / 등급
-    [SerializeField] private TMP_Text bottomNameText;  // 하단: 공격력 / 체력 / 등급명
+    [SerializeField] private TMP_Text topLabelText;    // 상단
+    [SerializeField] private TMP_Text bottomNameText;  // 하단
 
     private void Awake()
     {
@@ -28,6 +28,13 @@ public class SlotBarAutoText : MonoBehaviour
         ApplyText();
     }
 #endif
+
+    // 컨테이너 자동 배정에서 키 주입용
+    public void SetKey(EnumUI.SlotKey newKey)
+    {
+        key = newKey;
+        ApplyText();
+    }
 
     public void ApplyText()
     {

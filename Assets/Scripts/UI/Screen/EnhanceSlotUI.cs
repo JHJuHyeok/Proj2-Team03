@@ -4,12 +4,16 @@ using UnityEngine.UI;
 
 /*
 [승문]
-GrowthSlotUI
--성장 탭 슬롯 전용
--표시: (영문명 STR/HP...) (Max Lv.000) (Lv.000)
--하단: (한글명) (+000 -> +000)
+EnhanceSlotUI
+-강화 탭 슬롯 전용(기본 틀)
+-표시:
+  어빌리티 이름(한글: 공격력/체력...)
+  현재레벨(Lv.000)
+  강화했을때 바뀔수치(000 -> 000)
+  강화에 필요한 골드(코스트)
+-컨테이너 자동 배정을 위해 SetKey(EnumUI.SlotKey) 제공
 */
-public class GrowthSlotUI : MonoBehaviour
+public class EnhanceSlotUI : MonoBehaviour
 {
     [Header("Key")]
     [SerializeField] private EnumUI.SlotKey key;
@@ -18,13 +22,12 @@ public class GrowthSlotUI : MonoBehaviour
     [SerializeField] private Image iconImage;
 
     [Header("Texts")]
-    [SerializeField] private TMP_Text shortNameText;
-    [SerializeField] private TMP_Text maxLvText;
+    [SerializeField] private TMP_Text abilityNameText;
     [SerializeField] private TMP_Text levelText;
-    [SerializeField] private TMP_Text bottomInfoText;
+    [SerializeField] private TMP_Text changeText;
+    [SerializeField] private TMP_Text costGoldText;
 
     [Header("Format")]
-    [SerializeField] private string maxLvPrefix = "Max Lv.";
     [SerializeField] private string lvPrefix = "Lv.";
     [SerializeField] private string arrow = " -> ";
 
@@ -40,14 +43,6 @@ public class GrowthSlotUI : MonoBehaviour
     }
 #endif
 
-    private void ApplyStaticText()
-    {
-        if (shortNameText != null)
-        {
-            shortNameText.text = EnumUITables.GetTopLabel(key);
-        }
-    }
-
     // 컨테이너 자동 배정에서 호출
     public void SetKey(EnumUI.SlotKey newKey, Sprite iconSprite)
     {
@@ -60,10 +55,12 @@ public class GrowthSlotUI : MonoBehaviour
         }
     }
 
-    public void SetMaxLv(int maxLv)
+    private void ApplyStaticText()
     {
-        if (maxLvText == null) return;
-        maxLvText.text = maxLvPrefix + maxLv.ToString("N0");
+        if (abilityNameText != null)
+        {
+            abilityNameText.text = EnumUITables.GetKoreanName(key);
+        }
     }
 
     public void SetLevel(int level)
@@ -72,11 +69,15 @@ public class GrowthSlotUI : MonoBehaviour
         levelText.text = lvPrefix + level.ToString("000");
     }
 
-    public void SetBottomValueChange(long before, long after)
+    public void SetValueChange(long before, long after)
     {
-        if (bottomInfoText == null) return;
+        if (changeText == null) return;
+        changeText.text = before.ToString("N0") + arrow + after.ToString("N0");
+    }
 
-        string ko = EnumUITables.GetKoreanName(key);
-        bottomInfoText.text = ko + " +" + before.ToString("N0") + arrow + "+" + after.ToString("N0");
+    public void SetCostGold(long cost)
+    {
+        if (costGoldText == null) return;
+        costGoldText.text = cost.ToString("N0");
     }
 }
