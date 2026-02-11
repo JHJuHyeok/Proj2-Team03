@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public static class SourceKey
@@ -12,12 +13,14 @@ public static class SourceKey
     public const string Buddy = "Buddy";
 }
 
-public class StatController : Singleton<StatController>
+public class StatController
 {
     // 각 소스별 스탯 저장소
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
-    // 최종 합산 스탯들
+    // 최종 합산 스탯 캐시
     private Dictionary<StatType, double> _finalStats = new Dictionary<StatType, double>();
+    // 스탯 변경을 알리는 이벤트
+    public Action OnStatChanged;
 
     /// <summary>
     /// 스탯 소스 갱신
@@ -28,6 +31,7 @@ public class StatController : Singleton<StatController>
     {
         _statSources[sourceName] = stats;
         RefreshFinalStats();
+        OnStatChanged?.Invoke();    // 값 변경 알림
     }
 
     /// <summary>
@@ -38,7 +42,7 @@ public class StatController : Singleton<StatController>
         _finalStats.Clear();
 
         // 타입별 일괄 계산
-        foreach (StatType type in System.Enum.GetValues(typeof(StatType)))
+        foreach (StatType type in Enum.GetValues(typeof(StatType)))
         {
             double sumBase = 0;
             double sumMultiplier = 1.0;
