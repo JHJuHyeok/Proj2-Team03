@@ -96,7 +96,7 @@ public class LoadingController : MonoBehaviour
 
     private async Task ResourcesLoadStep()
     {
-        await SpriteManager.Instance.LoadAllAtlasAsync();
+        await SpriteManager.LoadAllAtlasAsync();
         await Task.Delay(100);      // 로딩 체감되도록 살짝 딜레이
     }
 }
