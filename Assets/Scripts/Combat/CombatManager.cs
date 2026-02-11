@@ -108,6 +108,7 @@ public class CombatManager : MonoBehaviour
             if (isRewardBox)
             {
                 spawnManager.StartFarmingSpawn(stageManager.CurrentStageData);
+                stageManager.ResetProgress();
             }
             else
             {
@@ -136,6 +137,7 @@ public class CombatManager : MonoBehaviour
         _isBossTimerActive = false;
         Debug.Log("[CombatManager] 보스 처치! 스테이지 클리어.");
         // TODO: 다음 스테이지 로드 로직
+        stageManager.ResetProgress();
         StartFarming();
     }
 

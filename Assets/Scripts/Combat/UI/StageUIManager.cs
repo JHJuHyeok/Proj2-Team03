@@ -31,6 +31,10 @@ public class StageUIManager : MonoBehaviour
             // 초기 UI 설정
             UpdateStageInfo();
             SetNormalPanelActive(true);
+            SetBossPanelActive(false);
+            
+            // 진행도 게이지 초기화 (0%에서 시작)
+            SetGaugeWidth(progressGauge, 0f);
         }
     }
 

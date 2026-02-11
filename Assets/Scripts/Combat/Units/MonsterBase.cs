@@ -39,6 +39,7 @@ public abstract class MonsterBase : MonoBehaviour
                 if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
                 {
                     renderer.sprite = handle.Result;
+                    renderer.enabled = true;
                 }
                 else
                 {
@@ -86,6 +87,11 @@ public abstract class MonsterBase : MonoBehaviour
 
         Debug.Log($"[{gameObject.name}] took {damage:F1} damage. HP: {_currentHp:F0}/{_maxHp:F0}");
 
+        if (IsBoss)
+        {
+            CombatManager.Instance?.UpdateBossHpRatio((float)HPRatio);
+        }
+
         if (_currentHp <= 0)
         {
             Die();
@@ -105,6 +111,10 @@ public abstract class MonsterBase : MonoBehaviour
         {
             CombatManager.Instance.SpawnManager.UnregisterEnemy(this);
         }
+
+        var renderer = GetComponent<SpriteRenderer>();
+        if (renderer == null) renderer = GetComponentInChildren<SpriteRenderer>();
+        renderer.enabled = false;
 
         PoolManager.Instance.ReturnPool(this);
     }
