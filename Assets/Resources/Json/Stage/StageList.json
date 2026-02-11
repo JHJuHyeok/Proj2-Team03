@@ -1,13 +1,13 @@
 {
   "areaList": [
     {
-      "id": "AREA_01",
-      "name": "TEST_01",
-      "spriteName": null,
+      "id": "AREA_1",
+      "name": "지역1",
+      "spriteName": "Blooming Peach Garden",
       "stageList": [
         {
-          "id": "AREA_01_1",
-          "name": "test",
+          "id": "STAGE_1",
+          "name": "스테이지1",
           "monsterId": "1",
           "minGoldDrop": 800,
           "maxGoldDrop": 1000,
@@ -18,8 +18,8 @@
           "bossId": "3"
         },
         {
-          "id": "AREA_01_2",
-          "name": "test",
+          "id": "STAGE_2",
+          "name": "스테이지2",
           "monsterId": "1",
           "minGoldDrop": 800,
           "maxGoldDrop": 1000,
@@ -30,14 +30,57 @@
           "bossId": "3"
         },
         {
-          "id": "AREA_01_3",
-          "name": "test",
+          "id": "STAGE_3",
+          "name": "스테이지3",
           "monsterId": "1",
           "minGoldDrop": 800,
           "maxGoldDrop": 1000,
           "expDrop": 500,
           "dropEquipID": "1",
           "dropPercent": 0.1,
+          "monsterCount": 10,
+          "bossId": "3"
+        }
+      ]
+    },
+    {
+      "id": "AREA_2",
+      "name": "지역2",
+      "spriteName": "Brink",
+      "stageList": [
+        {
+          "id": "STAGE_4",
+          "name": "스테이지4",
+          "monsterId": "1",
+          "minGoldDrop": 8000,
+          "maxGoldDrop": 10000,
+          "expDrop": 3000,
+          "dropEquipID": "1",
+          "dropPercent": 0.1,
+          "monsterCount": 10,
+          "bossId": "3"
+        },
+        {
+          "id": "STAGE_5",
+          "name": "스테이지5",
+          "monsterId": "1",
+          "minGoldDrop": 12000,
+          "maxGoldDrop": 15000,
+          "expDrop": 4000,
+          "dropEquipID": "2",
+          "dropPercent": 0.2,
+          "monsterCount": 10,
+          "bossId": "3"
+        },
+        {
+          "id": "STAGE_6",
+          "name": "스테이지6",
+          "monsterId": "1",
+          "minGoldDrop": 13000,
+          "maxGoldDrop": 16000,
+          "expDrop": 5000,
+          "dropEquipID": "3",
+          "dropPercent": 0.3,
           "monsterCount": 10,
           "bossId": "3"
         }

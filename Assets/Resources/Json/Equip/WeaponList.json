@@ -2,10 +2,46 @@
   "listType": 0,
   "equipList": [
     {
-      "id": "weapon1",
+      "id": "1",
       "name": "무기 1",
-      "spriteName": null,
+      "spriteName": "sword_00",
       "grade": 0,
+      "equipEffect": {
+        "type": 0,
+        "initValue": 12.0,
+        "levelUpValue": 5.0
+      },
+      "holdEffects": [
+        {
+          "type": 0,
+          "initValue": 10.0,
+          "levelUpValue": 2.0
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "무기 2",
+      "spriteName": "sword_01",
+      "grade": 1,
+      "equipEffect": {
+        "type": 0,
+        "initValue": 12.0,
+        "levelUpValue": 5.0
+      },
+      "holdEffects": [
+        {
+          "type": 0,
+          "initValue": 10.0,
+          "levelUpValue": 2.0
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "무기 3",
+      "spriteName": "sword_03",
+      "grade": 2,
       "equipEffect": {
         "type": 0,
         "initValue": 12.0,
