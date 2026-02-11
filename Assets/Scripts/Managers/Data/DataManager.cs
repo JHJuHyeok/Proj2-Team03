@@ -64,4 +64,21 @@ public class DataManager : Singleton<DataManager>
         }
         return null;
     }
+
+    // 스테이지 ID로 해당 지역 데이터 반환
+    public AreaData GetAreaByStageId(string stageId)
+    {
+        foreach (var area in maps.GetAll())
+        {
+            if (area.stageList != null)
+            {
+                foreach (var stage in area.stageList)
+                {
+                    if (stage.id == stageId)
+                        return area;
+                }
+            }
+        }
+        return null;
+    }
 }

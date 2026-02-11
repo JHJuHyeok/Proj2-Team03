@@ -1,6 +1,7 @@
 using UnityEngine;
 using Combat.Drop;
 
+[RequireComponent(typeof(SpriteRenderer))]
 public abstract class MonsterBase : MonoBehaviour
 {
     protected MonsterData _data;
@@ -26,26 +27,15 @@ public abstract class MonsterBase : MonoBehaviour
         }
     }
 
-    private void LoadSprite(string spriteName)
+    private async void LoadSprite(string spriteName)
     {
         var renderer = GetComponent<SpriteRenderer>();
-        if (renderer == null) renderer = GetComponentInChildren<SpriteRenderer>();
 
-        if (renderer != null)
+        Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Monster.spriteatlasv2", spriteName);
+        if (sprite != null && renderer != null)
         {
-            // Assuming spriteName is an Addressable Key or Path
-            UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(spriteName).Completed += handle =>
-            {
-                if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-                {
-                    renderer.sprite = handle.Result;
-                    renderer.enabled = true;
-                }
-                else
-                {
-                    Debug.LogWarning($"[{name}] Failed to load sprite: {spriteName}");
-                }
-            };
+            renderer.sprite = sprite;
+            renderer.enabled = true;
         }
     }
 

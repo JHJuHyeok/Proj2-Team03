@@ -11,6 +11,7 @@ public class StageSlotUI : MonoBehaviour
     [SerializeField] private TMP_Text dropInfoText;             // 드랍 정보 (장비ID + 확률)
     [SerializeField] private GameObject selectedObject;            // 현재 진행 중 표시 오브젝트
     [SerializeField] private Button slotButton;                 // 상세 버튼
+    [SerializeField] private Button moveButton;                  // 이동 버튼
 
     private StageData stageData;
 
@@ -32,6 +33,16 @@ public class StageSlotUI : MonoBehaviour
         {
             slotButton.onClick.RemoveAllListeners();
             slotButton.onClick.AddListener(() => action?.Invoke());
+        }
+    }
+
+    // 이동 버튼 클릭 이벤트 설정
+    public void SetMoveAction(Action action)
+    {
+        if (moveButton != null)
+        {
+            moveButton.onClick.RemoveAllListeners();
+            moveButton.onClick.AddListener(() => action?.Invoke());
         }
     }
 

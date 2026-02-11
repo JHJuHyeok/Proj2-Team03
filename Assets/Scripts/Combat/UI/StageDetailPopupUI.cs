@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.EventSystems;
 
 // 스테이지 상세 정보 팝업 UI를 관리하는 매니저
@@ -17,9 +15,11 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
     [SerializeField] private TMP_Text stageIdText;
 
     [Header("보상 정보")]
-    [SerializeField] private TMP_Text goldRewardText;           // 분당 골드획득량 (minGoldDrop * 80)
-    [SerializeField] private TMP_Text expRewardText;            // 분당 경험치획득량 (expDrop * 80)
-    
+    [SerializeField] private TMP_Text goldRewardText;           // 골드획득량
+    [SerializeField] private TMP_Text expRewardText;            // 경험치획득량
+    [SerializeField] private TMP_Text autoGoldRewardText;           // 분당 골드획득량 (minGoldDrop * 80)
+    [SerializeField] private TMP_Text autoExpRewardText;            // 분당 경험치획득량 (expDrop * 80)
+
     [Header("큐브 정보")]
     [SerializeField] private TMP_Text cubeCountText;            // 큐브 획득량
     [SerializeField] private TMP_Text cubePercentText;          // 큐브 획득 확률
@@ -30,8 +30,6 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
     [SerializeField] private Image equipGradeBackgroundImage;   // 장비 등급 배경
 
     private StageData currentStageData;
-    private AsyncOperationHandle<Sprite> iconHandle;
-    private AsyncOperationHandle<Sprite> bgHandle;
 
     // 팝업 열기 (StageData 포함)
     public void Open(StageData stageData)
@@ -81,25 +79,24 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
 
     private void UpdateUI()
     {
-        Debug.Log($"[StageDetailPopup] UpdateUI called. currentStageData: {(currentStageData != null ? currentStageData.name : "null")}");
         if (currentStageData == null) return;
-
-        Debug.Log($"[StageDetailPopup] Data - gold:{currentStageData.minGoldDrop}, exp:{currentStageData.expDrop}, dropEquipID:{currentStageData.dropEquipID}");
-        Debug.Log($"[StageDetailPopup] Refs - nameText:{stageNameText != null}, idText:{stageIdText != null}, goldText:{goldRewardText != null}, expText:{expRewardText != null}");
 
         // 기본 정보
         if (stageNameText != null) stageNameText.text = currentStageData.name;
         if (stageIdText != null) stageIdText.text = currentStageData.id;
 
+        if (goldRewardText != null) goldRewardText.text = currentStageData.minGoldDrop.ToString();
+        if (expRewardText != null) expRewardText.text = currentStageData.expDrop.ToString();
+
         // 골드/경험치 보상 (분당 획득량 = 기본값 * 80)
         long goldPerMin = currentStageData.minGoldDrop * 80;
         long expPerMin = currentStageData.expDrop * 80;
 
-        if (goldRewardText != null) goldRewardText.text = $"{goldPerMin}/m";
-        if (expRewardText != null) expRewardText.text = $"{expPerMin}/m";
+        if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin}/m";
+        if (autoExpRewardText != null) autoExpRewardText.text = $"{expPerMin}/m";
 
         // 드랍 확률
-        if (dropPercentText != null) 
+        if (dropPercentText != null)
             dropPercentText.text = $"{currentStageData.dropPercent * 100:F2}%";
 
         // 큐브 정보
@@ -110,11 +107,10 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
         UpdateEquipInfo();
     }
 
-    private void UpdateEquipInfo()
+    private async void UpdateEquipInfo()
     {
         if (string.IsNullOrEmpty(currentStageData.dropEquipID) || DataManager.Instance == null)
         {
-            // 장비 정보가 없으면 아이콘 등을 숨김 처리할 수도 있음
             return;
         }
 
@@ -126,39 +122,17 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
             // 장비 아이콘 설정
             if (equipIconImage != null && !string.IsNullOrEmpty(equipData.spriteName))
             {
-                // 기존 핸들 해제
-                if (iconHandle.IsValid()) Addressables.Release(iconHandle);
-
-                string path = $"Sprites/Equip/{equipData.spriteName}";
-                iconHandle = Addressables.LoadAssetAsync<Sprite>(path);
-                iconHandle.Completed += handle =>
-                {
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
-                        equipIconImage.sprite = handle.Result;
-                };
+                Sprite icon = await SpriteManager.Instance.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.spriteName);
+                if (icon != null) equipIconImage.sprite = icon;
             }
 
             // 장비 등급 배경 설정
             if (equipGradeBackgroundImage != null)
             {
-                // 기존 핸들 해제
-                if (bgHandle.IsValid()) Addressables.Release(bgHandle);
-
-                string path = $"Sprites/UI/Grade/{equipData.grade}";
-                bgHandle = Addressables.LoadAssetAsync<Sprite>(path);
-                bgHandle.Completed += handle =>
-                {
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
-                        equipGradeBackgroundImage.sprite = handle.Result;
-                };
+                Sprite bg = await SpriteManager.Instance.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.grade.ToString());
+                if (bg != null) equipGradeBackgroundImage.sprite = bg;
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        if (iconHandle.IsValid()) Addressables.Release(iconHandle);
-        if (bgHandle.IsValid()) Addressables.Release(bgHandle);
     }
 
     // ID로 장비 데이터 찾기 (무기 -> 장신구 순서 검색)

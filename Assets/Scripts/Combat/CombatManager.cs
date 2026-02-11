@@ -55,6 +55,12 @@ public class CombatManager : MonoBehaviour
 
     private void Start()
     {
+        // 데이터가 아직 로드되지 않았으면 먼저 로드
+        if (DataManager.Instance.maps.GetAll().Count == 0)
+        {
+            DataManager.Instance.LoadAllDatabase();
+        }
+
         if (stageManager) stageManager.Initialize(initialStageId);
         if (spawnManager) spawnManager.Initialize(playerTransform);
         if (dropManager) dropManager.Initialize(playerTransform);
@@ -162,6 +168,15 @@ public class CombatManager : MonoBehaviour
         }
 
         spawnManager.StartFarmingSpawn(stageManager.CurrentStageData);
+    }
+
+    // 스테이지 이동 (UI에서 호출)
+    public void MoveToStage(StageData stageData)
+    {
+        if (stageData == null) return;
+
+        stageManager.SetStage(stageData);
+        StartFarming();
     }
 
     private void OnPlayerDeath()

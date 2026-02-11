@@ -109,8 +109,6 @@ namespace Combat.Drop
             //     GameManager.Instance.AddExp(_amount);
             // }
 
-            Debug.Log($"[DropItem] Collected {dropType}: {_amount}");
-
             // 상태 초기화
             _isInitialized = false;
             _isMovingToPlayer = false;
