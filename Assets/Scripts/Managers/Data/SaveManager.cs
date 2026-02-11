@@ -2,6 +2,7 @@ using UnityEngine;
 using System.IO;
 using Newtonsoft.Json;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 public interface ISavable
@@ -12,28 +13,56 @@ public interface ISavable
 public class SaveManager : Singleton<SaveManager>
 {
     private bool _isDirty = false;              // 데이터 변경 여부
+    private CancellationTokenSource _cts;
     private float _saveTimer = 0f;
-    private const float saveInterval = 300f;    // 자동 저장 간격 5분
+    private const int saveInterval = 300;       // 자동 저장 간격 5분
 
-    private void Update()
+    private void Start()
     {
-        _saveTimer += Time.deltaTime;
+        _cts = new CancellationTokenSource();
 
-        // 5분 간격으로 자동 저장
-        if (_saveTimer >= saveInterval)
+        // 저장 루프 시작
+        _ = AutoSaveLoop(_cts.Token);       // '_' 는 리턴값을 무시해도 된다는 의미 
+    }
+
+    private async Task AutoSaveLoop(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
         {
-            if (_isDirty)
+            try
             {
-                SaveToRemote();
+                // 5분 대기
+                await Task.Delay(TimeSpan.FromSeconds((double)saveInterval), token);
+
+                // 저장 함수 호출
+                if (_isDirty)
+                {
+                    Debug.Log("자동 저장 조건을 만족하여 서버 저장을 시작합니다.");
+                    await SaveToRemote();
+                }
             }
-            _saveTimer = 0f;
+            catch (OperationCanceledException)
+            {
+                // 게임 종료 등으로 인해 작업 취소
+                break;
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 오브젝트 파괴 시 루프 종료
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
         }
     }
 
     /// <summary>
     /// 서버에 현재 데이터 원격 저장
     /// </summary>
-    public async void SaveToRemote()
+    public async Task SaveToRemote()
     {
         GameData saveData = DataManager.Instance.currentSaveData;
         CurrencyData saveCurrency = CurrencyManager.Instance.currencySave;
