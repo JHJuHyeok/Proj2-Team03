@@ -37,7 +37,7 @@ public class UpgradeManager : MonoBehaviour
         }
 
         // 스탯 컨트롤러에 소스 갱신 요청
-        StatController.Instance.UpdateStatSource(SourceKey.Upgrade, currentUpgradeStats);
+        //StatController.Instance.UpdateStatSource(SourceKey.Upgrade, currentUpgradeStats);
     }
 
     /// <summary>

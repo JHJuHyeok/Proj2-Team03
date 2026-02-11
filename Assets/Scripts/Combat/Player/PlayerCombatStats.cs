@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 
+// [주혁] - StatController 리팩토링 진행, 관련 부분 일부 추가 및 수정(22, 100, 106)
+
 // 플레이어의 전투 스탯을 관리하는 클래스
 // StatController에서 최종 계산된 스탯을 가져옴
 // TODO: StatController 앞단 데이터 수집 완료 후 더미 데이터 제거
@@ -15,6 +17,9 @@ public class PlayerCombatStats : MonoBehaviour
     public event Action<double, double> OnHpChanged;
     public event Action<double, double> OnManaChanged;
     public event Action OnDeath;
+
+    // ★★★★★ StatController 멤버 변수로 설정 ★★★★★ //
+    public StatController _statController { get; private set; } = new();
 
     // === StatController에서 가져오는 스탯 ===
     public double MaxHealth => GetStatValue(StatType.HP);
@@ -91,12 +96,14 @@ public class PlayerCombatStats : MonoBehaviour
     private double GetStatValue(StatType type)
     {
         // StatController가 준비되지 않았으면 더미 데이터 반환
-        if (StatController.Instance == null)
+        //if (StatController.Instance == null)
+        if (_statController == null)
         {
             return GetDummyStatValue(type);
         }
 
-        double value = StatController.Instance.GetFinalStat(type);
+        //double value = StatController.Instance.GetFinalStat(type);
+        double value = _statController.GetFinalStat(type);
         
         // 값이 0이면 더미 데이터 사용 (아직 데이터가 수집되지 않은 경우)
         return value > 0 ? value : GetDummyStatValue(type);
