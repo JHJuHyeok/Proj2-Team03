@@ -10,6 +10,19 @@ public static class EnumUI
     {
         Enhance,
         Growth,
+        Promotion,
+        Weapon,
+        Accessory,
+        Relic,
+        Summon,
+        Goods
+    }
+
+    // SlotKeyIconBinder에서 선택할 그룹
+    public enum GroupType
+    {
+        Enhance,
+        Growth,
         Promotion
     }
 
@@ -44,5 +57,20 @@ public static class EnumUI
         ARCANITE,
         ADAMANTITE,
         ETHER
+    }
+
+    //상점재화
+    public enum CurrencyType
+    {
+        Diamond,
+        Emerald
+    }
+
+    [System.Serializable]
+    public class ShopProductData
+    {
+        public CurrencyType currencyType; // 다이아 / 에메랄드
+        public int price;                 // 지불 재화
+        public int reward;                // 지급 재화
     }
 }

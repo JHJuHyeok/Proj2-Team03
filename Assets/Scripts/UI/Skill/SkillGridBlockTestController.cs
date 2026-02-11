@@ -7,7 +7,6 @@ SkillGridBlockTestController
 - 현재 블록 모양(SkillBlockData)을 보관
 - DraggableUI는 여기서 현재 모양만 받아서 배치 시도
 */
-
 public class SkillGridBlockTestController : MonoBehaviour
 {
     [Header("Refs")]
@@ -56,10 +55,7 @@ public class SkillGridBlockTestController : MonoBehaviour
 
     public void RotateLeft()
     {
-        if (currentData == null)
-        {
-            return;
-        }
+        if (currentData == null) return;
 
         currentData.RotateCCW();
         RefreshPreview();
@@ -67,10 +63,7 @@ public class SkillGridBlockTestController : MonoBehaviour
 
     public void RotateRight()
     {
-        if (currentData == null)
-        {
-            return;
-        }
+        if (currentData == null) return;
 
         currentData.RotateCW();
         RefreshPreview();
@@ -84,10 +77,7 @@ public class SkillGridBlockTestController : MonoBehaviour
 
     private void RefreshPreview()
     {
-        if (previewImage == null)
-        {
-            return;
-        }
+        if (previewImage == null) return;
 
         previewImage.sprite = previewSprite;
         previewImage.enabled = previewSprite != null;

@@ -68,16 +68,10 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             selfRect.anchoredPosition = localPos;
         }
 
-        if (overlay == null || controller == null)
-        {
-            return;
-        }
+        if (overlay == null || controller == null) return;
 
         SkillBlockData data = controller.GetCurrentBlockData();
-        if (data == null)
-        {
-            return;
-        }
+        if (data == null) return;
 
         Vector2Int cell;
         Camera cam = rootCanvas != null ? rootCanvas.worldCamera : null;
@@ -135,10 +129,7 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     private void ReturnToStart()
     {
-        if (selfRect == null)
-        {
-            return;
-        }
+        if (selfRect == null) return;
 
         selfRect.anchoredPosition = startAnchoredPos;
     }

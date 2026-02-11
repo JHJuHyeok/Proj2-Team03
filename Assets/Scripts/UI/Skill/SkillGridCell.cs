@@ -48,10 +48,7 @@ public class SkillGridCell : MonoBehaviour
     // 옵션: 배치된 스킬 아이콘 표시
     public void SetPlacedIcon(Sprite sprite)
     {
-        if (placedIconImage == null)
-        {
-            return;
-        }
+        if (placedIconImage == null)return;
 
         placedIconImage.sprite = sprite;
         placedIconImage.enabled = sprite != null;

@@ -793,7 +793,7 @@ GameObject:
   - component: {fileID: 5962871894793064939}
   - component: {fileID: 3048159023288392684}
   - component: {fileID: 834040597553844561}
-  - component: {fileID: 4477476537803855585}
+  - component: {fileID: 9028130642031381327}
   m_Layer: 5
   m_Name: Character Slot Bar
   m_TagString: Untagged
@@ -862,7 +862,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4477476537803855585
+--- !u!114 &9028130642031381327
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -871,14 +871,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 7025663924528385744}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7320bab369ac2e54b88321bd230926ba, type: 3}
+  m_Script: {fileID: 11500000, guid: 5271d35031615c54e8c1d3a8fec41ebb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   key: 0
+  iconImage: {fileID: 6032194618450488953}
   abilityNameText: {fileID: 2130526105591873170}
   levelText: {fileID: 7296726330214421417}
-  deltaText: {fileID: 8361649262232716270}
+  changeText: {fileID: 8361649262232716270}
   costGoldText: {fileID: 5046895197676547910}
+  lvPrefix: Lv.
+  arrow: ' -> '
 --- !u!1 &7298495224344958079
 GameObject:
   m_ObjectHideFlags: 0
@@ -1057,3 +1060,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6238020085194603993, guid: e57a0a824e7f77a42852f64e60cc1ad6, type: 3}
   m_PrefabInstance: {fileID: 8780694924866680268}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6032194618450488953 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3057348798968978357, guid: e57a0a824e7f77a42852f64e60cc1ad6, type: 3}
+  m_PrefabInstance: {fileID: 8780694924866680268}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

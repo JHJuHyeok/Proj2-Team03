@@ -2,9 +2,57 @@
 [승문]
 EnumUITables
 -EnumUI.SlotKey -> 표시문구 테이블
+-슬롯 키 "순서" 테이블(강화/성장/승급)도 여기서 관리
 */
 public static class EnumUITables
 {
+    // 강화 슬롯 키 순서
+    private static readonly EnumUI.SlotKey[] EnhanceKeys =
+    {
+        EnumUI.SlotKey.ENH_STR,
+        EnumUI.SlotKey.ENH_HP,
+        EnumUI.SlotKey.ENH_VIT,
+        EnumUI.SlotKey.ENH_CRI_DMG,
+        EnumUI.SlotKey.ENH_CRI_PROB,
+        EnumUI.SlotKey.ENH_BLOW_DMG,
+        EnumUI.SlotKey.ENH_BLOW_PROB
+    };
+
+    // 성장 슬롯 키 순서
+    private static readonly EnumUI.SlotKey[] GrowthKeys =
+    {
+        EnumUI.SlotKey.GRO_STR,
+        EnumUI.SlotKey.GRO_HP,
+        EnumUI.SlotKey.GRO_VIT,
+        EnumUI.SlotKey.GRO_CRI,
+        EnumUI.SlotKey.GRO_LUK,
+        EnumUI.SlotKey.GRO_ACC,
+        EnumUI.SlotKey.GRO_DODGE
+    };
+
+    // 승급 슬롯 키 순서
+    private static readonly EnumUI.SlotKey[] PromotionKeys =
+    {
+        EnumUI.SlotKey.STONE,
+        EnumUI.SlotKey.BRONZE,
+        EnumUI.SlotKey.IRON,
+        EnumUI.SlotKey.SILVER,
+        EnumUI.SlotKey.GOLD,
+        EnumUI.SlotKey.MITHRIL,
+        EnumUI.SlotKey.ORICHALCUM,
+        EnumUI.SlotKey.ARCANITE,
+        EnumUI.SlotKey.ADAMANTITE,
+        EnumUI.SlotKey.ETHER
+    };
+
+    // 컨테이너가 그룹만 선택하면, 해당 그룹 키 배열을 반환
+    public static EnumUI.SlotKey[] GetKeysByGroup(EnumUI.GroupType group)
+    {
+        if (group == EnumUI.GroupType.Enhance) return EnhanceKeys;
+        if (group == EnumUI.GroupType.Growth) return GrowthKeys;
+        return PromotionKeys;
+    }
+
     public static EnumUI.TabType GetTab(EnumUI.SlotKey key)
     {
         // 강화
@@ -99,5 +147,77 @@ public static class EnumUITables
         if (key == EnumUI.SlotKey.ETHER) return "에테르";
 
         return key.ToString();
+    }
+
+    // 승급 텍스트UI
+    public struct PromotionInfo
+    {
+        public int growthMul;        // 공격력 / 체력 배수 (xN)
+        public int recommendLevel;   // 권장 레벨 (Stone은 0 처리)
+    }
+
+    public static PromotionInfo GetPromotionInfo(EnumUI.SlotKey key)
+    {
+        if (key == EnumUI.SlotKey.STONE) return Make(1, 0);       // 기본
+        if (key == EnumUI.SlotKey.BRONZE) return Make(2, 50);
+        if (key == EnumUI.SlotKey.IRON) return Make(5, 90);
+        if (key == EnumUI.SlotKey.SILVER) return Make(18, 180);
+        if (key == EnumUI.SlotKey.GOLD) return Make(25, 300);
+        if (key == EnumUI.SlotKey.MITHRIL) return Make(100, 450);
+        if (key == EnumUI.SlotKey.ORICHALCUM) return Make(300, 600);
+        if (key == EnumUI.SlotKey.ARCANITE) return Make(550, 700);
+        if (key == EnumUI.SlotKey.ADAMANTITE) return Make(1000, 850);
+        if (key == EnumUI.SlotKey.ETHER) return Make(2000, 1000);
+
+        return Make(1, 0);
+    }
+
+    private static PromotionInfo Make(int mul, int recommendLv)
+    {
+        PromotionInfo info = new PromotionInfo();
+        info.growthMul = mul;
+        info.recommendLevel = recommendLv;
+        return info;
+    }
+
+    // 승급 버튼UI 순서
+    private static readonly EnumUI.SlotKey[] PromotionOrder =
+    {
+        EnumUI.SlotKey.STONE,
+        EnumUI.SlotKey.BRONZE,
+        EnumUI.SlotKey.IRON,
+        EnumUI.SlotKey.SILVER,
+        EnumUI.SlotKey.GOLD,
+        EnumUI.SlotKey.MITHRIL,
+        EnumUI.SlotKey.ORICHALCUM,
+        EnumUI.SlotKey.ARCANITE,
+        EnumUI.SlotKey.ADAMANTITE,
+        EnumUI.SlotKey.ETHER
+    };
+
+    public static int GetPromotionIndex(EnumUI.SlotKey key)
+    {
+        for (int i = 0; i < PromotionOrder.Length; i++)
+        {
+            if (PromotionOrder[i] == key) return i;
+        }
+        return -1;
+    }
+
+    public static EnumUI.SlotKey GetPromotionKeyByIndex(int index)
+    {
+        if (index < 0) index = 0;
+        if (index >= PromotionOrder.Length) index = PromotionOrder.Length - 1;
+        return PromotionOrder[index];
+    }
+
+    public static EnumUI.SlotKey GetNextPromotionKey(EnumUI.SlotKey currentKey)
+    {
+        int idx = GetPromotionIndex(currentKey);
+        if (idx < 0) return PromotionOrder[0];
+
+        int next = idx + 1;
+        if (next >= PromotionOrder.Length) return PromotionOrder[PromotionOrder.Length - 1];
+        return PromotionOrder[next];
     }
 }
