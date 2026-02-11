@@ -6,12 +6,24 @@ namespace SlayerLegend.Skill
 {
     // 액티브 스킬: 쿨타임마다 자동 발동
     // - Update()에서 쿨타임 감소 및 자동 발동
-    // - 마나 소모, 이펙트 생성, 데미지 계산
+    // - 마나 소모, 발사체 생성, 데미지 계산
     public class ActiveSkill : SkillBase
     {
         [Header("액티브 스킬 상태")]
         [SerializeField] private float currentCooldown = 0f;
         [SerializeField] private bool isActive = false;
+
+        [Header("발사체 설정")]
+        [SerializeField] private SkillProjectile2D projectilePrefab;
+        [SerializeField] private Vector3 fireDirection = Vector3.right;  // 발사 방향
+        [SerializeField] private Vector3 spawnOffset = Vector3.zero;   // 발사 위치 오프셋
+        [SerializeField] private Vector2 randomXRange = Vector2.zero;  // 조민희 추가: X좌표 랜덤 범위 (min, max)
+
+        [Header("테스트 설정")]
+        [SerializeField] private float cooldownMultiplier = 1f;
+        [SerializeField] private bool overrideCooldown = false;
+        [SerializeField] private float testCooldown = 1f;
+        [SerializeField] private bool testNoManaCost = false;  // 조민희 추가: 테스트용 무한 마나
 
         private GameObject cachedCaster;
 
@@ -21,12 +33,49 @@ namespace SlayerLegend.Skill
         {
             get
             {
-                float maxCooldown = SkillCalculator.GetCooldown(skillData, currentLevel);
+                float maxCooldown = overrideCooldown ? testCooldown : SkillCalculator.GetCooldown(skillData, currentLevel);
                 return maxCooldown > 0 ? currentCooldown / maxCooldown : 0f;
             }
         }
 
         public float CurrentCooldown => currentCooldown;
+
+        // 발사 방향 설정 (초기화 시 사용)
+        public void SetFireDirection(Vector3 direction)
+        {
+            fireDirection = direction;
+        }
+
+        public void SetSpawnOffset(Vector3 offset)
+        {
+            spawnOffset = offset;
+        }
+
+        // X좌표 랜덤 범위 설정 (조민희 추가: 메테오 등에서 사용)
+        public void SetRandomXRange(float min, float max)
+        {
+            randomXRange = new Vector2(min, max);
+        }
+
+        // 테스트용 쿨타임 설정 (초기화 시 사용)
+        // 조민희 추가: 테스트를 위해 쿨타임 오버라이드 설정
+        public void SetTestCooldown(float cooldown)
+        {
+            overrideCooldown = true;
+            testCooldown = cooldown;
+        }
+
+        // 테스트용 무한 마나 설정 (조민희 추가)
+        public void SetTestNoManaCost(bool noManaCost)
+        {
+            testNoManaCost = noManaCost;
+        }
+
+        // 발사체 프리팹 설정 (초기화 시 사용)
+        public void SetProjectilePrefab(SkillProjectile2D prefab)
+        {
+            projectilePrefab = prefab;
+        }
 
         // 스킬 활성화/비활성화
         public void SetActive(bool active)
@@ -75,64 +124,75 @@ namespace SlayerLegend.Skill
 
             var stats = cachedCaster.GetComponent<IStatsProvider>();
             int manaCost = SkillCalculator.GetManaCost(skillData);
-            if (stats != null && manaCost > 0)
+
+            // 조민희 추가: 테스트용 무한 마나 모드
+            if (!testNoManaCost)
             {
-                if (!stats.UseMana(manaCost))
-                    return; // 마나 부족하면 발동 안 함
+                if (stats != null && manaCost > 0)
+                {
+                    int currentMana = (int)stats.CurrentMana;  // 수정: CurrentMana 속성 사용
+                    if (!stats.UseMana(manaCost))
+                    {
+                        Debug.Log($"[Skill] {skillData.name} 발동 실패: 마나 부족 (필요: {manaCost}, 현재: {currentMana})");
+                        return; // 마나 부족하면 발동 안 함
+                    }
+                }
             }
 
+            Debug.Log($"[Skill] {skillData.name} 발동 시도...");
             ExecuteSkill(cachedCaster);
-            currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel);
+
+            // 쿨타임 설정 (테스트용 오버라이드 지원)
+            if (overrideCooldown)
+            {
+                currentCooldown = testCooldown * cooldownMultiplier;
+            }
+            else
+            {
+                currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+            }
         }
 
         // 스킬 효과 실행 (하위 클래스에서 오버라이드 가능)
         protected virtual void ExecuteSkill(GameObject caster)
         {
-            // 이펙트 생성 (JSON 데이터에는 effectPrefab이 없으므로 일단 생략)
-            // TODO: 팀원과 협의하여 effectPrefabPath 추가 시 ResourceManager 사용
-
-            // 적 찾기
-            var enemyObject = GameObject.FindWithTag("Enemy");
-            if (enemyObject == null)
-            {
-                Debug.Log($"[Skill] 적을 찾을 수 없습니다 (태그 'Enemy' 필요)");
-                return;
-            }
-
-            var enemy = enemyObject.GetComponent<IDamageable>();
-            if (enemy == null)
-            {
-                Debug.Log($"[Skill] 적에 IDamageable 컴포넌트가 없습니다");
-                return;
-            }
+            // 적은 항상 오른쪽에서 왼쪽으로 일직선 이동하므로,
+            // 굳이 적을 찾지 않고 오른쪽으로 발사
 
             // 데미지 계산
             var stats = caster.GetComponent<IStatsProvider>();
             float skillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
             float totalDamage = skillDamage;
+            bool isCritical = false;
 
             if (stats != null)
             {
                 totalDamage += stats.AttackDamage;
-                bool isCritical = stats.IsCriticalHit();
+                isCritical = stats.IsCriticalHit();
                 totalDamage = stats.CalculateFinalDamage(isCritical);
                 string critText = isCritical ? " [치명타!]" : "";
+                Debug.Log($"{caster.name}이(가) {skillData.name} 발사!{critText} → 예상 데미지: {totalDamage:F1}");
+            }
 
-                // 적에게 데미지 입히기 (스킬 이름 포함)
-                DealDamageWithSkillName(enemyObject, totalDamage, skillData.name);
-                Debug.Log($"{caster.name}이(가) {skillData.name} 발동!{critText} → 적에게 {totalDamage:F1} 데미지");
+            // 발사체 생성 (지정된 방향으로 발사)
+            if (projectilePrefab != null)
+            {
+                Vector3 offset = spawnOffset;
+
+                // 조민희 추가: X좌표 랜덤 범위가 설정되어 있으면 적용
+                if (randomXRange.x != 0 || randomXRange.y != 0)
+                {
+                    float randomX = Random.Range(randomXRange.x, randomXRange.y);
+                    offset.x = randomX;
+                }
+
+                Vector3 spawnPosition = caster.transform.position + offset;
+                SkillProjectile2D.Create(projectilePrefab, spawnPosition, totalDamage, isCritical, fireDirection);
             }
             else
             {
-                DealDamageWithSkillName(enemyObject, totalDamage, skillData.name);
-                Debug.Log($"{caster.name}이(가) {skillData.name} 발동! → 적에게 {totalDamage:F1} 데미지");
+                Debug.LogWarning($"[Skill] {skillData.name}에 발사체 프리팹이 없습니다.");
             }
-
-            // 도트 데미지 적용
-            ApplyDotEffect(enemyObject);
-
-            // CC 상태이상 적용
-            ApplyCCEffect(enemyObject);
         }
 
         // 도트 데미지 상태이상 적용
