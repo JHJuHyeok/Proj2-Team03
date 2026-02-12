@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /*[승문]
 BottomPanelSlideToggle
@@ -14,12 +14,26 @@ BottomPanelSlideToggle
 */
 public class BottomPanelSlideToggle : MonoBehaviour
 {
+    [System.Serializable]
+    private struct IgnoreRule
+    {
+        public RectTransform root;
+        [Tooltip("해당 오브젝트가 Active일 때만 예외 처리")]
+        public bool onlyWhenActive;
+        [Tooltip("특정 탭에서만 예외 처리(-1이면 항상)")]
+        public int onlyWhenTabIndex;
+    }
+
     [Header("Refs")]
     [SerializeField] private RectTransform bottomRoot;//내려서 숨길 루트(예: Bottom Screen 또는 PageContainer)
     [SerializeField] private Canvas rootCanvas;//Screen Space Overlay면 null이어도 동작
 
     [Header("Ignore Touch Roots")]
-    [SerializeField] private RectTransform[] ignoreRoots;//예: BTN Tab 루트(탭바). 여길 누르면 바깥터치 숨김 금지
+    [SerializeField] private RectTransform[] ignoreRoots;//기존(항상 예외)
+
+    [Header("Extra Ignore Rules")]
+    [Tooltip("예: SkillGridPanel은 스킬탭에서만 예외, 버튼 루트들은 항상 예외 등")]
+    [SerializeField] private IgnoreRule[] extraIgnoreRules;
 
     [Header("Managers")]
     [SerializeField] private NestedScrollManager nestedScrollManager;//탭 전환 담당
@@ -49,7 +63,6 @@ public class BottomPanelSlideToggle : MonoBehaviour
 
     private void Start()
     {
-        //레이아웃이 확정된 뒤(1프레임 뒤) 코너 기준으로 위치 캐싱
         RebuildAndCachePositions();
         ShowImmediate();
     }
@@ -65,13 +78,13 @@ public class BottomPanelSlideToggle : MonoBehaviour
             return;
         }
 
-        //바텀 영역 밖 터치/클릭하면 숨김(단, ignoreRoots는 제외)
+        //바텀 영역 밖 터치/클릭하면 숨김(단, 예외 영역(ignoreRoots/extraIgnoreRules)은 제외)
         if (isShown && IsPointerDown())
         {
             Vector2 screenPos = GetPointerScreenPosition();
 
-            //탭바/예외영역이면 자동 숨김 금지(버튼 클릭 이벤트가 정상 동작하게)
-            if (!IsPointInsideAny(ignoreRoots, screenPos))
+            //예외영역이면 자동 숨김 금지(버튼 클릭 이벤트가 정상 동작하게)
+            if (!IsPointInsideAny(ignoreRoots, screenPos) && !IsPointInsideExtraIgnores(screenPos))
             {
                 if (!IsPointInside(bottomRoot, screenPos))
                 {
@@ -83,8 +96,27 @@ public class BottomPanelSlideToggle : MonoBehaviour
         SlideUpdate();
     }
 
+    private bool IsPointInsideExtraIgnores(Vector2 screenPos)
+    {
+        if (extraIgnoreRules == null || extraIgnoreRules.Length == 0) return false;
 
-    //레이아웃 확정 후 위치(Shown/Hidden) 재계산
+        int activeTab = currentTabIndex; // 네가 탭 클릭에서 갱신하는 값
+
+        for (int i = 0; i < extraIgnoreRules.Length; i++)
+        {
+            var rule = extraIgnoreRules[i];
+            if (rule.root == null) continue;
+
+            if (rule.onlyWhenActive && !rule.root.gameObject.activeInHierarchy) continue;
+            if (rule.onlyWhenTabIndex >= 0 && rule.onlyWhenTabIndex != activeTab) continue;
+
+            if (IsPointInside(rule.root, screenPos)) return true;
+        }
+
+        return false;
+    }
+
+    // 이하 기존 코드 그대로...
     private void RebuildAndCachePositions()
     {
         if (bottomRoot == null) return;
@@ -96,13 +128,11 @@ public class BottomPanelSlideToggle : MonoBehaviour
         positionsCached = true;
     }
 
-    //부모 기준 코너를 비교해서 "패널의 Top이 부모 Bottom 아래로" 내려가게 숨김 Y 계산
     private float CalculateHiddenYByCorners()
     {
         RectTransform parent = bottomRoot.parent as RectTransform;
         if (parent == null)
         {
-            //부모가 없으면 일단 높이 기반으로 fallback
             return shownY - bottomRoot.rect.height - hiddenExtra;
         }
 
@@ -112,14 +142,10 @@ public class BottomPanelSlideToggle : MonoBehaviour
         bottomRoot.GetWorldCorners(panel);
         parent.GetWorldCorners(par);
 
-        //코너 인덱스: 0=BL, 1=TL, 2=TR, 3=BR
         float panelTopWorld = panel[1].y;
         float parentBottomWorld = par[0].y;
 
-        //panelTop을 parentBottom 아래로 보내기 위한 월드 이동량(음수)
         float deltaWorldY = (parentBottomWorld - panelTopWorld) - hiddenExtra;
-
-        //월드 이동량을 parent 로컬 이동량으로 변환
         float deltaLocalY = parent.InverseTransformVector(new Vector3(0f, deltaWorldY, 0f)).y;
 
         return shownY + deltaLocalY;
@@ -144,7 +170,6 @@ public class BottomPanelSlideToggle : MonoBehaviour
         float curY = bottomRoot.anchoredPosition.y;
         float y = Mathf.Lerp(curY, targetY, slideLerp);
 
-        //목표 근처면 스냅(“반만 오고 끝”처럼 보이는 체감 방지)
         if (Mathf.Abs(y - targetY) <= arriveEpsilon)
         {
             y = targetY;
@@ -162,12 +187,8 @@ public class BottomPanelSlideToggle : MonoBehaviour
 
     private bool IsPointerDown()
     {
-        //PC
         if (Input.GetMouseButtonDown(0)) return true;
-
-        //Mobile
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) return true;
-
         return false;
     }
 
@@ -238,12 +259,6 @@ public class BottomPanelSlideToggle : MonoBehaviour
         isShown = false;
     }
 
-    public void Toggle()
-    {
-        if (!positionsCached) RebuildAndCachePositions();
-        isShown = !isShown;
-    }
-
     private void ShowImmediate()
     {
         if (!positionsCached) RebuildAndCachePositions();
@@ -251,20 +266,9 @@ public class BottomPanelSlideToggle : MonoBehaviour
         SetY(shownY);
     }
 
-    public void HideImmediate()
-    {
-        if (!positionsCached) RebuildAndCachePositions();
-        isShown = false;
-        SetY(hiddenY);
-    }
-
-    //해상도/안전영역/캔버스 크기 바뀌면 코너 기준 재계산 필요
     private void OnRectTransformDimensionsChange()
     {
-        //플레이 중에만(에디터 선택/리사이즈 등으로 계속 호출될 수 있음)
         if (!Application.isPlaying) return;
-
-        //다음 Update에서 자연스럽게 다시 캐싱하도록
         positionsCached = false;
     }
 }
