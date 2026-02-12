@@ -57,6 +57,7 @@ public class EquipJsonCreator : EditorWindow
         data.name = EditorGUILayout.TextField("장비 명칭", data.name);
         data.spriteName = EditorGUILayout.TextField("이미지 이름", data.spriteName);
         data.grade = (EquipGrade)EditorGUILayout.EnumPopup("장비 등급", data.grade);
+        data.gradeStep = EditorGUILayout.IntField("등급 내 단계", data.gradeStep);
 
         EditorGUILayout.Space(5);
 
