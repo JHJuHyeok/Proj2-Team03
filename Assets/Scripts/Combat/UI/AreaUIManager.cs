@@ -39,7 +39,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     {
         if (DataManager.Instance == null) return;
 
-        var areaList = DataManager.Instance.maps.GetAll();
+        var areaList = DataManager.Instance.stages.GetAll();
         if (areaList == null || areaList.Count == 0)
         {
             Debug.LogWarning("[AreaUIManager] 지역 데이터가 없습니다.");
@@ -94,7 +94,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 지역 설정
     public void SetArea(int areaIndex)
     {
-        var areaList = DataManager.Instance.maps.GetAll();
+        var areaList = DataManager.Instance.stages.GetAll();
         if (areaList == null || areaIndex < 0 || areaIndex >= areaList.Count)
         {
             Debug.LogWarning($"[AreaUIManager] 유효하지 않은 지역 인덱스: {areaIndex}");
@@ -111,7 +111,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 다음 지역으로 전환
     public void NextArea()
     {
-        var areaList = DataManager.Instance.maps.GetAll();
+        var areaList = DataManager.Instance.stages.GetAll();
         if (areaList == null || areaList.Count == 0) return;
 
         int nextIndex = (currentAreaIndex + 1) % areaList.Count;
@@ -121,7 +121,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 이전 지역으로 전환
     public void PreviousArea()
     {
-        var areaList = DataManager.Instance.maps.GetAll();
+        var areaList = DataManager.Instance.stages.GetAll();
         if (areaList == null || areaList.Count == 0) return;
 
         int prevIndex = (currentAreaIndex - 1 + areaList.Count) % areaList.Count;

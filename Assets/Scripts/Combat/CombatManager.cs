@@ -56,7 +56,7 @@ public class CombatManager : MonoBehaviour
     private void Start()
     {
         // 데이터가 아직 로드되지 않았으면 먼저 로드
-        if (DataManager.Instance.maps.GetAll().Count == 0)
+        if (DataManager.Instance.stages.GetAll().Count == 0)
         {
             DataManager.Instance.LoadAllDatabase();
         }
