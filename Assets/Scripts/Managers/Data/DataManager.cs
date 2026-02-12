@@ -14,6 +14,7 @@ public enum GameDataType
     Gacha
 }
 
+// [태환] - 스테이지/지역 조회용 캐시 구현
 public class DataManager : Singleton<DataManager>
 {
     // 실시간 데이터 임시 보관
@@ -26,6 +27,9 @@ public class DataManager : Singleton<DataManager>
     
     // StageList actually contains AreaData
     public GameDB<AreaData, StageDataList> maps = new();
+
+    // 스테이지 조회용 캐시 (O(1) 조회)
+    private Dictionary<string, StageData> _stageCache = new();
 
     public static event Action<GameDataType, string> OnDataUpdated;
 
@@ -45,40 +49,32 @@ public class DataManager : Singleton<DataManager>
         accessories.Load("Json/Equip/AccessorieList");
         
         maps.Load("Json/Stage/StageList");
+        BuildStageCache();
         
         Debug.Log("데이터 로드 완료");
     }
 
-    public StageData GetStage(string stageId)
+    // 스테이지 캐시 구축
+    private void BuildStageCache()
     {
+        _stageCache.Clear();
+
         foreach (var area in maps.GetAll())
         {
-            if (area.stageList != null)
+            if (area.stageList == null) continue;
+            
+            foreach (var stage in area.stageList)
             {
-                foreach (var stage in area.stageList)
-                {
-                    if (stage.id == stageId)
-                        return stage;
-                }
+                _stageCache[stage.id] = stage;
             }
         }
-        return null;
     }
 
-    // 스테이지 ID로 해당 지역 데이터 반환
-    public AreaData GetAreaByStageId(string stageId)
+    public StageData GetStage(string stageId)
     {
-        foreach (var area in maps.GetAll())
-        {
-            if (area.stageList != null)
-            {
-                foreach (var stage in area.stageList)
-                {
-                    if (stage.id == stageId)
-                        return area;
-                }
-            }
-        }
-        return null;
+        _stageCache.TryGetValue(stageId, out StageData stage);
+        return stage;
     }
+
+
 }

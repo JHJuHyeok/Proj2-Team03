@@ -84,6 +84,9 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     {
         if (popupContent == null) return;
 
+        // StageDetailPopup이 열려있으면 AreaPopup 닫지 않음
+        if (stageDetailPopup != null && stageDetailPopup.gameObject.activeSelf) return;
+
         // 클릭된 위치가 컨텐츠 영역 내부인지 확인
         if (!RectTransformUtility.RectangleContainsScreenPoint(popupContent, eventData.position, eventData.pressEventCamera))
         {
@@ -210,11 +213,10 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         // 스테이지 전환
         CombatManager.Instance.MoveToStage(stageData);
 
-        // 해당 스테이지의 지역 데이터로 배경 스프라이트 변경
-        AreaData areaData = DataManager.Instance.GetAreaByStageId(stageData.id);
-        if (areaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(areaData.spriteName))
+        // 현재 지역 데이터로 배경 스프라이트 변경
+        if (currentAreaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(currentAreaData.spriteName))
         {
-            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", areaData.spriteName);
+            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
             if (sprite != null)
                 backgroundSpriteRenderer.sprite = sprite;
         }
