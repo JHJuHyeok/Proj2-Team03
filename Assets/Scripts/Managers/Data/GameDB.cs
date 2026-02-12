@@ -1,6 +1,9 @@
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
+using System.Threading.Tasks;
+using System.Reflection;
 
 // 모든 데이터 리스트가 상속받을 인터페이스
 public interface IDataList<T>
@@ -14,24 +17,49 @@ public class GameDB<T, TList> where TList : IDataList<T>
     // ID 기반 데이터 탐색용 딕셔너리
     private Dictionary<string, T> _dataDict = new Dictionary<string, T>();
 
-    public void Load(string path)
+    /// <summary>
+    /// 어드레서블로 Json 파일을 비동기 로드, 데이터베이스 구축
+    /// </summary>
+    /// <param name="address"> 어드레서블 주소 </param>
+    /// <returns></returns>
+    public async Task LoadAsync(string address)
     {
-        TextAsset jsonFile = Resources.Load<TextAsset>(path);
-        if (jsonFile == null)
-        {
-            Debug.Log($"{path} 경로에 파일이 존재하지 않습니다.");
-            return;
-        }
+        // 1. 에셋 비동기 로드
+        var handle = Addressables.LoadAssetAsync<TextAsset>(address);
+        TextAsset jsonFile = await handle.Task;
 
-        // 데이터 리스트 클래스로 역직렬화
-        TList list = JsonConvert.DeserializeObject<TList>(jsonFile.text);
+        if (jsonFile == null) return;
 
-        // 불러온 리스트를 딕셔너리로 변환
-        foreach (var item in list.GetList())
+        // 2. 백그라운드 파싱
+        await Task.Run(() =>
         {
-            var idField = typeof(T).GetField("id").GetValue(item).ToString();
-            _dataDict[idField] = item;
-        }
+            // Json 역직렬화
+            TList list = JsonConvert.DeserializeObject<TList>(jsonFile.text);
+
+            if (list == null) return;
+
+            // 리플렉션 최적화: 루프 밖에서 필드 정보를 미리 가져옴
+            FieldInfo idFieldInfo = typeof(T).GetField("id");
+            if (idFieldInfo == null)
+            {
+                Debug.LogError($"클래스에 'id' 필드가 없습니다.");
+                return;
+            }
+
+            // 기존 데이터 초기화 후 딕셔너리 구성
+            _dataDict.Clear();
+            foreach (var item in list.GetList())
+            {
+                var idValue = idFieldInfo.GetValue(item)?.ToString();
+                if (!string.IsNullOrEmpty(idValue))
+                {
+                    _dataDict[idValue] = item;
+                }
+            }
+        });
+
+        // 에셋 핸들 해제
+        Addressables.Release(handle);
     }
 
     /// <summary>
