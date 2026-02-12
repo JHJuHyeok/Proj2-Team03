@@ -7,5 +7,7 @@ public enum PopupId
     Settings = 1,
     ItemDetail = 2,
     Confirm = 3,
-    Loading = 4
+    Loading = 4,
+    Skill = 5,
+    Equip = 6
 }
