@@ -124,31 +124,9 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        // 공통 몬스터 프리팹 사용
-        if (!_loadedPrefabs.TryGetValue(commonMonsterAddress, out GameObject prefab))
-        {
-            Debug.LogWarning($"[SpawnManager] 보상 상자용 공통 프리팹 로드 안됨: {commonMonsterAddress}");
-            return;
-        }
-
-        MonsterBase prefabMonster = prefab.GetComponent<MonsterBase>();
-        if (prefabMonster == null) return;
-
-        MonsterBase rewardBox = PoolManager.Instance.GetFromPool(prefabMonster);
+        MonsterBase rewardBox = SpawnMonster(boxData, commonMonsterAddress, GetSpawnPosition() + Vector3.right * 5);
         if (rewardBox != null)
         {
-            rewardBox.transform.position = GetSpawnPosition() + Vector3.right * 5;
-
-            // 로드된 데이터로 초기화
-            rewardBox.Initialize(boxData, _playerTransform);
-
-            // 레이어 보장
-            if (rewardBox.gameObject.layer != LayerMask.NameToLayer("Enemy"))
-            {
-                rewardBox.gameObject.layer = LayerMask.NameToLayer("Enemy");
-            }
-
-            _enemyQueue.Add(rewardBox);
             Debug.Log($"[SpawnManager] 보상 상자 소환: {boxData.name} ({boxData.id})");
         }
     }
@@ -158,12 +136,6 @@ public class SpawnManager : MonoBehaviour
         StopSpawning();
         CleanUpEnemies();
 
-        if (_currentStageData == null || string.IsNullOrEmpty(_currentStageData.bossId))
-        {
-            Debug.LogWarning("[SpawnManager] 보스 ID가 설정되지 않음.");
-            return;
-        }
-
         MonsterData bossData = DataManager.Instance.monsters.Get(_currentStageData.bossId);
         if (bossData == null)
         {
@@ -171,32 +143,9 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        // 보스 전용 프리팹 사용
-        if (!_loadedPrefabs.TryGetValue(bossMonsterAddress, out GameObject prefab))
-        {
-            Debug.LogWarning($"[SpawnManager] 보스 프리팹 로드 안됨: {bossMonsterAddress}");
-            return;
-        }
-
-        MonsterBase prefabMonster = prefab.GetComponent<MonsterBase>();
-        if (prefabMonster == null)
-        {
-            Debug.LogError($"[SpawnManager] 보스 프리팹에 MonsterBase 컴포넌트 없음: {bossMonsterAddress}");
-            return;
-        }
-
-        MonsterBase boss = PoolManager.Instance.GetFromPool(prefabMonster);
+        MonsterBase boss = SpawnMonster(bossData, bossMonsterAddress, GetSpawnPosition() + Vector3.right * 3);
         if (boss != null)
         {
-            boss.transform.position = GetSpawnPosition() + Vector3.right * 3;
-            boss.Initialize(bossData, _playerTransform);
-
-            if (boss.gameObject.layer != LayerMask.NameToLayer("Enemy"))
-            {
-                boss.gameObject.layer = LayerMask.NameToLayer("Enemy");
-            }
-
-            _enemyQueue.Add(boss);
             Debug.Log($"[SpawnManager] 보스 소환: {bossData.name} ({bossData.id})");
         }
     }
@@ -301,47 +250,53 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        // 공통 몬스터 프리팹 사용
-        if (!_loadedPrefabs.TryGetValue(commonMonsterAddress, out GameObject prefab))
+        MonsterBase enemy = SpawnMonster(data, commonMonsterAddress, GetSpawnPosition());
+        if (enemy != null)
         {
-            Debug.LogWarning($"[SpawnManager] 공통 프리팹 로드 안됨: {commonMonsterAddress}");
-            return;
+            _totalSpawnedCount++;
+            Debug.Log($"[SpawnManager] {data.name} 소환됨. 총 소환: {_totalSpawnedCount}/{_currentStageData.monsterCount}");
+        }
+    }
+
+    // 공통 몬스터 스폰 로직
+    // 프리팹 조회 → 풀 가져오기 → 위치 설정 → 초기화 → flipX → 레이어 설정 → 큐 추가
+    private MonsterBase SpawnMonster(MonsterData data, string prefabAddress, Vector3 position)
+    {
+        if (!_loadedPrefabs.TryGetValue(prefabAddress, out GameObject prefab))
+        {
+            Debug.LogWarning($"[SpawnManager] 프리팹 로드 안됨: {prefabAddress}");
+            return null;
         }
 
         MonsterBase prefabMonster = prefab.GetComponent<MonsterBase>();
         if (prefabMonster == null)
         {
             Debug.LogError($"[SpawnManager] 프리팹 {prefab.name}에 MonsterBase 컴포넌트 없음");
-            return;
+            return null;
         }
 
-        MonsterBase enemy = PoolManager.Instance.GetFromPool(prefabMonster);
-        if (enemy != null)
-        {
-            enemy.transform.position = GetSpawnPosition();
-            enemy.Initialize(data, _playerTransform);
+        MonsterBase monster = PoolManager.Instance.GetFromPool(prefabMonster);
+        if (monster == null) return null;
 
-            if (enemy.gameObject.layer != LayerMask.NameToLayer("Enemy"))
-            {
-                enemy.gameObject.layer = LayerMask.NameToLayer("Enemy");
-            }
+        monster.transform.position = position;
+        monster.Initialize(data, _playerTransform);
 
-            _enemyQueue.Add(enemy);
-            _totalSpawnedCount++;
-            Debug.Log($"[SpawnManager] {data.name} 소환됨. 총 소환: {_totalSpawnedCount}/{_currentStageData.monsterCount}");
-        }
+        // 몬스터 스프라이트를 왼쪽(플레이어 방향)으로 전환
+        SpriteRenderer spriteRenderer = monster.GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null) spriteRenderer.flipX = true;
+
+        _enemyQueue.Add(monster);
+        return monster;
     }
 
     private Vector3 GetSpawnPosition()
     {
         if (_playerTransform == null) return Vector3.zero;
 
-        // 마지막 몬스터 위치보다 약간 뒤에 스폰 ...
-        // 이는 초기 몬스터들의 이동 거리를 크게 줄여줌
         float spawnXOffset = queueBaseOffset + (_enemyQueue.Count * queueSpacing) + queueSpacing;
 
         Vector3 spawnPos = _playerTransform.position + Vector3.right * spawnXOffset;
-        spawnPos.z = _playerTransform.position.z; // Z 정렬
+        spawnPos.z = _playerTransform.position.z;
         return spawnPos;
     }
 
@@ -350,7 +305,6 @@ public class SpawnManager : MonoBehaviour
         if (_enemyQueue.Contains(enemy))
         {
             _enemyQueue.Remove(enemy);
-            // 다음 업데이트 루프에서 위치 자동 업데이트
 
             // 죽은 적이 보상 상자라면, 다른 것을 소환하지 않음.
             if (enemy.IsRewardBox)

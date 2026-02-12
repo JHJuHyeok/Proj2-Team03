@@ -51,10 +51,6 @@ public class PlayerCombat : MonoBehaviour
                 _currentTarget = playerTargeting.FindClosestEnemy();
             }
 
-            if (_currentTarget != null)
-            {
-                 Debug.Log($"[PlayerCombat] 타겟 획득: {_currentTarget.name}");
-            }
         }
 
         // 현재 타겟 공격 시도
@@ -72,11 +68,6 @@ public class PlayerCombat : MonoBehaviour
         // 타겟이 공격 범위 내에 있는지 확인
         float distance = Vector3.Distance(transform.position, _currentTarget.transform.position);
 
-        if (distance > playerStats.AttackRange)
-        {
-            // Debug.Log($"[PlayerCombat] Target out of range. Dist: {distance:F1}, Range: {playerStats.AttackRange}");
-            return;
-        }
 
         // 공격 쿨다운 확인
         float cooldown = 1f / playerStats.AttackSpeed; // Convert attacks/sec to cooldown
@@ -86,10 +77,7 @@ public class PlayerCombat : MonoBehaviour
             ExecuteAttack();
             _lastAttackTime = Time.time;
         }
-        else
-        {
-            // Debug.Log($"[PlayerCombat] Attack on cooldown. Rem: {_lastAttackTime + cooldown - Time.time:F2}s");
-        }
+
     }
 
     /// <summary>
@@ -115,7 +103,7 @@ public class PlayerCombat : MonoBehaviour
 
         // 공격 로그
         string critText = isCritical ? " [치명타]" : "";
-        Debug.Log($"[PlayerCombat] {_currentTarget.gameObject.name}에게 {damage:F1} 데미지 공격{critText}");
+        // Debug.Log($"[PlayerCombat] {_currentTarget.gameObject.name}에게 {damage:F1} 데미지 공격{critText}");
 
         // 선택사항: 공격 애니메이션/이펙트 트리거
         OnAttackExecuted(isCritical);

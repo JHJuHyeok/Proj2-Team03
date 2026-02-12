@@ -10,7 +10,7 @@ public class StageUIManager : MonoBehaviour
     [SerializeField] private TMP_Text normalStageIdText;
     [SerializeField] private TMP_Text normalStageNameText;
     [SerializeField] private RectTransform progressGauge;
-    [SerializeField] private float progressGaugeMaxWidth = 200f;
+    [SerializeField] private float progressGaugeMaxWidth = 480f;
 
     [Header("보스 전투 패널")]
     [SerializeField] private GameObject bossPanel;
@@ -18,7 +18,7 @@ public class StageUIManager : MonoBehaviour
     [SerializeField] private TMP_Text bossStageNameText;
     [SerializeField] private RectTransform bossTimerGauge;
     [SerializeField] private RectTransform bossHpGauge;
-    [SerializeField] private float bossGaugeMaxWidth = 200f;
+    [SerializeField] private float bossGaugeMaxWidth = 450f;
 
     private void Start()
     {

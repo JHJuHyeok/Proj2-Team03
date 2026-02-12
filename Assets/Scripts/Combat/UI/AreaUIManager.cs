@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.EventSystems;
 
 // 지역 선택 팝업 UI를 관리하는 매니저
@@ -20,6 +18,9 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     [SerializeField] private GameObject areaPopup;              // 팝업 오브젝트 (활성/비활성 대상)
     [SerializeField] private StageDetailPopupUI stageDetailPopup; // 스테이지 상세 팝업
 
+    [Header("배경")]
+    [SerializeField] private SpriteRenderer backgroundSpriteRenderer; // 배경 스프라이트 렌더러
+
     [Header("스테이지 슬롯")]
     [SerializeField] private StageSlotUI stageSlotPrefab;       // 스테이지 슬롯 프리팹
     [SerializeField] private Transform stageSlotContainer;      // 슬롯을 배치할 부모 컨테이너
@@ -27,8 +28,6 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     private List<StageSlotUI> spawnedSlots = new List<StageSlotUI>();
     private AreaData currentAreaData;
     private int currentAreaIndex = 0;
-
-    private AsyncOperationHandle<Sprite> areaSpriteHandle;      // 배경 이미지 핸들
 
     private void Start()
     {
@@ -130,7 +129,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     }
 
     // 지역 UI 업데이트
-    private void UpdateAreaUI()
+    private async void UpdateAreaUI()
     {
         if (currentAreaData == null) return;
 
@@ -141,33 +140,8 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         // 배경 이미지 설정
         if (areaBackgroundImage != null && !string.IsNullOrEmpty(currentAreaData.spriteName))
         {
-            // 기존 핸들 해제
-            if (areaSpriteHandle.IsValid())
-            {
-                Addressables.Release(areaSpriteHandle);
-            }
-
-            string path = $"Sprites/Area/{currentAreaData.spriteName}";
-            areaSpriteHandle = Addressables.LoadAssetAsync<Sprite>(path);
-            areaSpriteHandle.Completed += handle =>
-            {
-                if (handle.Status == AsyncOperationStatus.Succeeded)
-                {
-                    areaBackgroundImage.sprite = handle.Result;
-                }
-                else
-                {
-                    Debug.LogWarning($"[AreaUIManager] 스프라이트 로드 실패: {path}");
-                }
-            };
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (areaSpriteHandle.IsValid())
-        {
-            Addressables.Release(areaSpriteHandle);
+            Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
+            if (sprite != null) areaBackgroundImage.sprite = sprite;
         }
     }
 
@@ -202,6 +176,9 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
                 // 클릭 이벤트 연결 (상세 팝업 열기)
                 slot.SetOnClickAction(() => OpenStageDetail(stageData));
 
+                // 이동 버튼 이벤트 연결 (스테이지 이동)
+                slot.SetMoveAction(() => MoveToStage(stageData));
+
                 slot.SetSelected(stageData.id == currentStageId);
             }
             else
@@ -223,6 +200,27 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         {
             Debug.LogWarning("[AreaUIManager] StageDetailPopupUI가 연결되지 않았습니다.");
         }
+    }
+
+    // 스테이지 이동 처리
+    private async void MoveToStage(StageData stageData)
+    {
+        if (stageData == null) return;
+
+        // 스테이지 전환
+        CombatManager.Instance.MoveToStage(stageData);
+
+        // 해당 스테이지의 지역 데이터로 배경 스프라이트 변경
+        AreaData areaData = DataManager.Instance.GetAreaByStageId(stageData.id);
+        if (areaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(areaData.spriteName))
+        {
+            Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", areaData.spriteName);
+            if (sprite != null)
+                backgroundSpriteRenderer.sprite = sprite;
+        }
+
+        // 팝업 닫기
+        ClosePopup();
     }
 
     // 생성된 슬롯 정리
