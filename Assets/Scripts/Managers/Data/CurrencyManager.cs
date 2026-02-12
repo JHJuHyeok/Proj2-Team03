@@ -7,10 +7,11 @@ using System.IO;
 
 public class CurrencyManager : Singleton<CurrencyManager>
 {
+    // 실시간 조회용 딕셔너리
     private Dictionary<CurrencyType, double> _currencies = new Dictionary<CurrencyType, double>();
-
+    // UI 갱신용 이벤트
     public event Action<CurrencyType, double> OnCurrencyChanged;
-
+    // 저장용 데이터
     public CurrencyData currencySave;
 
     public void Init(CurrencyData data)
@@ -49,10 +50,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (!_currencies.ContainsKey(type)) return;
         if (amount <= 0) return;
 
-        _currencies[type] += amount;
-
-        DictToCurrencyData();
-        OnCurrencyChanged?.Invoke(type, _currencies[type]);
+        UpdateValue(type, amount);
     }
 
     /// <summary>
@@ -62,12 +60,10 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <param name="amount"> 소모 재화량 </param>
     public void ConsumeCurrency(CurrencyType type, double amount)
     {
-        if (HasEnoughCurrency(type, amount))
-        {
-            _currencies[type] -= amount;
-            OnCurrencyChanged?.Invoke(type, _currencies[type]);
-        }
-        DictToCurrencyData();
+        if (amount <= 0) return;
+        if (!HasEnoughCurrency(type, amount)) return;
+
+        UpdateValue(type, -amount);
     }
 
     /// <summary>
@@ -79,18 +75,26 @@ public class CurrencyManager : Singleton<CurrencyManager>
         _currencies.GetValueOrDefault(type, 0);
 
     /// <summary>
-    /// 딕셔너리를 데이터 형태로 변환
+    /// 딕셔너리, 세이브용 데이터 동시 업데이트
     /// </summary>
-    public void DictToCurrencyData()
+    /// <param name="type"> 재화 타입 </param>
+    /// <param name="offset"> 변경값 </param>
+    private void UpdateValue(CurrencyType type, double offset)
     {
-        List<CurrencyType> types = _currencies.Keys.ToList();
-        List<double> values = _currencies.Values.ToList();
+        // 1. 딕셔너리 업데이트
+        if (!_currencies.ContainsKey(type)) _currencies[type] = 0;
+        _currencies[type] += offset;
 
-        for (int i = 0; i < _currencies.Count; i++)
-        {
-            currencySave.currencies[i].type = types[i];
-            currencySave.currencies[i].value = values[i];
-        }
+        // 2. 세이브 객체 업데이트
+        var target = currencySave.currencies.Find(c => c.type == type);
+        if (target != null)
+            target.value = _currencies[type];
+        else
+            currencySave.currencies.Add(new Currency { type = type, value = _currencies[type] });
+
+        // 3. 이벤트 전달 및 로컬 저장
+        OnCurrencyChanged?.Invoke(type, _currencies[type]);
+        SaveManager.Instance.SaveDataToLocal(currencySave);
     }
 }
 
