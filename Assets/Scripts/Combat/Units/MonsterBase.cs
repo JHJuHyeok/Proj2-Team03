@@ -31,7 +31,7 @@ public abstract class MonsterBase : MonoBehaviour
     {
         var renderer = GetComponent<SpriteRenderer>();
 
-        Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Monster.spriteatlasv2", spriteName);
+        Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Monster.spriteatlasv2", spriteName);
         if (sprite != null && renderer != null)
         {
             renderer.sprite = sprite;

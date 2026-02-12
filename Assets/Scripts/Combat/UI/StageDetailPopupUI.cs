@@ -122,14 +122,14 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
             // 장비 아이콘 설정
             if (equipIconImage != null && !string.IsNullOrEmpty(equipData.spriteName))
             {
-                Sprite icon = await SpriteManager.Instance.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.spriteName);
+                Sprite icon = await SpriteManager.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.spriteName);
                 if (icon != null) equipIconImage.sprite = icon;
             }
 
             // 장비 등급 배경 설정
             if (equipGradeBackgroundImage != null)
             {
-                Sprite bg = await SpriteManager.Instance.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.grade.ToString());
+                Sprite bg = await SpriteManager.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.grade.ToString());
                 if (bg != null) equipGradeBackgroundImage.sprite = bg;
             }
         }

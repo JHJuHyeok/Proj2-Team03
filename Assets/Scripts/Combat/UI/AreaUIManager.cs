@@ -140,7 +140,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         // 배경 이미지 설정
         if (areaBackgroundImage != null && !string.IsNullOrEmpty(currentAreaData.spriteName))
         {
-            Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
+            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
             if (sprite != null) areaBackgroundImage.sprite = sprite;
         }
     }
@@ -214,7 +214,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         AreaData areaData = DataManager.Instance.GetAreaByStageId(stageData.id);
         if (areaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(areaData.spriteName))
         {
-            Sprite sprite = await SpriteManager.Instance.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", areaData.spriteName);
+            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", areaData.spriteName);
             if (sprite != null)
                 backgroundSpriteRenderer.sprite = sprite;
         }
