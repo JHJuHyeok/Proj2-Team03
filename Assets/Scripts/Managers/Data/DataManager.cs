@@ -17,7 +17,7 @@ public enum GameDataType
 
 public static class DataManager
 {
-    // 실시간 유저 데이터
+    // 실시간 유저 데이터(나중에 옮겨야 됨)
     public static GameData CurrentSaveData { get; private set; }
 
     // 읽기 전용 데이터베이스
