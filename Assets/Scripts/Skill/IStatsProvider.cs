@@ -10,15 +10,15 @@ namespace SlayerLegend.Skill
         float MaxHealth { get; }
         float CurrentMana { get; }
         float MaxMana { get; }
-        float AttackDamage { get; }
+        double AttackDamage { get; }
         float Defense { get; }
         float CriticalRate { get; }
-        float CriticalDamage { get; }
+        double CriticalDamage { get; }
 
         // 전투
         bool UseMana(float amount);
         bool IsCriticalHit();
-        float CalculateFinalDamage(bool isCritical);
+        double CalculateFinalDamage(bool isCritical);
 
         // 버프 모디파이어 (패시브 스킬용)
         void AddAttackDamagePercentModifier(object source, float value);
@@ -41,6 +41,6 @@ namespace SlayerLegend.Skill
     // 데미지를 받을 수 있는 대상 인터페이스
     public interface IDamageable
     {
-        void TakeDamage(float damage);
+        void TakeDamage(double damage);
     }
 }

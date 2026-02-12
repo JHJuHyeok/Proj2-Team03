@@ -9,11 +9,11 @@ namespace SlayerLegend.Skill
     {
         // 레벨에 따른 데미지 계산
         // baseDamage + (damagePerLevel * (level - 1))
-        public static float GetDamage(SkillData data, int level)
+        public static double GetDamage(SkillData data, int level)
         {
             // 팀원 데이터: initialRate를 기본값으로 사용
-            float baseDamage = data.GetInitialRate();
-            float damagePerLevel = data.GetLevelUpValue();
+            double baseDamage = data.GetInitialRate();
+            double damagePerLevel = data.GetLevelUpValue();
             return baseDamage + (damagePerLevel * (level - 1));
         }
 

@@ -105,7 +105,7 @@ namespace SlayerLegend.Skill.StatusEffects
 
             // 유효성 검사 (음수 방지)
             float duration = Mathf.Max(0f, skillData.GetDotDuration());
-            float damage = skillData.GetDotDamagePerTick();
+            double damage = skillData.GetDotDamagePerTick();
             float interval = Mathf.Max(0.01f, skillData.GetDotTickInterval());
             bool isPercentage = skillData.GetDotIsPercentage();
 

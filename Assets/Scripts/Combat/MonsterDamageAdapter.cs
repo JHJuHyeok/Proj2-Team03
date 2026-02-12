@@ -8,7 +8,7 @@ namespace SlayerLegend.Combat
     //
     // 작성자: 조민희
     // 작성일: 2025-02-06
-    // 설명: 어댑터 패턴으로 MonsterBase.TakeDamage(double)를 IDamageable.TakeDamage(float)로 변환
+    // 설명: 어댑터 패턴으로 IDamageable.TakeDamage(double)을 MonsterBase.TakeDamage(double)에 전달
     public class MonsterDamageAdapter : MonoBehaviour, IDamageable
     {
         private MonsterBase _monster;
@@ -24,12 +24,12 @@ namespace SlayerLegend.Combat
             }
         }
 
-        // IDamageable 구현: float → double 변환 후 MonsterBase.TakeDamage() 호출
-        void IDamageable.TakeDamage(float damage)
+        // IDamageable 구현: MonsterBase.TakeDamage() 호출
+        void IDamageable.TakeDamage(double damage)
         {
             if (_monster != null)
             {
-                _monster.TakeDamage((double)damage);
+                _monster.TakeDamage(damage);
             }
         }
 

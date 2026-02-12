@@ -15,14 +15,14 @@ namespace SlayerLegend.Skill
         [SerializeField] protected GameObject hitEffectPrefab;
 
         // 런타임 데이터
-        protected float _damage;
+        protected double _damage;
         protected bool _isCritical;
         protected float _spawnTime;
         protected bool _isActive;
         protected Vector3 _moveDirection = Vector3.right;  // 이동 방향
 
         // 초기화 (방향 지정 가능)
-        public virtual void Initialize(Vector3 spawnPosition, float damage, bool isCritical, Vector3 direction = default)
+        public virtual void Initialize(Vector3 spawnPosition, double damage, bool isCritical, Vector3 direction = default)
         {
             transform.position = spawnPosition;
             _damage = damage;
@@ -93,7 +93,7 @@ namespace SlayerLegend.Skill
         }
 
         // 생성 헬퍼 (방향 지정 가능)
-        public static SkillProjectile2D Create(SkillProjectile2D prefab, Vector3 position, float damage, bool isCritical, Vector3 direction = default)
+        public static SkillProjectile2D Create(SkillProjectile2D prefab, Vector3 position, double damage, bool isCritical, Vector3 direction = default)
         {
             if (prefab == null) return null;
 

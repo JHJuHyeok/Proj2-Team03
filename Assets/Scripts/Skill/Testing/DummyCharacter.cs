@@ -32,10 +32,10 @@ namespace SlayerLegend.Skill.Testing
         public float CurrentMana { get; private set; }
         public float MaxHealth => _maxHealth;
         public float MaxMana => maxMana;
-        public float AttackDamage { get; private set; }
+        public double AttackDamage { get; private set; }
         public float Defense => defense;
         public float CriticalRate => _criticalRate;
-        public float CriticalDamage => _criticalDamage;
+        public double CriticalDamage => _criticalDamage;
 
         public long CurrentGold { get; private set; }
 
@@ -97,9 +97,9 @@ namespace SlayerLegend.Skill.Testing
             return isCritical;
         }
 
-        public float CalculateFinalDamage(bool isCritical)
+        public double CalculateFinalDamage(bool isCritical)
         {
-            float damage = AttackDamage;
+            double damage = AttackDamage;
             if (isCritical)
                 damage *= CriticalDamage;
             return damage;

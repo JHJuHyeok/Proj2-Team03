@@ -57,13 +57,15 @@
       "element": 3,
       "maxLevel": 10,
       "needMp": 15,
-      "initialRate": 30,
+      "initialRate": 10,
       "levelUpValue": 5,
-      "isDot": true,
-      "dotDuration": 5,
-      "dotDamagePerTick": 1,
-      "dotTickInterval": 1,
-      "dotIsPercentage": true
+      "effectData": {
+        "isDot": true,
+        "dotDuration": 5,
+        "dotDamagePerTick": 1,
+        "dotTickInterval": 1,
+        "dotIsPercentage": true
+      }
     },
     {
       "id": "burn",
@@ -79,11 +81,17 @@
       "needMp": 30,
       "initialRate": 50,
       "levelUpValue": 8,
-      "isDot": true,
-      "dotDuration": 3,
-      "dotDamagePerTick": 25,
-      "dotTickInterval": 1,
-      "dotIsPercentage": false
+      "effectData": {
+        "isDot": true,
+        "dotDuration": 3,
+        "dotDamagePerTick": 25,
+        "dotTickInterval": 1,
+        "dotIsPercentage": false,
+        "isBlastSkill": true,
+        "explosionRadius": 3,
+        "explodeDelay": 0.5,
+        "dotType": "burn"
+      }
     },
     {
       "id": "attack_boost",
@@ -129,8 +137,10 @@
       "needMp": 20,
       "initialRate": 60,
       "levelUpValue": 10,
-      "isStun": true,
-      "stunDuration": 1
+      "effectData": {
+        "isStun": true,
+        "stunDuration": 1
+      }
     },
     {
       "id": "freeze_blast",
@@ -146,8 +156,10 @@
       "needMp": 25,
       "initialRate": 70,
       "levelUpValue": 12,
-      "isFreeze": true,
-      "freezeDuration": 2
+      "effectData": {
+        "isFreeze": true,
+        "freezeDuration": 2
+      }
     },
     {
       "id": "root_vine",
@@ -163,8 +175,10 @@
       "needMp": 15,
       "initialRate": 50,
       "levelUpValue": 8,
-      "isRoot": true,
-      "rootDuration": 1.5
+      "effectData": {
+        "isRoot": true,
+        "rootDuration": 1.5
+      }
     }
   ]
 }

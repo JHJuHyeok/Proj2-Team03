@@ -116,12 +116,12 @@ namespace SlayerLegend.Skill.StatusEffects
         }
 
         // 틱당 데미지
-        public static float GetDotDamagePerTick(this SkillData data)
+        public static double GetDotDamagePerTick(this SkillData data)
         {
             var effectData = GetEffectData(data);
-            if (effectData == null || _dotDamagePerTickField == null) return 10f; // 기본값
+            if (effectData == null || _dotDamagePerTickField == null) return 10.0; // 기본값
             var value = _dotDamagePerTickField.GetValue(effectData);
-            return value is float f ? f : 10f;
+            return value is double d ? d : 10.0;
         }
 
         // 틱 간격
