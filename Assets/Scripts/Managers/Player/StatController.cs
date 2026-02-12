@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 
-// 각 소스에서 사용할 저장소 명칭 정리(필요하면 추가해도 됩니다)
+// 저장소 명칭 정리(필요하면 추가해도 됩니다)
 public static class SourceKey
 {
     public const string Base = "Base";
