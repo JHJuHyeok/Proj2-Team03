@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+
+// 각 소스에서 사용할 저장소 명칭 정리(필요하면 추가해도 됩니다)
 public static class SourceKey
 {
     public const string Base = "Base";
@@ -16,20 +18,29 @@ public static class SourceKey
 public class StatController
 {
     // 각 소스별 스탯 저장소
+    // Dictionary Key값 => SourceKey에 명시된 것을 이용할 것(오타 및 혼동 방지)
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
     // 최종 합산 스탯 캐시
-    private Dictionary<StatType, double> _finalStats = new Dictionary<StatType, double>();
+    private Dictionary<StatType, double> _finalStats = new();
     // 스탯 변경을 알리는 이벤트
     public Action OnStatChanged;
 
     /// <summary>
-    /// 스탯 소스 갱신
+    /// 스탯 소스 갱신 및 전체 스탯 재계산
     /// </summary>
     /// <param name="sourceName"> 소스 구분 명칭 </param>
     /// <param name="stats"> 내부 스탯들 </param>
     public void UpdateStatSource(string sourceName, List<StatValue> stats)
     {
-        _statSources[sourceName] = stats;
+        if (stats == null)
+        {
+            _statSources.Remove(sourceName);
+        }
+        else
+        {
+            _statSources[sourceName] = stats;
+        }
+
         RefreshFinalStats();
         OnStatChanged?.Invoke();    // 값 변경 알림
     }
@@ -44,13 +55,28 @@ public class StatController
         // 타입별 일괄 계산
         foreach (StatType type in Enum.GetValues(typeof(StatType)))
         {
-            double sumBase = 0;
-            double sumMultiplier = 1.0;
+            _finalStats.Clear();
 
             // 각 소스의 type 별 계산
-            foreach (var source in _statSources.Values)
+            foreach (var sourceList in _statSources.Values)
             {
-                var match = source.Find(s => s.type == type);
+                foreach (var stat in sourceList)
+                {
+                    // 초기값이 없다면 기본 0 설정
+                    if (!_finalStats.ContainsKey(stat.type))
+                        _finalStats[stat.type] = 0;
+                }
+            }
+        }
+
+        foreach (var type in _finalStats.Keys)
+        {
+            double sumBase = 0;
+            double sumMultiplier = 1.0f;
+
+            foreach (var sourceList in _statSources.Values)
+            {
+                var match = sourceList.Find(s => s.type == type);
                 if (match != null)
                 {
                     sumBase += match.baseValue;
