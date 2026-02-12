@@ -17,6 +17,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     {
         // 1. 저장용 임시 프로퍼티 초기화
         currencySave = data;
+        _currencies.Clear();
 
         // 2. 딕셔너리에 삽입
         foreach (var currency in data.currencies)
@@ -46,6 +47,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     public void AddCurrency(CurrencyType type, double amount)
     {
         if (!_currencies.ContainsKey(type)) return;
+        if (amount <= 0) return;
 
         _currencies[type] += amount;
 
