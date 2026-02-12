@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using SlayerLegend.Equipment;  // 장비 시스템
 
+// [주혁] - DataManager 정적 클래스 전환에 의해 코드 수정(234)
+
 namespace SlayerLegend.Skill.Testing
 {
     // 메뉴 상태 열거형
@@ -229,7 +231,7 @@ namespace SlayerLegend.Skill.Testing
 
         private void AddSkill(string id, string name, bool isActive)
         {
-            var data = DataManager.Instance?.skills?.Get(id);
+            var data = DataManager.skills?.Get(id);
             if (data == null)
             {
                 Debug.LogError($"스킬 데이터를 찾을 수 없습니다: {id}");

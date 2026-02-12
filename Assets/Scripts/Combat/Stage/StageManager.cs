@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 
+// [주혁] - DataManager 정적 클래스 전환에 의해 코드 수정(20)
+
 public class StageManager : MonoBehaviour
 {
     // 이벤트
@@ -15,7 +17,7 @@ public class StageManager : MonoBehaviour
     
     public void Initialize(string stageId)
     {
-        StageData stageData = DataManager.Instance.GetStage(stageId);
+        StageData stageData = DataManager.GetStage(stageId);
         if (stageData != null)
         {
             SetStage(stageData);

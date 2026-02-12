@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+// [주혁] - DataManager 정적 클래스 전환에 의해 코드 수정(40, 58)
+
 namespace SlayerLegend.Skill.Testing
 {
     // 스킬 시스템 테스트용 UI
@@ -35,7 +37,7 @@ namespace SlayerLegend.Skill.Testing
 
         private void AddActiveSkill(string id, string name)
         {
-            var data = DataManager.Instance.skills.Get(id);
+            var data = DataManager.skills.Get(id);
             if (data == null)
             {
                 Debug.LogError($"스킬 데이터를 찾을 수 없습니다: {id}");
@@ -53,7 +55,7 @@ namespace SlayerLegend.Skill.Testing
 
         private void AddPassiveSkill(string id, string name)
         {
-            var data = DataManager.Instance.skills.Get(id);
+            var data = DataManager.skills.Get(id);
             if (data == null)
             {
                 Debug.LogError($"스킬 데이터를 찾을 수 없습니다: {id}");

@@ -14,7 +14,6 @@ public class SaveManager : Singleton<SaveManager>
 {
     private bool _isDirty = false;              // 데이터 변경 여부
     private CancellationTokenSource _cts;
-    private float _saveTimer = 0f;
     private const int saveInterval = 300;       // 자동 저장 간격 5분
 
     private void Start()
@@ -64,14 +63,14 @@ public class SaveManager : Singleton<SaveManager>
     /// </summary>
     public async Task SaveToRemote()
     {
-        GameData saveData = DataManager.Instance.currentSaveData;
+        GameData saveData = DataManager.CurrentSaveData;
         CurrencyData saveCurrency = CurrencyManager.Instance.currencySave;
 
         // 저장 시간 기록
         PrepareForSave(saveData);
         PrepareForSave(saveCurrency);
 
-        Task<bool> saveResultTask = SaveToBackend("UserSave", DataManager.Instance.currentSaveData);
+        Task<bool> saveResultTask = SaveToBackend("UserSave", DataManager.CurrentSaveData);
         Task<bool> saveCurrencyTask = SaveToBackend("UserCurrency", CurrencyManager.Instance.currencySave);
 
         bool[] results = await Task.WhenAll(saveResultTask, saveCurrencyTask);
@@ -79,7 +78,6 @@ public class SaveManager : Singleton<SaveManager>
         if (results[0] && results[1])
         {
             _isDirty = false;
-            _saveTimer = 0f;
         }
     }
 

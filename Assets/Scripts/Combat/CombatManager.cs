@@ -2,6 +2,8 @@ using UnityEngine;
 using Combat.Drop;
 using System;
 
+// [주혁] - DataManager 정적 클래스 전환에 따라 일부 내용 수정(61, 63)
+
 public enum CombatState
 {
     Farming,
@@ -56,9 +58,9 @@ public class CombatManager : MonoBehaviour
     private void Start()
     {
         // 데이터가 아직 로드되지 않았으면 먼저 로드
-        if (DataManager.Instance.stages.GetAll().Count == 0)
+        if (DataManager.stages.GetAll().Count == 0)
         {
-            DataManager.Instance.LoadAllDatabase();
+           //DataManager.LoadAllDatabase();
         }
 
         if (stageManager) stageManager.Initialize(initialStageId);

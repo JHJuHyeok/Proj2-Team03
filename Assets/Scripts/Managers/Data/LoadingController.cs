@@ -24,7 +24,7 @@ public class LoadingController : MonoBehaviour
 
         // 3. 리소스 로드
         await ResourcesLoadStep();
-        DataManager.Instance.LoadAllDatabase();
+        DataManager.LoadAllDatabase();
 
         // 4. 씬 이동
     }
@@ -63,7 +63,7 @@ public class LoadingController : MonoBehaviour
         {
             // 6. 각 매니저의 데이터 초기화
             CurrencyManager.Instance.Init(latestCurrency);
-            DataManager.Instance.Init(latestData);
+            DataManager.Init(latestData);
 
             // 7. 아틀라스 스프라이트 로드
             await ResourcesLoadStep();

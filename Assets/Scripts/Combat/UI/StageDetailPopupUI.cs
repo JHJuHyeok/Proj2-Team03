@@ -4,6 +4,8 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
+// [주혁] -DataManager 정적 클래스 전환에 의해 코드 수정(114, 144, 146, 155, 157)
+
 // 스테이지 상세 정보 팝업 UI를 관리하는 매니저
 public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
 {
@@ -109,7 +111,7 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
 
     private async void UpdateEquipInfo()
     {
-        if (string.IsNullOrEmpty(currentStageData.dropEquipID) || DataManager.Instance == null)
+        if (string.IsNullOrEmpty(currentStageData.dropEquipID))
         {
             return;
         }
@@ -139,9 +141,9 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
     private EquipData FindEquipData(string equipId)
     {
         // 무기에서 검색
-        if (DataManager.Instance.weapons != null)
+        if (DataManager.weapons != null)
         {
-            var weapons = DataManager.Instance.weapons.GetAll();
+            var weapons = DataManager.weapons.GetAll();
             if (weapons != null)
             {
                 var weapon = weapons.Find(w => w.id == equipId);
@@ -150,9 +152,9 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
         }
 
         // 장신구에서 검색
-        if (DataManager.Instance.accessories != null)
+        if (DataManager.accessories != null)
         {
-            var accessories = DataManager.Instance.accessories.GetAll();
+            var accessories = DataManager.accessories.GetAll();
             if (accessories != null)
             {
                 var accessory = accessories.Find(a => a.id == equipId);

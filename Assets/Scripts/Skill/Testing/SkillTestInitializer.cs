@@ -1,6 +1,8 @@
 using UnityEngine;
 using SlayerLegend.Skill;
 
+// [주혁] -DataManager 정적 클래스 전환에 의해 코드 수정(17, 18, 19)
+
 public class SkillTestInitializer : MonoBehaviour
 {
     [Header("참조")]
@@ -14,9 +16,9 @@ public class SkillTestInitializer : MonoBehaviour
     private void Start()
     {
         // DataManager에서 스킬 데이터 로드
-        var fireballData = DataManager.Instance.skills.Get("fireball");
-        var iceSpearData = DataManager.Instance.skills.Get("ice_spear");
-        var meteorData = DataManager.Instance.skills.Get("meteor");
+        var fireballData = DataManager.skills.Get("fireball");
+        var iceSpearData = DataManager.skills.Get("ice_spear");
+        var meteorData = DataManager.skills.Get("meteor");
 
         // 스킬 생성 및 추가
         if (fireballData != null)

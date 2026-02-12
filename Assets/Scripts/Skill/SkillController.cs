@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+// [주혁] -DataManager 정적 클래스 전환에 의해 코드 수정(26)
+
 namespace SlayerLegend.Skill
 {
     // 스킬 컨트롤러: 플레이어의 모든 스킬을 관리
@@ -21,7 +23,7 @@ namespace SlayerLegend.Skill
         private void Awake()
         {
             // DataManager에서 스킬 데이터 로드 확인
-            if (DataManager.Instance == null || DataManager.Instance.skills == null)
+            if (DataManager.skills == null)
                 Debug.LogWarning("DataManager가 초기화되지 않았습니다!");
         }
 

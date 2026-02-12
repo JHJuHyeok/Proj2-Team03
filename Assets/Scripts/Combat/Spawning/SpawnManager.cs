@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
+// [주혁] - DataManager 정적 클래스 전환에 의해 일부 내용 수정(122, 141, 215)
+
 // 몬스터 및 아이템 스폰 관리
 // Addressables를 사용하여 풀링된 오브젝트를 로드하고 생성
 public class SpawnManager : MonoBehaviour
@@ -117,7 +119,7 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterData boxData = DataManager.Instance.monsters.Get(rewardBoxId);
+        MonsterData boxData = DataManager.monsters.Get(rewardBoxId);
         if (boxData == null)
         {
             Debug.LogError($"[SpawnManager] 보상 상자 데이터 없음 ID: {rewardBoxId}");
@@ -136,7 +138,7 @@ public class SpawnManager : MonoBehaviour
         StopSpawning();
         CleanUpEnemies();
 
-        MonsterData bossData = DataManager.Instance.monsters.Get(_currentStageData.bossId);
+        MonsterData bossData = DataManager.monsters.Get(_currentStageData.bossId);
         if (bossData == null)
         {
             Debug.LogError($"[SpawnManager] 보스 데이터 없음: {_currentStageData.bossId}");
@@ -210,7 +212,7 @@ public class SpawnManager : MonoBehaviour
         {
             if (_currentStageData != null && !string.IsNullOrEmpty(_currentStageData.monsterId))
             {
-                MonsterData monsterData = DataManager.Instance.monsters.Get(_currentStageData.monsterId);
+                MonsterData monsterData = DataManager.monsters.Get(_currentStageData.monsterId);
                 if (monsterData != null)
                 {
                     SpawnEnemy(monsterData);
@@ -232,7 +234,7 @@ public class SpawnManager : MonoBehaviour
             {
                 if (_currentStageData != null && !string.IsNullOrEmpty(_currentStageData.monsterId))
                 {
-                    MonsterData monsterData = DataManager.Instance.monsters.Get(_currentStageData.monsterId);
+                    MonsterData monsterData = DataManager.monsters.Get(_currentStageData.monsterId);
                     if (monsterData != null)
                     {
                         SpawnEnemy(monsterData);
