@@ -24,7 +24,7 @@ public class LoadingController : MonoBehaviour
 
         // 3. 리소스 로드
         await ResourcesLoadStep();
-        DataManager.LoadAllDatabase();
+        await DataManager.LoadAllDatabase();
 
         // 4. 씬 이동
     }
