@@ -1,8 +1,9 @@
 using UnityEngine;
 using Combat.Drop;
+using SlayerLegend.Skill;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public abstract class MonsterBase : MonoBehaviour
+public abstract class MonsterBase : MonoBehaviour, IDamageable
 {
     protected MonsterData _data;
     protected Transform _target;
@@ -75,7 +76,12 @@ public abstract class MonsterBase : MonoBehaviour
         _currentHp -= damage;
         _currentHp = System.Math.Max(0, _currentHp);
 
-        Debug.Log($"[{gameObject.name}] took {damage:F1} damage. HP: {_currentHp:F0}/{_maxHp:F0}");
+        // 데미지 넘버 표시
+        var prefab = CombatManager.Instance?.DamageNumberPrefab;
+        if (prefab != null)
+        {
+            prefab.Spawn(transform.position, damage.ToString("N0"));
+        }
 
         if (IsBoss)
         {

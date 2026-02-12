@@ -17018,7 +17018,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1210495204}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a5ae9d64cb9bd1a41b65711788dcdbee, type: 3}
   m_Name: 
@@ -22957,7 +22957,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 984364833}
   m_Direction: 3
   m_Value: 1
-  m_Size: 0.27568522
+  m_Size: 0.2758363
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -27397,8 +27397,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2052712499}
   m_HandleRect: {fileID: 2052712498}
   m_Direction: 0
-  m_Value: 0.00000010172526
-  m_Size: 0.64296854
+  m_Value: 0
+  m_Size: 0.6427949
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -29679,7 +29679,8 @@ MonoBehaviour:
   dropManager: {fileID: 1926311404}
   playerTransform: {fileID: 1400777994}
   playerStats: {fileID: 1400777999}
-  initialStageId: AREA_01_1
+  damageNumberPrefab: {fileID: 7239377516473605472, guid: 9b4c94e3329e942e8bc2c80c5a6d8618, type: 3}
+  initialStageId: STAGE_1
 --- !u!4 &1926311403
 Transform:
   m_ObjectHideFlags: 0

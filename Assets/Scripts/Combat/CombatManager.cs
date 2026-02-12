@@ -1,5 +1,6 @@
 using UnityEngine;
 using Combat.Drop;
+using DamageNumbersPro;
 using System;
 
 public enum CombatState
@@ -25,6 +26,9 @@ public class CombatManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private Transform playerTransform;
     [SerializeField] private PlayerCombatStats playerStats;
+    [SerializeField] private DamageNumber damageNumberPrefab;
+
+    public DamageNumber DamageNumberPrefab => damageNumberPrefab;
 
     [Header("Initial Stage")]
     [SerializeField] private string initialStageId = "Stage_1";
