@@ -15,6 +15,7 @@ public enum GameDataType
     Gacha
 }
 
+// [신태환] - LoadAllDatabase에 try catch 추가
 public static class DataManager
 {
     // 실시간 유저 데이터(나중에 옮겨야 됨)
@@ -44,14 +45,23 @@ public static class DataManager
     /// <returns></returns>
     public static async Task LoadAllDatabase()
     {
-        await Task.WhenAll(
-            monsters.LoadAsync("Json/Monster/MonsterList"),
-            skills.LoadAsync("Json/Skill/SkillList"),
-            weapons.LoadAsync("Json/Equip/WeaponList"),
-            accessories.LoadAsync("Json/Equip/AccessorieList"),
-            stages.LoadAsync("Json/Stage/StageList")
-        );
-        Debug.Log("데이터 로드 완료");
+        try
+        {
+            Debug.Log("데이터 로드 시작");
+
+            await Task.WhenAll(
+                monsters.LoadAsync("Json/Monster/MonsterList"),
+                skills.LoadAsync("Json/Skill/SkillList"),
+                weapons.LoadAsync("Json/Equip/WeaponList"),
+                accessories.LoadAsync("Json/Equip/AccessorieList"),
+                stages.LoadAsync("Json/Stage/StageList")
+            );
+            Debug.Log("데이터 로드 완료");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"데이터 로드 실패: {e.Message}\n{e.StackTrace}");
+        }
     }
 
     public static StageData GetStage(string stageId)
