@@ -5,23 +5,26 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.U2D;
 using System.Threading.Tasks;
 
+// [ì‹ íƒœí™˜] - AtlasBase ì¶”ê°€
 public static class SpriteManager
 {
-    // Dictionary<È£Ãâ ¾ÆÆ²¶ó½º ¸íÄª, ¾ÆÆ²¶ó½º>
+    public const string AtlasBase = "Assets/Resource/Atlas/";
+
+    // Dictionary<È£ï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½ï¿½Äª, ï¿½ï¿½Æ²ï¿½ï¿½>
     private static Dictionary<string, SpriteAtlas> _atlasCache = new();
 
     /// <summary>
-    /// ·ÎµåµÈ ¾ÆÆ²¶ó½º¿¡¼­ ½ºÇÁ¶óÀÌÆ® Å½»ö
+    /// ï¿½Îµï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ó½º¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® Å½ï¿½ï¿½
     /// </summary>
-    /// <param name="atlasAddress"> ¾ÆÆ²¶ó½º ÁÖ¼Ò </param>
-    /// <param name="spriteName"> ½ºÇÁ¶óÀÌÆ® ¸íÄª </param>
+    /// <param name="atlasAddress"> ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½Ö¼ï¿½ </param>
+    /// <param name="spriteName"> ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½Äª </param>
     /// <returns></returns>
     public static async Task<Sprite> GetSprite(string atlasAddress, string spriteName)
     {
-        // ÀÌ¹Ì ·ÎµåµÈ ¾ÆÆ²¶ó½º°¡ ÀÖ´ÂÁö È®ÀÎ
+        // ï¿½Ì¹ï¿½ ï¿½Îµï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ó½º°ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
         if (!_atlasCache.TryGetValue(atlasAddress, out SpriteAtlas atlas))
         {
-            // ¾ø´Ù¸é ¾îµå·¹¼­ºí·Î ¾ÆÆ²¶ó½º ·Îµå
+            // ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½ï¿½å·¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½Îµï¿½
             AsyncOperationHandle<SpriteAtlas> handle = Addressables.LoadAssetAsync<SpriteAtlas>(atlasAddress);
             await handle.Task;
 
@@ -32,7 +35,7 @@ public static class SpriteManager
             }
             else
             {
-                Debug.Log("¾ÆÆ²¶ó½º ·Îµå ½ÇÆÐ");
+                Debug.Log("ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½");
                 return null;
             }
         }
@@ -41,7 +44,7 @@ public static class SpriteManager
 
         if (targetSprite == null)
         {
-            Debug.Log("¾ÆÆ²¶ó½º¿¡ ÇØ´çÇÏ´Â ½ºÇÁ¶óÀÌÆ®°¡ ¾ø½À´Ï´Ù.");
+            Debug.Log("ï¿½ï¿½Æ²ï¿½ó½º¿ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
 
         return targetSprite;
@@ -49,13 +52,13 @@ public static class SpriteManager
 
     public static async Task LoadAllAtlasAsync()
     {
-        // 1. °ÔÀÓ ½ÃÀÛ ½Ã ¾ÆÆ²¶ó½º ÆÄÀÏ ºÒ·¯¿À±â
+        // 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½
         AsyncOperationHandle<IList<SpriteAtlas>> handle = 
             Addressables.LoadAssetsAsync<SpriteAtlas>("Atlas", null);
 
         await handle.Task;
 
-        // 2. µñ¼Å³Ê¸®¿¡ È£ÃâÇÑ ¾ÆÆ²¶ó½ºµé »ðÀÔ
+        // 2. ï¿½ï¿½Å³Ê¸ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ²ï¿½ó½ºµï¿½ ï¿½ï¿½ï¿½ï¿½
         if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             _atlasCache.Clear();

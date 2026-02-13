@@ -32,7 +32,7 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
     {
         var renderer = GetComponent<SpriteRenderer>();
 
-        Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Monster.spriteatlasv2", spriteName);
+        Sprite sprite = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2", spriteName);
         if (sprite != null && renderer != null)
         {
             renderer.sprite = sprite;

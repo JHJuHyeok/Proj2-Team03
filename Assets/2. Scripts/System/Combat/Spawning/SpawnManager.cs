@@ -1,21 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 // [주혁] - DataManager 정적 클래스 전환에 의해 일부 내용 수정(122, 141, 215)
 
 // 몬스터 및 아이템 스폰 관리
-// Addressables를 사용하여 풀링된 오브젝트를 로드하고 생성
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private float spawnInterval = 1f;
     [SerializeField] private int maxQueueSize = 20;
     [SerializeField] private float queueSpacing = 2f;
     [SerializeField] private float queueBaseOffset = 1.5f;
-    [SerializeField] private string commonMonsterAddress = "CommonMonster"; // 공통 몬스터 Addressable 키
-    [SerializeField] private string bossMonsterAddress = "BossMonster"; // 보스 몬스터 Addressable 키
+    [SerializeField] private MonsterBase commonMonsterPrefab;
+    [SerializeField] private MonsterBase bossMonsterPrefab;
     [SerializeField] private string rewardBoxId = "REWARD_BOX"; // 보상 상자 몬스터 ID
 
     private Coroutine _spawnCoroutine;
@@ -25,11 +22,7 @@ public class SpawnManager : MonoBehaviour
     // 활성화된 몬스터 추적 (Queue)
     // 인덱스 0이 가장 앞에 있는 몬스터 (플레이어와 가장 가까움)
     private List<MonsterBase> _enemyQueue = new List<MonsterBase>();
-    private bool _poolsInitialized = false;
     private int _totalSpawnedCount = 0;
-
-    // Addressable 로드된 프리팹 캐시
-    private Dictionary<string, GameObject> _loadedPrefabs = new Dictionary<string, GameObject>();
 
     public void Initialize(Transform playerTransform)
     {
@@ -40,59 +33,17 @@ public class SpawnManager : MonoBehaviour
     {
         if (stageData == null) return;
 
-        StartCoroutine(InitializePoolsAsync(stageData));
-    }
-
-    private IEnumerator InitializePoolsAsync(StageData stageData)
-    {
-        // 공통 몬스터 프리팹 로드
-        if (!string.IsNullOrEmpty(commonMonsterAddress))
-        {
-            yield return LoadPrefabAsync(commonMonsterAddress, 10);
-        }
-
-        // 보스 몬스터 프리팹 로드
-        if (!string.IsNullOrEmpty(bossMonsterAddress))
-        {
-            yield return LoadPrefabAsync(bossMonsterAddress, 2);
-        }
-
-        _poolsInitialized = true;
-        Debug.Log("[SpawnManager] 풀 초기화됨 (공통 몬스터 + 보스 몬스터)");
-    }
-
-    private IEnumerator LoadPrefabAsync(string address, int poolSize)
-    {
-        if (_loadedPrefabs.ContainsKey(address)) yield break;
-
-        AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(address);
-        yield return handle;
-
-        if (handle.Status == AsyncOperationStatus.Succeeded)
-        {
-            GameObject prefab = handle.Result;
-            _loadedPrefabs[address] = prefab;
-
-            MonsterBase monsterBase = prefab.GetComponent<MonsterBase>();
-            if (monsterBase != null)
-            {
-                PoolManager.Instance.CreatePool(monsterBase, poolSize, transform);
-            }
-        }
-        else
-        {
-            Debug.LogError($"[SpawnManager] 프리팹 로드 실패: {address}");
-        }
+        if (commonMonsterPrefab != null)
+            PoolManager.Instance.CreatePool(commonMonsterPrefab, 10, transform);
+        if (bossMonsterPrefab != null)
+            PoolManager.Instance.CreatePool(bossMonsterPrefab, 2, transform);
     }
 
     public void StartFarmingSpawn(StageData stageData)
     {
         _currentStageData = stageData;
 
-        if (!_poolsInitialized)
-        {
-            InitializePools(stageData);
-        }
+        InitializePools(stageData);
 
         _totalSpawnedCount = 0;
 
@@ -126,7 +77,7 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterBase rewardBox = SpawnMonster(boxData, commonMonsterAddress, GetSpawnPosition() + Vector3.right * 5);
+        MonsterBase rewardBox = SpawnMonster(boxData, commonMonsterPrefab, GetSpawnPosition() + Vector3.right * 5);
         if (rewardBox != null)
         {
             Debug.Log($"[SpawnManager] 보상 상자 소환: {boxData.name} ({boxData.id})");
@@ -145,7 +96,7 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterBase boss = SpawnMonster(bossData, bossMonsterAddress, GetSpawnPosition() + Vector3.right * 3);
+        MonsterBase boss = SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
         if (boss != null)
         {
             Debug.Log($"[SpawnManager] 보스 소환: {bossData.name} ({bossData.id})");
@@ -192,9 +143,6 @@ public class SpawnManager : MonoBehaviour
 
     private IEnumerator SpawnRoutine()
     {
-        // 풀 초기화 대기
-        yield return new WaitUntil(() => _poolsInitialized);
-
         // 초기 스폰 배치: 큐를 즉시 채움
         int initialNeeded = maxQueueSize - _enemyQueue.Count;
 
@@ -252,7 +200,7 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterBase enemy = SpawnMonster(data, commonMonsterAddress, GetSpawnPosition());
+        MonsterBase enemy = SpawnMonster(data, commonMonsterPrefab, GetSpawnPosition());
         if (enemy != null)
         {
             _totalSpawnedCount++;
@@ -262,22 +210,15 @@ public class SpawnManager : MonoBehaviour
 
     // 공통 몬스터 스폰 로직
     // 프리팹 조회 → 풀 가져오기 → 위치 설정 → 초기화 → flipX → 레이어 설정 → 큐 추가
-    private MonsterBase SpawnMonster(MonsterData data, string prefabAddress, Vector3 position)
+    private MonsterBase SpawnMonster(MonsterData data, MonsterBase prefab, Vector3 position)
     {
-        if (!_loadedPrefabs.TryGetValue(prefabAddress, out GameObject prefab))
+        if (prefab == null)
         {
-            Debug.LogWarning($"[SpawnManager] 프리팹 로드 안됨: {prefabAddress}");
+            Debug.LogWarning("[SpawnManager] 프리팹이 할당되지 않음");
             return null;
         }
 
-        MonsterBase prefabMonster = prefab.GetComponent<MonsterBase>();
-        if (prefabMonster == null)
-        {
-            Debug.LogError($"[SpawnManager] 프리팹 {prefab.name}에 MonsterBase 컴포넌트 없음");
-            return null;
-        }
-
-        MonsterBase monster = PoolManager.Instance.GetFromPool(prefabMonster);
+        MonsterBase monster = PoolManager.Instance.GetFromPool(prefab);
         if (monster == null) return null;
 
         monster.transform.position = position;
@@ -332,15 +273,5 @@ public class SpawnManager : MonoBehaviour
             return _enemyQueue[0];
         }
         return null;
-    }
-
-    private void OnDestroy()
-    {
-        // Addressable 리소스 해제
-        foreach (var kvp in _loadedPrefabs)
-        {
-            Addressables.Release(kvp.Value);
-        }
-        _loadedPrefabs.Clear();
     }
 }
