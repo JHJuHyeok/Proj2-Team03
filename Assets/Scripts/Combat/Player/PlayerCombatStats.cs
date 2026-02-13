@@ -1,12 +1,13 @@
 using UnityEngine;
 using System;
+using SlayerLegend.Skill;
 
 // [주혁] - StatController 리팩토링 진행, 관련 부분 일부 추가 및 수정(22, 100, 106)
 
 // 플레이어의 전투 스탯을 관리하는 클래스
 // StatController에서 최종 계산된 스탯을 가져옴
 // TODO: StatController 앞단 데이터 수집 완료 후 더미 데이터 제거
-public class PlayerCombatStats : MonoBehaviour
+public class PlayerCombatStats : MonoBehaviour, IDamageable
 {
     // 런타임 상태
     private double _currentHp;
@@ -166,7 +167,12 @@ public class PlayerCombatStats : MonoBehaviour
 
         OnHpChanged?.Invoke(_currentHp, MaxHealth);
 
-        Debug.Log($"[PlayerCombatStats] Took {damage:F1} damage. HP: {_currentHp:F0}/{MaxHealth:F0}");
+        // 데미지 넘버 표시
+        var prefab = CombatManager.Instance?.DamageNumberPrefab;
+        if (prefab != null)
+        {
+            prefab.Spawn(transform.position, damage.ToString("N0"));
+        }
 
         if (_currentHp <= 0 && !_isDead)
         {

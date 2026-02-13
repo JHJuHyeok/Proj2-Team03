@@ -7,14 +7,13 @@ using UnityEngine.EventSystems;
 // [주혁] -DataManager 정적 클래스 전환에 의해 코드 수정(114, 144, 146, 155, 157)
 
 // 스테이지 상세 정보 팝업 UI를 관리하는 매니저
-public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
+public class StageDetailPopupUI : MonoBehaviour
 {
     [Header("UI 참조")]
     [SerializeField] private RectTransform popupContent;        // 팝업 내부 컨텐츠 영역 (이 밖을 클릭하면 닫힘)
 
     [Header("기본 정보")]
     [SerializeField] private TMP_Text stageNameText;
-    [SerializeField] private TMP_Text stageIdText;
 
     [Header("보상 정보")]
     [SerializeField] private TMP_Text goldRewardText;           // 골드획득량
@@ -32,6 +31,7 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
     [SerializeField] private Image equipGradeBackgroundImage;   // 장비 등급 배경
 
     private StageData currentStageData;
+    private bool skipFrame;
 
     // 팝업 열기 (StageData 포함)
     public void Open(StageData stageData)
@@ -55,6 +55,7 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
         }
 
         gameObject.SetActive(true);
+        skipFrame = true;
         UpdateUI();
     }
 
@@ -65,18 +66,27 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
         gameObject.SetActive(false);
     }
 
-    // 영역 밖 클릭 시 닫기 (IPointerDownHandler 구현)
-    public void OnPointerDown(PointerEventData eventData)
+    // 영역 밖 클릭 시 닫기 (LateUpdate에서 Input으로 감지)
+    private void LateUpdate()
     {
-        if (popupContent == null) return;
+        if (skipFrame) { skipFrame = false; return; }
 
-        // 클릭된 위치가 컨텐츠 영역 내부인지 확인
-        if (!RectTransformUtility.RectangleContainsScreenPoint(popupContent, eventData.position, eventData.pressEventCamera))
+        if (Input.GetMouseButtonDown(0) && popupContent != null)
         {
-            Close();
-            // 이벤트가 아래 팝업(AreaUIManager)으로 전파되지 않도록 함
-            eventData.Use();
+            if (!RectTransformUtility.RectangleContainsScreenPoint(
+                popupContent, Input.mousePosition, GetUICamera()))
+            {
+                Close();
+            }
         }
+    }
+
+    private Camera GetUICamera()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            return canvas.rootCanvas.worldCamera;
+        return null;
     }
 
     private void UpdateUI()
@@ -85,17 +95,16 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
 
         // 기본 정보
         if (stageNameText != null) stageNameText.text = currentStageData.name;
-        if (stageIdText != null) stageIdText.text = currentStageData.id;
 
-        if (goldRewardText != null) goldRewardText.text = currentStageData.minGoldDrop.ToString();
-        if (expRewardText != null) expRewardText.text = currentStageData.expDrop.ToString();
+        if (goldRewardText != null) goldRewardText.text = currentStageData.minGoldDrop.ToString("N0");
+        if (expRewardText != null) expRewardText.text = currentStageData.expDrop.ToString("N0");
 
         // 골드/경험치 보상 (분당 획득량 = 기본값 * 80)
         long goldPerMin = currentStageData.minGoldDrop * 80;
         long expPerMin = currentStageData.expDrop * 80;
 
-        if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin}/m";
-        if (autoExpRewardText != null) autoExpRewardText.text = $"{expPerMin}/m";
+        if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin:N0}/m";
+        if (autoExpRewardText != null) autoExpRewardText.text = $"{expPerMin:N0}/m";
 
         // 드랍 확률
         if (dropPercentText != null)
@@ -131,6 +140,7 @@ public class StageDetailPopupUI : MonoBehaviour, IPointerDownHandler
             // 장비 등급 배경 설정
             if (equipGradeBackgroundImage != null)
             {
+                Debug.Log("장비 등급 배경 설정: " + equipData.grade.ToString());
                 Sprite bg = await SpriteManager.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.grade.ToString());
                 if (bg != null) equipGradeBackgroundImage.sprite = bg;
             }

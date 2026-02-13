@@ -6,7 +6,6 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerCombatStats playerStats;
-    [SerializeField] private PlayerTargeting playerTargeting;
 
     [Header("Settings")]
     [SerializeField] private bool autoAttackEnabled = true;
@@ -21,10 +20,7 @@ public class PlayerCombat : MonoBehaviour
         if (playerStats == null)
             playerStats = GetComponent<PlayerCombatStats>();
 
-        if (playerTargeting == null)
-            playerTargeting = GetComponent<PlayerTargeting>();
-
-        if (playerStats == null || playerTargeting == null)
+        if (playerStats == null)
         {
             Debug.LogError("[PlayerCombat] Missing required components!");
             enabled = false;
@@ -39,18 +35,10 @@ public class PlayerCombat : MonoBehaviour
         // 현재 타겟이 유효하지 않으면 타겟 갱신
         if (!IsTargetValid())
         {
-            // 1. 큐 우선 확인
             if (CombatManager.Instance != null && CombatManager.Instance.SpawnManager != null)
             {
                 _currentTarget = CombatManager.Instance.SpawnManager.GetFirstEnemy();
             }
-
-            // 2. 센서로 대체
-            if (_currentTarget == null)
-            {
-                _currentTarget = playerTargeting.FindClosestEnemy();
-            }
-
         }
 
         // 현재 타겟 공격 시도
@@ -67,6 +55,9 @@ public class PlayerCombat : MonoBehaviour
     {
         // 타겟이 공격 범위 내에 있는지 확인
         float distance = Vector3.Distance(transform.position, _currentTarget.transform.position);
+
+        if (distance > playerStats.AttackRange)
+            return; // 공격 범위 밖이면 공격하지 않음
 
 
         // 공격 쿨다운 확인
@@ -114,7 +105,11 @@ public class PlayerCombat : MonoBehaviour
     /// </summary>
     private bool IsTargetValid()
     {
-        return playerTargeting.IsTargetValid(_currentTarget, playerStats.DetectionRange);
+        if (_currentTarget == null || _currentTarget.gameObject == null || !_currentTarget.gameObject.activeSelf)
+            return false;
+
+        float distance = Vector3.Distance(transform.position, _currentTarget.transform.position);
+        return distance <= playerStats.DetectionRange;
     }
 
     /// <summary>

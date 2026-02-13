@@ -4,8 +4,6 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-// [주혁] - DataManager 정적 클래스 전환에 의해 코드 수정(41, 96, 113, 123, 213)
-
 // 지역 선택 팝업 UI를 관리하는 매니저
 public class AreaUIManager : MonoBehaviour, IPointerDownHandler
 {
@@ -38,7 +36,10 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
 
     // 지역 데이터 로드
     private void LoadAreaData()
-    {var areaList = DataManager.stages.GetAll();
+    {
+        if (DataManager.Instance == null) return;
+
+        var areaList = DataManager.Instance.maps.GetAll();
         if (areaList == null || areaList.Count == 0)
         {
             Debug.LogWarning("[AreaUIManager] 지역 데이터가 없습니다.");
@@ -83,6 +84,9 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     {
         if (popupContent == null) return;
 
+        // StageDetailPopup이 열려있으면 AreaPopup 닫지 않음
+        if (stageDetailPopup != null && stageDetailPopup.gameObject.activeSelf) return;
+
         // 클릭된 위치가 컨텐츠 영역 내부인지 확인
         if (!RectTransformUtility.RectangleContainsScreenPoint(popupContent, eventData.position, eventData.pressEventCamera))
         {
@@ -93,7 +97,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 지역 설정
     public void SetArea(int areaIndex)
     {
-        var areaList = DataManager.stages.GetAll();
+        var areaList = DataManager.Instance.maps.GetAll();
         if (areaList == null || areaIndex < 0 || areaIndex >= areaList.Count)
         {
             Debug.LogWarning($"[AreaUIManager] 유효하지 않은 지역 인덱스: {areaIndex}");
@@ -110,7 +114,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 다음 지역으로 전환
     public void NextArea()
     {
-        var areaList = DataManager.stages.GetAll();
+        var areaList = DataManager.Instance.maps.GetAll();
         if (areaList == null || areaList.Count == 0) return;
 
         int nextIndex = (currentAreaIndex + 1) % areaList.Count;
@@ -120,7 +124,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     // 이전 지역으로 전환
     public void PreviousArea()
     {
-        var areaList = DataManager.stages.GetAll();
+        var areaList = DataManager.Instance.maps.GetAll();
         if (areaList == null || areaList.Count == 0) return;
 
         int prevIndex = (currentAreaIndex - 1 + areaList.Count) % areaList.Count;
@@ -209,11 +213,10 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
         // 스테이지 전환
         CombatManager.Instance.MoveToStage(stageData);
 
-        // 해당 스테이지의 지역 데이터로 배경 스프라이트 변경
-        AreaData areaData = DataManager.GetAreaByStageId(stageData.id);
-        if (areaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(areaData.spriteName))
+        // 현재 지역 데이터로 배경 스프라이트 변경
+        if (currentAreaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(currentAreaData.spriteName))
         {
-            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", areaData.spriteName);
+            Sprite sprite = await SpriteManager.GetSprite("Assets/Atlas/Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
             if (sprite != null)
                 backgroundSpriteRenderer.sprite = sprite;
         }

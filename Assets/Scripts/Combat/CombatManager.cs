@@ -1,5 +1,6 @@
 using UnityEngine;
 using Combat.Drop;
+using DamageNumbersPro;
 using System;
 
 // [주혁] - DataManager 정적 클래스 전환에 따라 일부 내용 수정(61, 63)
@@ -27,6 +28,9 @@ public class CombatManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private Transform playerTransform;
     [SerializeField] private PlayerCombatStats playerStats;
+    [SerializeField] private DamageNumber damageNumberPrefab;
+
+    public DamageNumber DamageNumberPrefab => damageNumberPrefab;
 
     [Header("Initial Stage")]
     [SerializeField] private string initialStageId = "Stage_1";

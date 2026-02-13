@@ -20,13 +20,7 @@ public class StageSlotUI : MonoBehaviour
         stageData = data;
         UpdateUI();
     }
-
-    private void Awake()
-    {
-        if (slotButton == null)
-            slotButton = GetComponent<Button>();
-    }
-
+    
     public void SetOnClickAction(Action action)
     {
         if (slotButton != null)
@@ -70,6 +64,10 @@ public class StageSlotUI : MonoBehaviour
     {
         if (selectedObject != null)
             selectedObject.SetActive(isSelected);
+
+        // 현재 스테이지에서는 이동 버튼 비활성화
+        if (moveButton != null)
+            moveButton.interactable = !isSelected;
     }
 
     public StageData GetStageData()
