@@ -19,6 +19,9 @@ namespace SlayerLegend.Skill
         [SerializeField] private Vector3 spawnOffset = Vector3.zero;   // 발사 위치 오프셋
         [SerializeField] private Vector2 randomXRange = Vector2.zero;  // 조민희 추가: X좌표 랜덤 범위 (min, max)
 
+        [Header("폭발 설정")]
+        [SerializeField] private GameObject explosionEffectPrefab;  // 폭발 이펙트 (인스펙터에서 설정 가능)
+
         [Header("테스트 설정")]
         [SerializeField] private float cooldownMultiplier = 1f;
         [SerializeField] private bool overrideCooldown = false;
@@ -77,6 +80,12 @@ namespace SlayerLegend.Skill
             projectilePrefab = prefab;
         }
 
+        // 폭발 이펙트 프리팹 설정 (폭발 스킬용)
+        public void SetExplosionEffectPrefab(GameObject prefab)
+        {
+            explosionEffectPrefab = prefab;
+        }
+
         // 스킬 활성화/비활성화
         public void SetActive(bool active)
         {
@@ -100,19 +109,30 @@ namespace SlayerLegend.Skill
             cachedCaster = gameObject;
         }
 
-        // 쿨타임 감소 및 자동 발동
+        // 조민희 추가: Update()에서 쿨타임 처리 및 스킬 자동 발동
         private void Update()
         {
             if (!isActive) return;
 
+            // 쿨타임 감소
             if (currentCooldown > 0f)
             {
                 currentCooldown -= Time.deltaTime;
-                if (currentCooldown < 0f) currentCooldown = 0f;
+                return;
             }
-            else
+
+            // 쿨타임 완료 시 스킬 발동
+            if (skillData != null)
             {
-                TryAutoCast();
+                // 폭발 스킬 여부 확인 (effectData 사용)
+                if (skillData.effectData != null && skillData.effectData.isBlastSkill)
+                {
+                    ExecuteBlastSkill();
+                }
+                else
+                {
+                    TryAutoCast();
+                }
             }
         }
 
@@ -153,6 +173,59 @@ namespace SlayerLegend.Skill
             }
         }
 
+        // 조민희 추가: 폭발 스킬 전용 실행 메서드
+        protected virtual void ExecuteBlastSkill()
+        {
+            // 마나 소모 체크
+            if (cachedCaster == null) CacheCaster();
+            if (cachedCaster == null) return;
+
+            var stats = cachedCaster.GetComponent<IStatsProvider>();
+            int manaCost = SkillCalculator.GetManaCost(skillData);
+
+            // 테스트용 무한 마나 모드
+            if (!testNoManaCost)
+            {
+                if (stats != null && manaCost > 0)
+                {
+                    int currentMana = (int)stats.CurrentMana;
+                    if (!stats.UseMana(manaCost))
+                    {
+                        Debug.Log($"[Skill] {skillData.name} 발동 실패: 마나 부족 (필요: {manaCost}, 현재: {currentMana})");
+                        return;
+                    }
+                }
+            }
+
+            Debug.Log($"[Skill] {skillData.name} 폭발 스킬 발동!");
+
+            // 폭발 파라미터 가져오기 (effectData 사용)
+            float explosionRadius = skillData.effectData?.explosionRadius ?? 3f;
+            float explodeDelay = skillData.effectData?.explodeDelay ?? 0.5f;
+            // 폭발 이펙트: 인스펙터 설정 우선, 없으면 effectData 사용
+            GameObject explosionEffect = explosionEffectPrefab ?? skillData.effectData?.explosionEffect;
+
+            // 화상 DoT 파라미터 가져오기 (effectData 사용)
+            float dotDuration = skillData.effectData?.dotDuration ?? 3f;
+            double damagePerTick = skillData.effectData?.dotDamagePerTick ?? 25.0;
+            float tickInterval = skillData.effectData?.dotTickInterval ?? 1f;
+            string dotType = skillData.effectData?.dotType ?? "burn";
+
+            // 폭발 실행
+            ExecuteExplosion(explosionRadius, explodeDelay, explosionEffect,
+                dotDuration, damagePerTick, tickInterval, dotType);
+
+            // 쿨타임 설정
+            if (overrideCooldown)
+            {
+                currentCooldown = testCooldown * cooldownMultiplier;
+            }
+            else
+            {
+                currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+            }
+        }
+
         // 스킬 효과 실행 (하위 클래스에서 오버라이드 가능)
         protected virtual void ExecuteSkill(GameObject caster)
         {
@@ -161,8 +234,8 @@ namespace SlayerLegend.Skill
 
             // 데미지 계산
             var stats = caster.GetComponent<IStatsProvider>();
-            float skillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
-            float totalDamage = skillDamage;
+            double skillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
+            double totalDamage = skillDamage;
             bool isCritical = false;
 
             if (stats != null)
@@ -213,14 +286,14 @@ namespace SlayerLegend.Skill
             bool isPercentage = skillData.GetDotIsPercentage();
 
             // 체력 비례 데미지인 경우 레벨업 보정을 %에 적용
-            float damageValue = skillData.GetDotDamagePerTick();
+            double damageValue = skillData.GetDotDamagePerTick();
             if (isPercentage)
             {
-                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.1f; // 0.1%씩 증가
+                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.1; // 0.1%씩 증가
             }
             else
             {
-                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.5f; // 고정값 증가
+                damageValue += skillData.GetLevelUpValue() * (currentLevel - 1) * 0.5; // 고정값 증가
             }
 
             // 적에게 직접 컴포넌트 추가 (불필요한 임시 생성 제거)
@@ -283,7 +356,7 @@ namespace SlayerLegend.Skill
         }
 
         // 스킬 이름과 함께 데미지를 입힘 (테스트용 로그 개선)
-        private void DealDamageWithSkillName(GameObject enemyObject, float damage, string skillName)
+        private void DealDamageWithSkillName(GameObject enemyObject, double damage, string skillName)
         {
             // DummyEnemy 테스트 클래스인 경우 스킬 이름 포함 메서드 사용
             var dummyEnemy = enemyObject.GetComponent<Testing.DummyEnemy>();
@@ -296,6 +369,51 @@ namespace SlayerLegend.Skill
             // DummyEnemy가 아닌 경우 기본 TakeDamage 사용
             var damageable = enemyObject.GetComponent<IDamageable>();
             damageable?.TakeDamage(damage);
+        }
+
+        // 조민희 추가: 폭발 스킬은 발사체 없이 직접 폭발 로직
+        private void ExecuteExplosion(float radius, float delay, GameObject effect,
+            float dotDuration, double dotDamage, float dotTick, string dotType)
+        {
+            // 플레이어 위치에 폭발 오브젝트 생성
+            Vector3 spawnPosition = cachedCaster.transform.position + spawnOffset;
+
+            // X좌표 랜덤 범위 적용 (플레이어 기준 앞쪽)
+            if (randomXRange.x != 0 || randomXRange.y != 0)
+            {
+                float randomX = Random.Range(randomXRange.x, randomXRange.y);
+                spawnPosition.x = cachedCaster.transform.position.x + randomX;
+            }
+
+            // 데미지 계산 (ExecuteSkill과 동일한 로직)
+            var stats = cachedCaster.GetComponent<IStatsProvider>();
+            double skillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
+            double totalDamage = skillDamage;
+            bool isCritical = false;
+
+            if (stats != null)
+            {
+                totalDamage += stats.AttackDamage;
+                isCritical = stats.IsCriticalHit();
+                totalDamage = stats.CalculateFinalDamage(isCritical);
+            }
+
+            // 폭발 오브젝트
+            GameObject explosionObj = new GameObject($"Explosion_{skillData.name}");
+            explosionObj.transform.position = spawnPosition;
+
+            // 폭발 로직 처리
+            var explosionLogic = explosionObj.AddComponent<Explosion>();
+            explosionLogic.Initialize(radius, delay, effect,
+                totalDamage, isCritical, fireDirection,
+                dotDuration, dotDamage, dotTick, dotType,
+                cachedCaster.transform);
+
+            string critText = isCritical ? " [치명타!]" : "";
+            Debug.Log($"[Skill] {skillData.name} 폭발 생성! → 예상 데미지: {totalDamage:F1}{critText}");
+
+            // 일정 시간 후 제거
+            Destroy(explosionObj, 5f);
         }
 
         public void ResetCooldown() => currentCooldown = 0f;

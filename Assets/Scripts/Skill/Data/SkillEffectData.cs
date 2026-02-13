@@ -29,7 +29,7 @@ namespace SlayerLegend.Skill.Data
         public float dotDuration = 5f;
 
         [Tooltip("틱당 데미지")]
-        public float dotDamagePerTick = 10f;
+        public double dotDamagePerTick = 10.0;
 
         [Tooltip("틱 간격 (초)")]
         public float dotTickInterval = 1f;
@@ -55,6 +55,22 @@ namespace SlayerLegend.Skill.Data
 
         [Tooltip("속박 지속 시간 (초)")]
         public float rootDuration = 1.5f;
+
+        [Header("폭발 스킬 (Blast)")]
+        [Tooltip("폭발 스킬 여부")]
+        public bool isBlastSkill = false;
+
+        [Tooltip("폭발 범위")]
+        public float explosionRadius = 3f;
+
+        [Tooltip("폭발 대기 시간 (초)")]
+        public float explodeDelay = 0.5f;
+
+        [Tooltip("폭발 이펙트 프리팹")]
+        public GameObject explosionEffect;
+
+        [Tooltip("DoT 타입 (burn, poison 등)")]
+        public string dotType = "burn";
 
         #region 유틸리티 메서드
 

@@ -24,7 +24,7 @@ namespace SlayerLegend.Skill.Testing
         private int freezeStacks = 0;
         private float baseMoveSpeed = 2f; // 기본 이동 속도
 
-        public float CurrentHealth { get; private set; }
+        public double CurrentHealth { get; private set; }
 
         // CC 인터페이스 프로퍼티
         public bool IsStunned => isStunned;
@@ -62,7 +62,7 @@ namespace SlayerLegend.Skill.Testing
         }
 
         // 데미지를 입음
-        public void TakeDamage(float damage)
+        public void TakeDamage(double damage)
         {
             if (isStunned)
             {
@@ -78,7 +78,7 @@ namespace SlayerLegend.Skill.Testing
         }
 
         // 스킬 이름과 함께 데미지를 입음 (테스트용)
-        public void TakeDamage(float damage, string skillName)
+        public void TakeDamage(double damage, string skillName)
         {
             if (isStunned)
             {
@@ -216,7 +216,7 @@ namespace SlayerLegend.Skill.Testing
 
             // 적의 HP를 화면에 표시
             Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-            float hpPercent = CurrentHealth / MaxHealth;
+            float hpPercent = (float)(CurrentHealth / MaxHealth);
 
             float boxWidth = 120 * scaleFactor;
             float boxHeight = 22 * scaleFactor;

@@ -30,10 +30,10 @@ namespace SlayerLegend.Combat
         public float MaxHealth => _stats != null ? (float)_stats.MaxHealth : 0f;
         public float CurrentMana => _stats != null ? (float)_stats.CurrentMana : 0f;
         public float MaxMana => _stats != null ? (float)_stats.MaxMana : 0f;
-        public float AttackDamage => _stats != null ? (float)_stats.AttackDamage : 0f;
+        public double AttackDamage => _stats != null ? _stats.AttackDamage : 0.0;
         public float Defense => 0f;  // 현재 방어력 스탯 없음
         public float CriticalRate => _stats != null ? (float)_stats.CriticalRate : 0f;
-        public float CriticalDamage => _stats != null ? (float)_stats.CriticalDamage : 0f;
+        public double CriticalDamage => _stats != null ? _stats.CriticalDamage : 0.0;
 
         // === IStatsProvider 메서드 구현 (위임) ===
 
@@ -47,9 +47,9 @@ namespace SlayerLegend.Combat
             return _stats != null && _stats.IsCriticalHit();
         }
 
-        public float CalculateFinalDamage(bool isCritical)
+        public double CalculateFinalDamage(bool isCritical)
         {
-            return _stats != null ? (float)_stats.CalculateFinalDamage(isCritical) : 0f;
+            return _stats != null ? _stats.CalculateFinalDamage(isCritical) : 0.0;
         }
 
         // === 버프 모디파이어 (패시브 스킬용) - 현재 미구현 ===

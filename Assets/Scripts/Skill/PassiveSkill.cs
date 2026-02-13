@@ -43,13 +43,20 @@ namespace SlayerLegend.Skill
             return SkillCalculator.GetBuffValue(skillData, currentLevel);
         }
 
-        // 버프 타입 (JSON 데이터에 없으므로 기본값 반환, 필요 시 확장)
+        // 버프 타입 (스킬 ID에 따라 결정)
         private PassiveBuffType BuffType
         {
             get
             {
-                // TODO: 팀원과 협의하여 JSON에 buffType 추가
-                return PassiveBuffType.AttackDamagePercent; // 임시 기본값
+                if (skillData == null) return PassiveBuffType.None;
+
+                // 스킬 ID에 따라 버프 타입 결정
+                return skillData.id switch
+                {
+                    "attack_boost" => PassiveBuffType.AttackDamagePercent,
+                    "crit_boost" => PassiveBuffType.CriticalRate,
+                    _ => PassiveBuffType.AttackDamagePercent  // 기본값
+                };
             }
         }
 
