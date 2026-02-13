@@ -23,6 +23,7 @@ public class EquipData
     public string spriteName;                   // �̹��� �̸�
 
     public EquipGrade grade;
+    public int gradeStep;                       // 단계별 등급
     public int level;  // 조민희 추가: 장비 레벨 
     public ItemEffect equipEffect;              // ���� ȿ��
     public List<ItemEffect> holdEffects;        // ���� ȿ�� ���

@@ -2,6 +2,8 @@ using UnityEngine;
 using SlayerLegend.Skill;
 using System.Linq;
 
+// [주혁] - DataManager 정적 클래스 전환으로 인한 코드 수정(134, 143, 231, 278)
+
 public class SkillTestInitializer : MonoBehaviour
 {
     [Header("참조")]
@@ -129,7 +131,7 @@ public class SkillTestInitializer : MonoBehaviour
     {
         foreach (var config in passiveSkillConfigs)
         {
-            InitializePassiveSkill(DataManager.Instance.skills.Get(config.skillId), config.name);
+            InitializePassiveSkill(DataManager.skills.Get(config.skillId), config.name);
         }
     }
 
@@ -138,7 +140,7 @@ public class SkillTestInitializer : MonoBehaviour
     {
         foreach (var config in skillConfigs)
         {
-            InitializeSkill(DataManager.Instance.skills.Get(config.skillId), config.projectile, config.direction, config.name,
+            InitializeSkill(DataManager.skills.Get(config.skillId), config.projectile, config.direction, config.name,
                 config.offset, config.hasRandomX ? (object)config.randomXRange : null, config.explosionEffect);
         }
     }
@@ -226,7 +228,7 @@ public class SkillTestInitializer : MonoBehaviour
         }
 
         // 새로 생성
-        InitializeSkill(DataManager.Instance.skills.Get(skillId), projectile, direction, skillName, offset, randomX, explosionEffect);
+        InitializeSkill(DataManager.skills.Get(skillId), projectile, direction, skillName, offset, randomX, explosionEffect);
         Debug.Log($"[SkillTestInitializer] {skillName} 스킬 재생성 완료");
     }
 
@@ -273,7 +275,7 @@ public class SkillTestInitializer : MonoBehaviour
         }
 
         // 새로 생성
-        InitializePassiveSkill(DataManager.Instance.skills.Get("attack_boost"), "공격력 강화");
+        InitializePassiveSkill(DataManager.skills.Get("attack_boost"), "공격력 강화");
         Debug.Log("[SkillTestInitializer] 공격력 강화 재생성 완료");
     }
 
