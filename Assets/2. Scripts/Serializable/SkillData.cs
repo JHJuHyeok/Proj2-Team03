@@ -24,6 +24,7 @@ public class SkillData
     public SkillElement element;    // 스킬 속성
 
     public int maxLevel;            // 최대 레벨
+    public float wantedDelay;       // 대기 시간 or 필요 공격 수
     public int needMp;              // 소비 MP
     public int initialRate;         // 기본 수치 (%)
     public float levelUpValue;      // 레벨 당 수치 증가
