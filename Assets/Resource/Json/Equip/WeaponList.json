@@ -1,0 +1,561 @@
+{
+  "listType": "Weapon",
+  "equipList": [
+    {
+      "id": "WP_000",
+      "name": "녹슨검",
+      "spriteName": "sword_00",
+      "grade": "Common",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 1.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 0.0,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "WP_001",
+      "name": "넓은검",
+      "spriteName": "sword_01",
+      "grade": "Common",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 20.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 6.3,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "WP_002",
+      "name": "장검",
+      "spriteName": "sword_02",
+      "grade": "Common",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 57.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 16.3,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "WP_003",
+      "name": "강철검",
+      "spriteName": "sword_03",
+      "grade": "Common",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 93.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 27.9,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "WP_004",
+      "name": "은검",
+      "spriteName": "sword_04",
+      "grade": "Uncommon",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 150.0,
+        "levelUpValue": 2.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 45.0,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "WP_005",
+      "name": "장식용 보검",
+      "spriteName": "sword_05",
+      "grade": "Uncommon",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 209.0,
+        "levelUpValue": 3.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 74.7,
+          "levelUpValue": 0.9
+        }
+      ]
+    },
+    {
+      "id": "WP_006",
+      "name": "저주받은 톱검",
+      "spriteName": "sword_06",
+      "grade": "Uncommon",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 327.0,
+        "levelUpValue": 5.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 98.1,
+          "levelUpValue": 1.5
+        }
+      ]
+    },
+    {
+      "id": "WP_007",
+      "name": "세이버",
+      "spriteName": "sword_07",
+      "grade": "Uncommon",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 471.0,
+        "levelUpValue": 8.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 141.3,
+          "levelUpValue": 2.4
+        }
+      ]
+    },
+    {
+      "id": "WP_008",
+      "name": "덩굴 레이피어",
+      "spriteName": "sword_08",
+      "grade": "Rare",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 490.0,
+        "levelUpValue": 18.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 147.0,
+          "levelUpValue": 5.4
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 1.0,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "WP_009",
+      "name": "해적의 언월도",
+      "spriteName": "sword_09",
+      "grade": "Rare",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 700.0,
+        "levelUpValue": 25.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 210.0,
+          "levelUpValue": 7.5
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 1.4,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "WP_010",
+      "name": "본 블레이드",
+      "spriteName": "sword_10",
+      "grade": "Rare",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 950.0,
+        "levelUpValue": 35.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 285.0,
+          "levelUpValue": 10.5
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 1.7,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "WP_011",
+      "name": "엘프족 장검",
+      "spriteName": "sword_11",
+      "grade": "Rare",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 1221.0,
+        "levelUpValue": 49.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 496.3,
+          "levelUpValue": 14.7
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 2.0,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "WP_012",
+      "name": "광기의 칼날",
+      "spriteName": "sword_12",
+      "grade": "Hero",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 2282.0,
+        "levelUpValue": 86.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 684.6,
+          "levelUpValue": 25.8
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 2.0,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "WP_013",
+      "name": "흑기사 장검",
+      "spriteName": "sword_13",
+      "grade": "Hero",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 5060.0,
+        "levelUpValue": 50.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 918.0,
+          "levelUpValue": 75.0
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 2.4,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "WP_014",
+      "name": "요정왕의 검",
+      "spriteName": "sword_14",
+      "grade": "Hero",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 5106.0,
+        "levelUpValue": 416.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 1531.8,
+          "levelUpValue": 124.8
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 3.0,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "WP_015",
+      "name": "타오르는 신념",
+      "spriteName": "sword_15",
+      "grade": "Hero",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 8157.0,
+        "levelUpValue": 667.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 2447.0,
+          "levelUpValue": 200.1
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 2.5,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "WP_016",
+      "name": "혹한의 칼날",
+      "spriteName": "sword_16",
+      "grade": "Legend",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 20401.0,
+        "levelUpValue": 1666.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 5122.1,
+          "levelUpValue": 599.8
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 5.5,
+          "levelUpValue": 0.5
+        }
+      ]
+    },
+    {
+      "id": "WP_017",
+      "name": "왕가의 보검 - 엑스칼리버",
+      "spriteName": "sword_17",
+      "grade": "Legend",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 50601.0,
+        "levelUpValue": 500.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 9580.3,
+          "levelUpValue": 710.0
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 5.6,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "WP_018",
+      "name": "봉인된 마왕 - 제로스",
+      "spriteName": "sword_18",
+      "grade": "Legend",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 51062.0,
+        "levelUpValue": 3790.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 16318.6,
+          "levelUpValue": 1037.0
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 6.6,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "WP_019",
+      "name": "마검 - 스틱스",
+      "spriteName": "sword_19",
+      "grade": "Legend",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 85810.0,
+        "levelUpValue": 3214.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 25943.0,
+          "levelUpValue": 954.2
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 6.2,
+          "levelUpValue": 0.7
+        }
+      ]
+    },
+    {
+      "id": "WP_020",
+      "name": "파괴의 검 - 루인",
+      "spriteName": "sword_20",
+      "grade": "Myth",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 40338.0,
+        "levelUpValue": 5895.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 30874.0,
+          "levelUpValue": 1287.4
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 11.0,
+          "levelUpValue": 1.0
+        },
+        {
+          "type": "GoldGain",
+          "initValue": 5.0,
+          "levelUpValue": 0.5
+        }
+      ]
+    },
+    {
+      "id": "WP_021",
+      "name": "고대의 용검 - 프린셔",
+      "spriteName": "sword_21",
+      "grade": "Myth",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 60200.0,
+        "levelUpValue": 18650.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 45665.0,
+          "levelUpValue": 4427.1
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 12.0,
+          "levelUpValue": 1.1
+        },
+        {
+          "type": "GoldGain",
+          "initValue": 10.0,
+          "levelUpValue": 1.0
+        }
+      ]
+    },
+    {
+      "id": "WP_022",
+      "name": "침묵의 검 - 둠",
+      "spriteName": "sword_22",
+      "grade": "Myth",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 85000.0,
+        "levelUpValue": 31875.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 65035.0,
+          "levelUpValue": 9004.6
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 12.0,
+          "levelUpValue": 1.2
+        },
+        {
+          "type": "GoldGain",
+          "initValue": 15.0,
+          "levelUpValue": 1.5
+        }
+      ]
+    },
+    {
+      "id": "WP_023",
+      "name": "귀멸의 검 - 데몬 슬레이어",
+      "spriteName": "sword_23",
+      "grade": "Myth",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "AttackBoost",
+        "initValue": 100000.0,
+        "levelUpValue": 53762.0
+      },
+      "holdEffects": [
+        {
+          "type": "AttackBoost",
+          "initValue": 100000.0,
+          "levelUpValue": 12872.1
+        },
+        {
+          "type": "CriticalDamage",
+          "initValue": 12.0,
+          "levelUpValue": 1.2
+        },
+        {
+          "type": "GoldGain",
+          "initValue": 15.0,
+          "levelUpValue": 1.5
+        }
+      ]
+    }
+  ]
+}
