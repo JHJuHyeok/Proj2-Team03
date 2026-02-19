@@ -24,6 +24,13 @@ namespace SlayerLegend.Skill.UI.Grid
         [SerializeField] private KeyCode rotateKey = KeyCode.R;
         [SerializeField] private bool allowRotation = true;
 
+        [Header("셀 이미지 설정")]
+        [SerializeField] private Transform cellImagesContainer;
+        [SerializeField] private GameObject cellImagePrefab;
+
+        // 셀 이미지 리스트
+        private List<Image> cellImages = new List<Image>();
+
         // 상태
         private bool isDragging = false;
         private bool isOnGrid = false;
@@ -31,7 +38,10 @@ namespace SlayerLegend.Skill.UI.Grid
         private int currentRotation = 0;
         private Transform originalParent;
         private Vector3 originalPosition;
+        private int originalSiblingIndex;
+        private int inventorySiblingIndex = -1;  // 인벤토리 내 원래 순서
         private SkillGridManager gridManager;
+        private Transform inventoryContainer;  // 인벤토리 컨테이너 참조
         private RectTransform rectTransform;
 
         // 드래그 중 임시 저장
@@ -60,6 +70,19 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 canvasGroup = GetComponent<CanvasGroup>();
             }
+
+            // 셀 이미지 컨테이너 자동 생성
+            if (cellImagesContainer == null)
+            {
+                GameObject container = new GameObject("CellImagesContainer");
+                container.transform.SetParent(transform);
+                container.transform.localPosition = Vector3.zero;
+                RectTransform cr = container.AddComponent<RectTransform>();
+                cr.anchorMin = Vector2.zero;
+                cr.anchorMax = Vector2.one;
+                cr.sizeDelta = Vector2.zero;
+                cellImagesContainer = container.transform;
+            }
         }
 
         private void Update()
@@ -85,33 +108,119 @@ namespace SlayerLegend.Skill.UI.Grid
             }
 
             // 모양에 따른 크기 조정
-            UpdateVisualSize();
+            UpdateCellImages();
         }
 
         // 그리드 매니저 설정
         public void SetGridManager(SkillGridManager manager)
         {
             gridManager = manager;
+            // gridManager가 설정되면 올바른 cellSize로 다시 그리기
+            UpdateCellImages();
         }
 
-        // 모양에 따른 시각적 크기 업데이트
-        private void UpdateVisualSize()
+        // 인벤토리 컨테이너 설정
+        public void SetInventoryContainer(Transform container)
+        {
+            inventoryContainer = container;
+        }
+
+        // 모양에 따른 시각적 크기 및 셀 이미지 업데이트
+        private void UpdateCellImages()
         {
             var shapeData = SkillShapeData.Create(shapeType);
-            var size = shapeData.GetRotatedSize(currentRotation);
+            var occupiedCells = shapeData.GetOccupiedCells(Vector2Int.zero, currentRotation);
+            float cellSize = gridManager != null ? gridManager.CellSize : 70f;
 
-            if (rectTransform != null)
+            // 기존 셀 이미지 제거
+            ClearCellImages();
+
+            // 경계 계산
+            var bounds = CalculateBounds(occupiedCells);
+            rectTransform.sizeDelta = new Vector2(bounds.size.x * cellSize, bounds.size.y * cellSize);
+
+            // 각 점유 셀에 이미지 생성
+            foreach (var cell in occupiedCells)
             {
-                float cellSize = gridManager != null ? gridManager.CellSize : 70f; // 기본값
-                rectTransform.sizeDelta = new Vector2(size.x * cellSize, size.y * cellSize);
+                CreateCellImage(cell, cellSize, bounds);
             }
+
+            // 1x1 스킬은 기존 아이콘 사용
+            if (iconImage != null)
+                iconImage.gameObject.SetActive(shapeType == SkillShapeType.OneByOne);
+        }
+
+        // 개별 셀 이미지 생성
+        private void CreateCellImage(Vector2Int cellPos, float cellSize, BoundsInt bounds)
+        {
+            if (cellImagesContainer == null) return;
+
+            GameObject cellObj = new GameObject($"Cell_{cellPos.x}_{cellPos.y}");
+            cellObj.transform.SetParent(cellImagesContainer);
+
+            RectTransform rect = cellObj.AddComponent<RectTransform>();
+
+            // 셀 위치 계산 (중앙 기준)
+            float localX = (cellPos.x - bounds.xMin) * cellSize + cellSize / 2f - bounds.size.x * cellSize / 2f;
+            float localY = -(cellPos.y - bounds.yMin) * cellSize - cellSize / 2f + bounds.size.y * cellSize / 2f;
+
+            rect.anchoredPosition = new Vector2(localX, localY);
+            rect.sizeDelta = new Vector2(cellSize - 4f, cellSize - 4f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+
+            Image img = cellObj.AddComponent<Image>();
+            img.sprite = GetCellSprite();
+            img.raycastTarget = true;
+
+            cellImages.Add(img);
+        }
+
+        // 셀 이미지 모두 제거
+        private void ClearCellImages()
+        {
+            if (cellImages == null) return;
+            foreach (var img in cellImages)
+                if (img != null) Destroy(img.gameObject);
+            cellImages.Clear();
+        }
+
+        // 셀들의 경계 계산
+        private BoundsInt CalculateBounds(List<Vector2Int> cells)
+        {
+            int minX = int.MaxValue, minY = int.MaxValue;
+            int maxX = int.MinValue, maxY = int.MinValue;
+
+            foreach (var c in cells)
+            {
+                if (c.x < minX) minX = c.x;
+                if (c.y < minY) minY = c.y;
+                if (c.x > maxX) maxX = c.x;
+                if (c.y > maxY) maxY = c.y;
+            }
+
+            return new BoundsInt(minX, minY, 0, maxX - minX + 1, maxY - minY + 1, 1);
+        }
+
+        // 셀 스프라이트 가져오기 (없으면 흰색 기본 스프라이트 생성)
+        private Sprite GetCellSprite()
+        {
+            Sprite sprite = Resources.Load<Sprite>("Skill/Grid/TempCellSprite");
+            if (sprite != null) return sprite;
+
+            // 기본 흰색 스프라이트 생성
+            Texture2D tex = new Texture2D(64, 64, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[64 * 64];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = Color.white;
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
         }
 
         // 회전
         public void Rotate()
         {
             currentRotation = (currentRotation + 90) % 360;
-            UpdateVisualSize();
+            UpdateCellImages();
             UpdatePreview();
 
             Debug.Log($"[SkillDraggableItem] {skillName} 회전: {currentRotation}도");
@@ -131,6 +240,13 @@ namespace SlayerLegend.Skill.UI.Grid
             // 원래 위치 저장
             originalParent = transform.parent;
             originalPosition = rectTransform.anchoredPosition;
+            originalSiblingIndex = transform.GetSiblingIndex();
+
+            // 인벤토리에 있었다면 인벤토리 내 순서 저장
+            if (!isOnGrid && inventoryContainer != null && transform.parent == inventoryContainer)
+            {
+                inventorySiblingIndex = originalSiblingIndex;
+            }
 
             // 그리드에 있었다면 임시 제거
             if (isOnGrid && gridManager != null)
@@ -182,13 +298,24 @@ namespace SlayerLegend.Skill.UI.Grid
                 canvasGroup.blocksRaycasts = true;
             }
 
-            // 그리드에 배치 시도
-            bool placed = TryPlaceOnGrid();
+            // 그리드 영역 내부인지 확인
+            bool isInsideGrid = IsInsideGridArea();
 
-            if (!placed)
+            if (isInsideGrid)
             {
-                // 배치 실패 시 원래 위치로 복귀
-                ReturnToOriginalPosition();
+                // 그리드에 배치 시도
+                bool placed = TryPlaceOnGrid();
+
+                if (!placed)
+                {
+                    // 배치 실패 시 인벤토리로 복귀
+                    ReturnToInventory();
+                }
+            }
+            else
+            {
+                // 그리드 밖으로 드래그 시 인벤토리로 복귀
+                ReturnToInventory();
             }
 
             // 하이라이트 제거
@@ -199,7 +326,19 @@ namespace SlayerLegend.Skill.UI.Grid
 
             OnDragEnded?.Invoke(this);
 
-            Debug.Log($"[SkillDraggableItem] 드래그 종료: {skillName}, 배치: {placed}");
+            Debug.Log($"[SkillDraggableItem] 드래그 종료: {skillName}");
+        }
+
+        // 그리드 영역 내부인지 확인
+        private bool IsInsideGridArea()
+        {
+            if (gridManager == null) return false;
+
+            Vector2Int gridPos = gridManager.ScreenToGridPosition(Input.mousePosition);
+
+            // 그리드 범위 내인지 확인
+            return gridPos.x >= 0 && gridPos.x < gridManager.GridWidth &&
+                   gridPos.y >= 0 && gridPos.y < gridManager.GridHeight;
         }
 
         // 클릭 (우클릭으로 회전)
@@ -217,7 +356,7 @@ namespace SlayerLegend.Skill.UI.Grid
                         if (gridManager.RotateSkill(skillId))
                         {
                             currentRotation = newRotation;
-                            UpdateVisualSize();
+                            UpdateCellImages();
                             Debug.Log($"[SkillDraggableItem] 그리드에서 회전: {skillName} -> {currentRotation}도");
                         }
                         else
@@ -299,7 +438,7 @@ namespace SlayerLegend.Skill.UI.Grid
                 rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
 
                 // 크기 업데이트
-                UpdateVisualSize();
+                UpdateCellImages();
 
                 OnItemPlaced?.Invoke(this);
                 Debug.Log($"[SkillDraggableItem] 배치 성공: {skillName} at {targetPos}");
@@ -313,9 +452,52 @@ namespace SlayerLegend.Skill.UI.Grid
         private void ReturnToOriginalPosition()
         {
             transform.SetParent(originalParent);
+            transform.SetSiblingIndex(originalSiblingIndex);
             rectTransform.anchoredPosition = originalPosition;
             isOnGrid = false;
+
+            // 인벤토리로 돌아갈 때 크기 업데이트
+            UpdateCellImages();
+
             OnItemRemoved?.Invoke(this);
+        }
+
+        // 인벤토리로 복귀 (그리드 밖으로 드래그 시)
+        private void ReturnToInventory()
+        {
+            if (inventoryContainer == null)
+            {
+                ReturnToOriginalPosition();
+                return;
+            }
+
+            // 그리드에서 제거
+            if (isOnGrid && gridManager != null)
+            {
+                gridManager.RemoveSkill(skillId);
+            }
+
+            // 인벤토리로 이동
+            transform.SetParent(inventoryContainer);
+
+            // 원래 인벤토리 순서로 복원
+            if (inventorySiblingIndex >= 0 && inventorySiblingIndex < inventoryContainer.childCount)
+            {
+                transform.SetSiblingIndex(inventorySiblingIndex);
+            }
+            else
+            {
+                transform.SetAsLastSibling();
+            }
+
+            rectTransform.anchoredPosition = Vector3.zero;
+            isOnGrid = false;
+
+            // 크기 업데이트
+            UpdateCellImages();
+
+            OnItemRemoved?.Invoke(this);
+            Debug.Log($"[SkillDraggableItem] 인벤토리로 복귀: {skillName}");
         }
 
         // 그리드에서 제거 (외부 호출용)
@@ -335,7 +517,7 @@ namespace SlayerLegend.Skill.UI.Grid
             gridPosition = position;
             currentRotation = rotation;
             isOnGrid = true;
-            UpdateVisualSize();
+            UpdateCellImages();
         }
 
         // 현재 상태 정보 반환

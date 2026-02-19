@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 using System.Threading.Tasks;
 using System.Reflection;
 
-// ¸ðµç µ¥ÀÌÅÍ ¸®½ºÆ®°¡ »ó¼Ó¹ÞÀ» ÀÎÅÍÆäÀÌ½º
+// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½
 public interface IDataList<T>
 {
     List<T> GetList();
@@ -13,40 +13,44 @@ public interface IDataList<T>
 
 public class GameDB<T, TList> where TList : IDataList<T>
 {
-    // Dictionary<string, T>    -> stringÀº ID, T´Â µ¥ÀÌÅÍ Å¬·¡½º
-    // ID ±â¹Ý µ¥ÀÌÅÍ Å½»ö¿ë µñ¼Å³Ê¸®
+    // Dictionary<string, T>    -> stringï¿½ï¿½ ID, Tï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½
+    // ID ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å³Ê¸ï¿½
     private Dictionary<string, T> _dataDict = new Dictionary<string, T>();
 
     /// <summary>
-    /// ¾îµå·¹¼­ºí·Î Json ÆÄÀÏÀ» ºñµ¿±â ·Îµå, µ¥ÀÌÅÍº£ÀÌ½º ±¸Ãà
+    /// ï¿½ï¿½å·¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Json ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ñµ¿±ï¿½ ï¿½Îµï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Íºï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½
     /// </summary>
-    /// <param name="address"> ¾îµå·¹¼­ºí ÁÖ¼Ò </param>
+    /// <param name="address"> ï¿½ï¿½å·¹ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½ </param>
     /// <returns></returns>
     public async Task LoadAsync(string address)
     {
-        // 1. ¿¡¼Â ºñµ¿±â ·Îµå
+        // 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ñµ¿±ï¿½ ï¿½Îµï¿½
         var handle = Addressables.LoadAssetAsync<TextAsset>(address);
         TextAsset jsonFile = await handle.Task;
 
         if (jsonFile == null) return;
 
-        // 2. ¹é±×¶ó¿îµå ÆÄ½Ì
+        // [ì¡°ë¯¼í¬ ìˆ˜ì •] Unity APIëŠ” ë©”ì¸ ìŠ¤ë ˆë“œì—ì„œë§Œ í˜¸ì¶œ ê°€ëŠ¥í•˜ë¯€ë¡œ ë¯¸ë¦¬ text ê°€ì ¸ì˜¤ê¸°
+        // ê¸°ì¡´: Task.Run ë‚´ë¶€ì—ì„œ jsonFile.text ì§ì ‘ í˜¸ì¶œ â†’ UnityException ë°œìƒ
+        string jsonText = jsonFile.text;
+
+        // 2. ï¿½ï¿½×¶ï¿½ï¿½ï¿½ ï¿½Ä½ï¿½
         await Task.Run(() =>
         {
-            // Json ¿ªÁ÷·ÄÈ­
-            TList list = JsonConvert.DeserializeObject<TList>(jsonFile.text);
+            // Json ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È­
+            TList list = JsonConvert.DeserializeObject<TList>(jsonText);
 
             if (list == null) return;
 
-            // ¸®ÇÃ·º¼Ç ÃÖÀûÈ­: ·çÇÁ ¹Û¿¡¼­ ÇÊµå Á¤º¸¸¦ ¹Ì¸® °¡Á®¿È
+            // ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­: ï¿½ï¿½ï¿½ï¿½ ï¿½Û¿ï¿½ï¿½ï¿½ ï¿½Êµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             FieldInfo idFieldInfo = typeof(T).GetField("id");
             if (idFieldInfo == null)
             {
-                Debug.LogError($"Å¬·¡½º¿¡ 'id' ÇÊµå°¡ ¾ø½À´Ï´Ù.");
+                Debug.LogError($"Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 'id' ï¿½Êµå°¡ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
                 return;
             }
 
-            // ±âÁ¸ µ¥ÀÌÅÍ ÃÊ±âÈ­ ÈÄ µñ¼Å³Ê¸® ±¸¼º
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ ï¿½ï¿½Å³Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½
             _dataDict.Clear();
             foreach (var item in list.GetList())
             {
@@ -58,15 +62,15 @@ public class GameDB<T, TList> where TList : IDataList<T>
             }
         });
 
-        // ¿¡¼Â ÇÚµé ÇØÁ¦
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½
         Addressables.Release(handle);
     }
 
     /// <summary>
-    /// ID ±â¹Ý µ¥ÀÌÅÍ Å½»ö
+    /// ID ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å½ï¿½ï¿½
     /// </summary>
-    /// <param name="id"> Ã£°íÀÚ ÇÏ´Â µ¥ÀÌÅÍÀÇ ID °ª </param>
-    /// <returns> ÇØ´ç µ¥ÀÌÅÍ </returns>
+    /// <param name="id"> Ã£ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ID ï¿½ï¿½ </param>
+    /// <returns> ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ </returns>
     public T Get(string id)
     {
         if (_dataDict.TryGetValue(id, out T value)) return value;
@@ -74,8 +78,8 @@ public class GameDB<T, TList> where TList : IDataList<T>
     }
 
     /// <summary>
-    /// µ¥ÀÌÅÍ ¸®½ºÆ® ÀüÃ¼ È£Ãâ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½Ã¼ È£ï¿½ï¿½
     /// </summary>
-    /// <returns> ÀúÀåµÈ ¸ðµç µ¥ÀÌÅÍ </returns>
+    /// <returns> ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ </returns>
     public List<T> GetAll() => new List<T>(_dataDict.Values);
 }

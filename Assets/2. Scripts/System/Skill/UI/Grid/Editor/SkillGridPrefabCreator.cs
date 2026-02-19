@@ -143,6 +143,16 @@ namespace SlayerLegend.Skill.UI.Grid.Editor
             iconRect.anchorMax = new Vector2(0.9f, 0.9f);
             iconRect.sizeDelta = Vector2.zero;
 
+            // 셀 이미지 컨테이너 (비정형 스킬용)
+            GameObject containerObj = new GameObject("CellImagesContainer");
+            containerObj.transform.SetParent(itemObj.transform);
+            containerObj.transform.localPosition = Vector3.zero;
+
+            RectTransform containerRect = containerObj.AddComponent<RectTransform>();
+            containerRect.anchorMin = Vector2.zero;
+            containerRect.anchorMax = Vector2.one;
+            containerRect.sizeDelta = Vector2.zero;
+
             // SkillDraggableItem 컴포넌트 추가
             SkillDraggableItem item = itemObj.AddComponent<SkillDraggableItem>();
 
@@ -151,6 +161,7 @@ namespace SlayerLegend.Skill.UI.Grid.Editor
             serializedItem.FindProperty("iconImage").objectReferenceValue = iconImage;
             serializedItem.FindProperty("background").objectReferenceValue = bgImage;
             serializedItem.FindProperty("canvasGroup").objectReferenceValue = canvasGroup;
+            serializedItem.FindProperty("cellImagesContainer").objectReferenceValue = containerObj.transform;
             serializedItem.FindProperty("allowRotation").boolValue = true;
             serializedItem.ApplyModifiedProperties();
 

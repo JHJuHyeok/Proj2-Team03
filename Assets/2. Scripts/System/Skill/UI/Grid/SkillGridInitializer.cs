@@ -16,6 +16,7 @@ namespace SlayerLegend.Skill.UI
         [Header("설정")]
         [SerializeField] private bool loadOnStart = true;
         [SerializeField] private bool loadSavedGridData = true;
+        [SerializeField] private bool autoInitializeDataManager = true;
 
         // 초기화 완료 여부
         public bool IsInitialized { get; private set; } = false;
@@ -27,12 +28,30 @@ namespace SlayerLegend.Skill.UI
         // 이벤트
         public event System.Action OnInitializationComplete;
 
-        private void Start()
+        private async void Start()
         {
             if (loadOnStart)
             {
-                Initialize();
+                await InitializeAsync();
             }
+        }
+
+        // 비동기 초기화
+        public async System.Threading.Tasks.Task InitializeAsync()
+        {
+            // DataManager 자동 초기화
+            if (autoInitializeDataManager)
+            {
+                // skills가 비어있으면 로드
+                if (DataManager.skills.GetAll() == null || DataManager.skills.GetAll().Count == 0)
+                {
+                    Debug.Log("[SkillGridInitializer] DataManager 초기화 중...");
+                    await DataManager.LoadAllDatabase();
+                    Debug.Log("[SkillGridInitializer] DataManager 초기화 완료");
+                }
+            }
+
+            Initialize();
         }
 
         // 초기화

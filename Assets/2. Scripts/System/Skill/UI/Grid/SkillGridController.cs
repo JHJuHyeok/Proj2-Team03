@@ -91,6 +91,7 @@ namespace SlayerLegend.Skill.UI.Grid
             // 초기화
             item.Initialize(skillId, skillName, shapeType, skillType, icon);
             item.SetGridManager(gridManager);
+            item.SetInventoryContainer(inventoryContainer);
 
             // 이벤트 구독
             item.OnItemPlaced += HandleItemPlaced;
