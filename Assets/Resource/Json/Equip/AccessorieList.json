@@ -1,21 +1,559 @@
 {
-  "listType": 1,
+  "listType": "Accessorie",
   "equipList": [
     {
-      "id": "accesorie1",
-      "name": "악세서리1",
-      "spriteName": null,
-      "grade": 0,
+      "id": "AC_000",
+      "name": "녹슨 팔찌",
+      "spriteName": "acce_00",
+      "grade": "Common",
+      "gradeStep": 4,
       "equipEffect": {
-        "type": 3,
-        "initValue": 12.0,
+        "type": "HealthBoost",
+        "initValue": 1.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 0.0,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "AC_001",
+      "name": "나태의 귀걸이",
+      "spriteName": "acce_01",
+      "grade": "Common",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 20.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 6.3,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "AC_002",
+      "name": "초조의 반지",
+      "spriteName": "acce_02",
+      "grade": "Common",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 57.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 16.3,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "AC_003",
+      "name": "오래된 팬던트",
+      "spriteName": "acce_03",
+      "grade": "Common",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 93.0,
+        "levelUpValue": 1.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 27.9,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "AC_004",
+      "name": "순수의 팔찌",
+      "spriteName": "acce_04",
+      "grade": "Uncommon",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 150.0,
+        "levelUpValue": 2.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 45.0,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "AC_005",
+      "name": "항해의 귀걸이",
+      "spriteName": "acce_05",
+      "grade": "Uncommon",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 209.0,
+        "levelUpValue": 3.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 74.7,
+          "levelUpValue": 0.9
+        }
+      ]
+    },
+    {
+      "id": "AC_006",
+      "name": "희생의 반지",
+      "spriteName": "acce_06",
+      "grade": "Uncommon",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 327.0,
         "levelUpValue": 5.0
       },
       "holdEffects": [
         {
-          "type": 3,
+          "type": "HealthBoost",
+          "initValue": 98.1,
+          "levelUpValue": 1.5
+        }
+      ]
+    },
+    {
+      "id": "AC_007",
+      "name": "기대의 팬던트",
+      "spriteName": "acce_07",
+      "grade": "Uncommon",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 471.0,
+        "levelUpValue": 8.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 141.3,
+          "levelUpValue": 2.4
+        }
+      ]
+    },
+    {
+      "id": "AC_008",
+      "name": "소원의 팔찌",
+      "spriteName": "acce_08",
+      "grade": "Rare",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 490.0,
+        "levelUpValue": 18.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 147.0,
+          "levelUpValue": 5.4
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 1.0,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "AC_009",
+      "name": "호박 귀걸이",
+      "spriteName": "acce_09",
+      "grade": "Rare",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 700.0,
+        "levelUpValue": 25.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 210.0,
+          "levelUpValue": 7.5
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 1.4,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "AC_010",
+      "name": "인내의 팔찌",
+      "spriteName": "acce_10",
+      "grade": "Rare",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 950.0,
+        "levelUpValue": 35.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 285.0,
+          "levelUpValue": 10.5
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 1.7,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "AC_011",
+      "name": "갈망의 팬던트",
+      "spriteName": "acce_11",
+      "grade": "Rare",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 1221.0,
+        "levelUpValue": 49.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 496.3,
+          "levelUpValue": 14.7
+        },
+        {
+          "type": "ManaBoost",
           "initValue": 2.0,
+          "levelUpValue": 0.1
+        }
+      ]
+    },
+    {
+      "id": "AC_012",
+      "name": "단련의 팔찌",
+      "spriteName": "acce_12",
+      "grade": "Hero",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 2282.0,
+        "levelUpValue": 86.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 684.6,
+          "levelUpValue": 25.8
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 2.0,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "AC_013",
+      "name": "성숙의 귀걸이",
+      "spriteName": "acce_13",
+      "grade": "Hero",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 5060.0,
+        "levelUpValue": 50.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 918.0,
+          "levelUpValue": 75.0
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 2.4,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "AC_014",
+      "name": "연금술의 반지",
+      "spriteName": "acce_14",
+      "grade": "Hero",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 5106.0,
+        "levelUpValue": 416.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 1531.8,
+          "levelUpValue": 124.8
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 3.0,
+          "levelUpValue": 0.2
+        }
+      ]
+    },
+    {
+      "id": "AC_015",
+      "name": "지혜의 팬던트",
+      "spriteName": "acce_15",
+      "grade": "Hero",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 8157.0,
+        "levelUpValue": 667.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 2447.0,
+          "levelUpValue": 200.1
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 2.5,
+          "levelUpValue": 0.3
+        }
+      ]
+    },
+    {
+      "id": "AC_016",
+      "name": "야망의 팔찌",
+      "spriteName": "acce_16",
+      "grade": "Legend",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 20401.0,
+        "levelUpValue": 1666.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 5122.1,
+          "levelUpValue": 599.8
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 5.5,
+          "levelUpValue": 0.5
+        }
+      ]
+    },
+    {
+      "id": "AC_017",
+      "name": "십자가 귀걸이",
+      "spriteName": "acce_17",
+      "grade": "Legend",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 50601.0,
+        "levelUpValue": 500.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 9580.3,
+          "levelUpValue": 710.0
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 5.6,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "AC_018",
+      "name": "마왕의 반지",
+      "spriteName": "acce_18",
+      "grade": "Legend",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 51062.0,
+        "levelUpValue": 3790.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 16318.6,
+          "levelUpValue": 1037.0
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 6.6,
+          "levelUpValue": 0.6
+        }
+      ]
+    },
+    {
+      "id": "AC_019",
+      "name": "용기의 팬던트",
+      "spriteName": "acce_19",
+      "grade": "Legend",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 85810.0,
+        "levelUpValue": 3214.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 25943.0,
+          "levelUpValue": 954.2
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 6.2,
+          "levelUpValue": 0.7
+        }
+      ]
+    },
+    {
+      "id": "AC_020",
+      "name": "투신의 팔찌",
+      "spriteName": "acce_20",
+      "grade": "Myth",
+      "gradeStep": 4,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 40338.0,
+        "levelUpValue": 5895.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 30874.0,
+          "levelUpValue": 1287.4
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 11.0,
           "levelUpValue": 1.0
+        },
+        {
+          "type": "ExpGain",
+          "initValue": 5.0,
+          "levelUpValue": 0.5
+        }
+      ]
+    },
+    {
+      "id": "AC_021",
+      "name": "고요의 귀걸이",
+      "spriteName": "acce_21",
+      "grade": "Myth",
+      "gradeStep": 3,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 60200.0,
+        "levelUpValue": 18650.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 45665.0,
+          "levelUpValue": 4427.1
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 12.0,
+          "levelUpValue": 1.1
+        },
+        {
+          "type": "ExpGain",
+          "initValue": 10.0,
+          "levelUpValue": 1.0
+        }
+      ]
+    },
+    {
+      "id": "AC_022",
+      "name": "환상의 반지",
+      "spriteName": "acce_22",
+      "grade": "Myth",
+      "gradeStep": 2,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 85000.0,
+        "levelUpValue": 31875.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 65035.0,
+          "levelUpValue": 9004.6
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 12.0,
+          "levelUpValue": 1.2
+        },
+        {
+          "type": "ExpGain",
+          "initValue": 15.0,
+          "levelUpValue": 1.5
+        }
+      ]
+    },
+    {
+      "id": "AC_023",
+      "name": "혼돈의 팬던트",
+      "spriteName": "acce_23",
+      "grade": "Myth",
+      "gradeStep": 1,
+      "equipEffect": {
+        "type": "HealthBoost",
+        "initValue": 100000.0,
+        "levelUpValue": 53762.0
+      },
+      "holdEffects": [
+        {
+          "type": "HealthBoost",
+          "initValue": 100000.0,
+          "levelUpValue": 12872.1
+        },
+        {
+          "type": "ManaBoost",
+          "initValue": 12.0,
+          "levelUpValue": 1.2
+        },
+        {
+          "type": "ExpGain",
+          "initValue": 15.0,
+          "levelUpValue": 1.5
         }
       ]
     }
