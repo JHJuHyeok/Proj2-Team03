@@ -32,7 +32,7 @@ public class GameDB<T, TList> where TList : IDataList<T>
         if (jsonFile == null) return;
         string jsonText = jsonFile.text;
 
-        // 2. ��׶��� �Ľ�
+        // 2. 백그라운드 파싱
         await Task.Run(() =>
         {
             // Json ������ȭ
