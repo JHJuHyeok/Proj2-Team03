@@ -4,7 +4,8 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-// [주혁] -DataManager 정적 클래스 전환에 의해 코드 수정(114, 144, 146, 155, 157)
+// [주혁] - DataManager 정적 클래스 전환에 의해 코드 수정(114, 144, 146, 155, 157)
+// [주혁] - StageData 리팩토링으로 인한 코드 수정(100, 104)
 
 // 스테이지 상세 정보 팝업 UI를 관리하는 매니저
 public class StageDetailPopupUI : MonoBehaviour
@@ -96,11 +97,11 @@ public class StageDetailPopupUI : MonoBehaviour
         // 기본 정보
         if (stageNameText != null) stageNameText.text = currentStageData.name;
 
-        if (goldRewardText != null) goldRewardText.text = currentStageData.minGoldDrop.ToString("N0");
+        if (goldRewardText != null) goldRewardText.text = currentStageData.goldDrop.ToString("N0");
         if (expRewardText != null) expRewardText.text = currentStageData.expDrop.ToString("N0");
 
         // 골드/경험치 보상 (분당 획득량 = 기본값 * 80)
-        long goldPerMin = currentStageData.minGoldDrop * 80;
+        long goldPerMin = currentStageData.goldDrop * 80;
         long expPerMin = currentStageData.expDrop * 80;
 
         if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin:N0}/m";
@@ -112,7 +113,7 @@ public class StageDetailPopupUI : MonoBehaviour
 
         // 큐브 정보
         if (cubeCountText != null) cubeCountText.text = $"{currentStageData.cubeCount}";
-        if (cubePercentText != null) cubePercentText.text = $"{currentStageData.cubePercent * 100:F2}%";
+        if (cubePercentText != null) cubePercentText.text = $"{currentStageData.cubeRate * 100:F2}%";
 
         // 장비 정보 업데이트
         UpdateEquipInfo();

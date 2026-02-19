@@ -14,9 +14,6 @@ public class MonsterData
     public string name;                 // 몬스터 명칭
     public string spriteName;           // 이미지 이름
 
-    public double maxHp;                // 체력
-    public double Attack;               // 공격력
-
     public MonsterType type;            // 몬스터 타입
     public SkillElement weakElement;    // 약점 속성
 }
