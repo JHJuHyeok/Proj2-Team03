@@ -45,11 +45,11 @@ public static class DataManager
     public static async Task LoadAllDatabase()
     {
         await Task.WhenAll(
-            monsters.LoadAsync("Json/Monster/MonsterList"),
-            skills.LoadAsync("Json/Skill/SkillList"),
-            weapons.LoadAsync("Json/Equip/WeaponList"),
-            accessories.LoadAsync("Json/Equip/AccessorieList"),
-            stages.LoadAsync("Json/Stage/StageList")
+            monsters.LoadAsync("Assets/Resource/Json/Monster/MonsterList"),
+            skills.LoadAsync("Assets/Resource/Json/Skill/SkillList"),
+            weapons.LoadAsync("Assets/Resource/Json/Equip/WeaponList"),
+            accessories.LoadAsync("Assets/Resource/Json/Equip/AccessorieList"),
+            stages.LoadAsync("Assets/Resource/Json/Stage/StageList")
         );
         Debug.Log("데이터 로드 완료");
     }
