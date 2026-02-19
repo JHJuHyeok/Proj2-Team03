@@ -112,7 +112,7 @@ public class StageDetailPopupUI : MonoBehaviour
 
         // 큐브 정보
         if (cubeCountText != null) cubeCountText.text = $"{currentStageData.cubeCount}";
-        if (cubePercentText != null) cubePercentText.text = $"{currentStageData.cubePercent * 100:F2}%";
+        if (cubePercentText != null) cubePercentText.text = $"{currentStageData.cubeRate * 100:F2}%";
 
         // 장비 정보 업데이트
         UpdateEquipInfo();

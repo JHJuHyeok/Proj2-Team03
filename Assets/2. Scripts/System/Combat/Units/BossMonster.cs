@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// [주혁] - MonsterData 리팩토링으로 인해 오류 코드 주석화(49. 50)
+
 // 보스 몬스터 - 플레이어를 공격함
 public class BossMonster : MonsterBase
 {
@@ -44,8 +46,8 @@ public class BossMonster : MonsterBase
         var playerStats = _target.GetComponent<PlayerCombatStats>();
         if (playerStats != null)
         {
-            playerStats.TakeDamage((double)_data.Attack);
-            Debug.Log($"[{_data.name}] 플레이어에게 {(float)_data.Attack:F1} 데미지 공격");
+            //playerStats.TakeDamage((double)_data.Attack);
+            //Debug.Log($"[{_data.name}] 플레이어에게 {(float)_data.Attack:F1} 데미지 공격");
         }
         else
         {

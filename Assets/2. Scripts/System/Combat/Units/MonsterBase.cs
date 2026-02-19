@@ -2,6 +2,8 @@ using UnityEngine;
 using Combat.Drop;
 using SlayerLegend.Skill;
 
+// [주혁] - 몬스터 데이터 리팩토링으로 인해 오류 코드 주석화(23, 24)
+
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class MonsterBase : MonoBehaviour, IDamageable
 {
@@ -18,8 +20,8 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         _isDead = false;
 
         // HP 초기화
-        _maxHp = data.maxHp;
-        _currentHp = _maxHp;
+        //_maxHp = data.maxHp;
+        //_currentHp = _maxHp;
 
         // Sprite Load
         if (!string.IsNullOrEmpty(data.spriteName))

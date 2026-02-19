@@ -105,7 +105,7 @@ public class StageJsonCreator : EditorWindow
         stage.maxGoldDrop = EditorGUILayout.LongField("ÃÖ´ë °ñµå", stage.maxGoldDrop);
         stage.expDrop = EditorGUILayout.IntField("°æÇèÄ¡ È¹µæ·®", stage.expDrop);
         stage.cubeCount = EditorGUILayout.IntField("°­È­Å¥ºê È¹µæ·®", stage.cubeCount);
-        stage.cubePercent = EditorGUILayout.FloatField("°­È­Å¥ºê È¹µæÈ®·ü", stage.cubePercent);
+        stage.cubeRate = EditorGUILayout.FloatField("°­È­Å¥ºê È¹µæÈ®·ü", stage.cubeRate);
         GUILayout.Space(5);
         stage.dropEquipID = EditorGUILayout.TextField("µå¶ø Àåºñ ID", stage.dropEquipID);
         stage.dropPercent = EditorGUILayout.FloatField("µå¶ø È®·ü", stage.dropPercent);

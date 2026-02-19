@@ -54,10 +54,6 @@ public class MonsterJsonCreator : EditorWindow
         monster.name = EditorGUILayout.TextField("몬스터 명칭", monster.name);
         monster.spriteName = EditorGUILayout.TextField("이미지 이름", monster.spriteName);
 
-        // Double 입력 필드
-        monster.maxHp = ConvertDoubleField("최대 체력", monster.maxHp);
-        monster.Attack = ConvertDoubleField("공격력", monster.Attack);
-
         monster.type = (MonsterType)EditorGUILayout.EnumPopup("몬스터 타입", monster.type);
         monster.weakElement = (SkillElement)EditorGUILayout.EnumPopup("약한 속성", monster.weakElement);
 
