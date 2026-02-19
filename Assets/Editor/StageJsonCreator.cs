@@ -101,8 +101,7 @@ public class StageJsonCreator : EditorWindow
         stage.monsterCount = EditorGUILayout.IntField("µÓ¿Â ∏ÛΩ∫≈Õ ºˆ", stage.monsterCount);
         stage.bossId = EditorGUILayout.TextField("µÓ¿Â ∫∏Ω∫ ID", stage.bossId);
         GUILayout.Space(5);
-        stage.minGoldDrop = EditorGUILayout.LongField("√÷º“ ∞ÒµÂ", stage.minGoldDrop);
-        stage.maxGoldDrop = EditorGUILayout.LongField("√÷¥Î ∞ÒµÂ", stage.maxGoldDrop);
+        stage.goldDrop = EditorGUILayout.LongField("√÷º“ ∞ÒµÂ", stage.goldDrop);
         stage.expDrop = EditorGUILayout.IntField("∞Ê«Ëƒ° »πµÊ∑Æ", stage.expDrop);
         stage.cubeCount = EditorGUILayout.IntField("∞≠»≠≈•∫Í »πµÊ∑Æ", stage.cubeCount);
         stage.cubeRate = EditorGUILayout.FloatField("∞≠»≠≈•∫Í »πµÊ»Æ∑¸", stage.cubeRate);

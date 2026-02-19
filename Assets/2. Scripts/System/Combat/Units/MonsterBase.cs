@@ -2,7 +2,7 @@ using UnityEngine;
 using Combat.Drop;
 using SlayerLegend.Skill;
 
-// [주혁] - 몬스터 데이터 리팩토링으로 인해 오류 코드 주석화(23, 24)
+// [주혁] - 몬스터, 스테이지 데이터 리팩토링으로 인해 오류 코드 주석화(23, 24, 132)
 
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class MonsterBase : MonoBehaviour, IDamageable
@@ -129,7 +129,7 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         if (stageData == null) return;
 
         // 골드 랜덤 범위 계산
-        long goldAmount = Random.Range((int)stageData.minGoldDrop, (int)stageData.maxGoldDrop + 1);
+        long goldAmount = Random.Range((int)stageData.goldDrop, (int)stageData.goldDrop + 1);
         int expAmount = stageData.expDrop;
 
         // 드롭 아이템 생성
