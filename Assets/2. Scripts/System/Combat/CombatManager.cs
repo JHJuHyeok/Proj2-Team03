@@ -59,12 +59,13 @@ public class CombatManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
+    private async void Start()
     {
         // 데이터가 아직 로드되지 않았으면 먼저 로드
         if (DataManager.stages.GetAll().Count == 0)
         {
-           //DataManager.LoadAllDatabase();
+            Debug.Log("데이터 다시 로드");
+            await DataManager.LoadAllDatabase();
         }
 
         if (stageManager) stageManager.Initialize(initialStageId);

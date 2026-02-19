@@ -133,7 +133,7 @@ public class StageDetailPopupUI : MonoBehaviour
             // 장비 아이콘 설정
             if (equipIconImage != null && !string.IsNullOrEmpty(equipData.spriteName))
             {
-                Sprite icon = await SpriteManager.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.spriteName);
+                Sprite icon = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_UI.spriteatlasv2", equipData.spriteName);
                 if (icon != null) equipIconImage.sprite = icon;
             }
 
@@ -141,7 +141,7 @@ public class StageDetailPopupUI : MonoBehaviour
             if (equipGradeBackgroundImage != null)
             {
                 Debug.Log("장비 등급 배경 설정: " + equipData.grade.ToString());
-                Sprite bg = await SpriteManager.GetSprite("Assets/Atlas/UIAtlas.spriteatlasv2", equipData.grade.ToString());
+                Sprite bg = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_UI.spriteatlasv2", equipData.grade.ToString());
                 if (bg != null) equipGradeBackgroundImage.sprite = bg;
             }
         }

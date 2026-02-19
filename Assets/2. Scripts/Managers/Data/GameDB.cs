@@ -5,7 +5,8 @@ using UnityEngine.AddressableAssets;
 using System.Threading.Tasks;
 using System.Reflection;
 
-// ╦П╣Г ╣╔юлем ╦╝╫╨ф╝╟║ ╩С╪с╧чю╩ юнемфДюл╫╨
+// О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ф╝О©╫О©╫ О©╫О©╫с╧О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫л╫О©╫
+// [Л▀═М┐°М≥≤] - jsonFile.text Б├▓ UnityЛ²≤ TextAsset Л├█Л└╠ Б├▓ К╘■Л²╦ Л┼╓К═┬К⌠°Л≈░Л└°К╖▄ Л═▒Й╥╪ Й╟─К┼╔. string jsonText = jsonFile.text; Л╤■Й╟─
 public interface IDataList<T>
 {
     List<T> GetList();
@@ -13,40 +14,41 @@ public interface IDataList<T>
 
 public class GameDB<T, TList> where TList : IDataList<T>
 {
-    // Dictionary<string, T>    -> stringю╨ ID, T╢б ╣╔юлем е╛╥║╫╨
-    // ID ╠Б╧щ ╣╔юлем е╫╩Ж©К ╣Я╪еЁй╦╝
+    // Dictionary<string, T>    -> stringО©╫О©╫ ID, TО©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ е╛О©╫О©╫О©╫О©╫
+    // ID О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ е╫О©╫О©╫О©╫О©╫ О©╫О©╫еЁй╦О©╫
     private Dictionary<string, T> _dataDict = new Dictionary<string, T>();
 
     /// <summary>
-    /// ╬Н╣Е╥╧╪╜╨М╥н Json фдюою╩ ╨Я╣©╠Б ╥н╣Е, ╣╔юлем╨ёюл╫╨ ╠╦цЮ
+    /// О©╫О©╫Е╥╧О©╫О©╫О©╫О©╫О©╫О©╫ Json О©╫О©╫О©╫О©╫О©╫О©╫ О©╫Я╣©╠О©╫ О©╫н╣О©╫, О©╫О©╫О©╫О©╫О©╫м╨О©╫О©╫л╫О©╫ О©╫О©╫О©╫О©╫
     /// </summary>
-    /// <param name="address"> ╬Н╣Е╥╧╪╜╨М аж╪р </param>
+    /// <param name="address"> О©╫О©╫Е╥╧О©╫О©╫О©╫О©╫ О©╫ж╪О©╫ </param>
     /// <returns></returns>
     public async Task LoadAsync(string address)
     {
-        // 1. ©║╪б ╨Я╣©╠Б ╥н╣Е
+        // 1. О©╫О©╫О©╫О©╫ О©╫Я╣©╠О©╫ О©╫н╣О©╫
         var handle = Addressables.LoadAssetAsync<TextAsset>(address);
         TextAsset jsonFile = await handle.Task;
 
         if (jsonFile == null) return;
+        string jsonText = jsonFile.text;
 
-        // 2. ╧И╠в╤С©Н╣Е фд╫л
+        // 2. О©╫О©╫в╤О©╫О©╫О©╫ О©╫д╫О©╫
         await Task.Run(() =>
         {
-            // Json ©╙аВ╥дх╜
-            TList list = JsonConvert.DeserializeObject<TList>(jsonFile.text);
+            // Json О©╫О©╫О©╫О©╫О©╫О©╫х╜
+            TList list = JsonConvert.DeserializeObject<TList>(jsonText);
 
             if (list == null) return;
 
-            // ╦╝гц╥╨╪г цжюШх╜: ╥Гга ╧ш©║╪╜ гй╣Е а╓╨╦╦╕ ╧л╦╝ ╟║а╝©х
+            // О©╫О©╫О©╫ц╥О©╫О©╫О©╫ О©╫О©╫О©╫О©╫х╜: О©╫О©╫О©╫О©╫ О©╫ш©О©╫О©╫О©╫ О©╫й╣О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫л╦О©╫ О©╫О©╫О©╫О©╫О©╫О©╫
             FieldInfo idFieldInfo = typeof(T).GetField("id");
             if (idFieldInfo == null)
             {
-                Debug.LogError($"е╛╥║╫╨©║ 'id' гй╣Е╟║ ╬Ь╫ю╢о╢ы.");
+                Debug.LogError($"е╛О©╫О©╫О©╫О©╫О©╫О©╫ 'id' О©╫й╣Е╟║ О©╫О©╫О©╫О©╫О©╫о╢О©╫.");
                 return;
             }
 
-            // ╠Ба╦ ╣╔юлем цй╠Бх╜ хд ╣Я╪еЁй╦╝ ╠╦╪╨
+            // О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ О©╫й╠О©╫х╜ О©╫О©╫ О©╫О©╫еЁй╦О©╫ О©╫О©╫О©╫О©╫
             _dataDict.Clear();
             foreach (var item in list.GetList())
             {
@@ -58,15 +60,15 @@ public class GameDB<T, TList> where TList : IDataList<T>
             }
         });
 
-        // ©║╪б гз╣И гьа╕
+        // О©╫О©╫О©╫О©╫ О©╫з╣О©╫ О©╫О©╫О©╫О©╫
         Addressables.Release(handle);
     }
 
     /// <summary>
-    /// ID ╠Б╧щ ╣╔юлем е╫╩Ж
+    /// ID О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ е╫О©╫О©╫
     /// </summary>
-    /// <param name="id"> цё╟Мюз го╢б ╣╔юлемюг ID ╟╙ </param>
-    /// <returns> гь╢Г ╣╔юлем </returns>
+    /// <param name="id"> цёО©╫О©╫О©╫О©╫ О©╫о╢О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ ID О©╫О©╫ </param>
+    /// <returns> О©╫ь╢О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ </returns>
     public T Get(string id)
     {
         if (_dataDict.TryGetValue(id, out T value)) return value;
@@ -74,8 +76,8 @@ public class GameDB<T, TList> where TList : IDataList<T>
     }
 
     /// <summary>
-    /// ╣╔юлем ╦╝╫╨ф╝ юЭц╪ хёцБ
+    /// О©╫О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ф╝ О©╫О©╫ц╪ хёО©╫О©╫
     /// </summary>
-    /// <returns> юЗюЕ╣х ╦П╣Г ╣╔юлем </returns>
+    /// <returns> О©╫О©╫О©╫О©╫О©╫ О©╫О©╫О©╫ О©╫О©╫О©╫О©╫О©╫О©╫ </returns>
     public List<T> GetAll() => new List<T>(_dataDict.Values);
 }
