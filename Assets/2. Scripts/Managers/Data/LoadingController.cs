@@ -22,10 +22,6 @@ public class LoadingController : MonoBehaviour
         bool dataLoadSuccess = await LoadGameDataStep();
         if (!dataLoadSuccess) return;
 
-        // 3. 리소스 로드
-        await ResourcesLoadStep();
-        await DataManager.LoadAllDatabase();
-
         // 4. 씬 이동
     }
 
@@ -49,11 +45,34 @@ public class LoadingController : MonoBehaviour
         // 3. 데이터 불러올 때까지 대기
         await Task.WhenAll(currencyResult, dataResult);
 
-        // 4. 서버에서 호출한 데이터 역직렬화
-        CurrencyData serverCurrency = (currencyResult != null) ?
-            JsonConvert.DeserializeObject<CurrencyData>(currencyResult.Result) : null;
-        GameData serverData = (dataResult != null) ?
-            JsonConvert.DeserializeObject<GameData>(dataResult.Result) : null;
+        string currencyJson = await currencyResult;
+        string dataJson = await dataResult;
+
+        CurrencyData serverCurrency;
+        GameData serverData;
+
+        // 4. 서버에 데이터가 없을 경우 초기화
+        if (string.IsNullOrEmpty(currencyJson))
+        {
+            Debug.Log("신규 재화 데이터를 생성하고 서버에 저장합니다.");
+            serverCurrency = CurrencyData.CreateDefault();
+            await BackendManager.Instance.SaveDataAsync("UserCurrency", serverCurrency);
+        }
+        else
+        {
+            serverCurrency = JsonConvert.DeserializeObject<CurrencyData>(currencyJson);
+        }
+        
+        if (string.IsNullOrEmpty(dataJson))
+        {
+            Debug.Log("신규 게임 데이터를 생성하고 서버에 저장합니다.");
+            serverData = GameData.CreateDefault();
+            await BackendManager.Instance.SaveDataAsync("UserSave", serverData);
+        }
+        else
+        {
+            serverData = JsonConvert.DeserializeObject<GameData>(dataJson);
+        }
 
         // 5. 최신 저장 데이터 비교
         CurrencyData latestCurrency = DataSyncManager.ResolveLatestCurrency(localCurrency, serverCurrency);
@@ -67,8 +86,10 @@ public class LoadingController : MonoBehaviour
 
             // 7. 아틀라스 스프라이트 로드
             await ResourcesLoadStep();
+            // 8. 데이터베이스 로드
+            await DataManager.LoadAllDatabase();
 
-            Debug.Log("데이터 로드 완료");
+            Debug.Log("전체 데이터 로드 완료");
             return true;
         }
 
@@ -98,5 +119,6 @@ public class LoadingController : MonoBehaviour
     {
         await SpriteManager.LoadAllAtlasAsync();
         await Task.Delay(100);      // 로딩 체감되도록 살짝 딜레이
+        Debug.Log("리소스 로드 완료");
     }
 }
