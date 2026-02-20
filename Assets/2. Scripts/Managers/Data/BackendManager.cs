@@ -6,8 +6,9 @@ using Newtonsoft.Json;
 
 public class BackendManager : Singleton<BackendManager>
 {
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
         var bro = Backend.Initialize(); // 뒤끝 초기화
 
         // 뒤끝 초기화에 대한 응답값
@@ -28,18 +29,52 @@ public class BackendManager : Singleton<BackendManager>
     /// <returns></returns>
     public async Task<string> GetDataAsync(string tableName)
     {
-        return await Task.Run(() =>
+        Debug.Log($"{tableName} 데이터 요청 중...");
+
+        try
         {
-            var bro = Backend.GameData.GetMyData(tableName, new Where());
+            // 뒤끝의 전용 비동기 핸들러를 사용하여 데드락 방지
+            BackendReturnObject bro = null;
+            bool isCompleted = false;
 
-            if (bro.IsSuccess() && bro.FlattenRows().Count > 0)
+            Backend.GameData.GetMyData(tableName, new Where(), callback =>
             {
-                Debug.Log("게임 정보 조회 성공");
+                bro = callback;
+                isCompleted = true;
+            });
 
-                return bro.FlattenRows()[0].ToJson();
+            // 콜백 대기
+            while (!isCompleted)
+            {
+                await Task.Yield();
             }
+
+            if (bro == null)
+            {
+                Debug.LogError($"[GetDataAsync] {tableName} 응답 객체가 null입니다.");
+                return null;
+            }
+
+            if (bro.IsSuccess())
+            {
+                var rows = bro.FlattenRows();
+                if (rows.Count > 0)
+                {
+                    Debug.Log($"[GetDataAsync] {tableName} 조회 성공: {rows[0]["Content"].ToString()}");
+                    return rows[0]["Content"].ToString();
+                }
+                Debug.Log($"[GetDataAsync] {tableName} 데이터가 존재하지 않습니다.");
+                return null;
+            }
+
+            Debug.LogWarning($"[GetDataAsync] {tableName} 조회 실패: {bro.GetStatusCode()} / {bro.GetErrorCode()} - {bro.GetMessage()}");
             return null;
-        });
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[GetDataAsync] 심각한 오류 발생: {e.Message}\n{e.StackTrace}");
+            return null;
+        }
     }
 
     /// <summary>
@@ -48,49 +83,36 @@ public class BackendManager : Singleton<BackendManager>
     /// <param name="tableName"> 데이터 테이블 명칭 </param>
     /// <param name="dataObject"> 저장할 데이터 </param>
     /// <returns></returns>
-    public async Task<bool> SaveDataAsync(string tableName, object dataObject)
+    public async Task SaveDataAsync(string tableName, object dataObject)
     {
         Param param = new Param();
 
         string json = JsonConvert.SerializeObject(dataObject);
-        var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+        param.Add("Content", json);
 
-        foreach (var item in dictionary)
+        BackendReturnObject bro = null;
+        bool isCompleted = false;
+
+        // 뒤끝 비동기 인서트
+        Backend.GameData.Insert(tableName, param, callback =>
         {
-            param.Add(item.Key, item.Value);
+            bro = callback;
+            isCompleted = true;
+        });
+
+        // 콜백이 올 때까지 대기
+        while (!isCompleted)
+        {
+            await Task.Yield();
         }
 
-        return await Task.Run(() =>
+        if (bro.IsSuccess())
         {
-            // 2. 먼저 해당 테이블에 내 데이터가 있는지 확인 (업데이트를 위해 inDate가 필요함)
-            var getResult = Backend.GameData.GetMyData(tableName, new Where());
-
-            BackendReturnObject bro = null;
-
-            if (getResult.IsSuccess() && getResult.FlattenRows().Count > 0)
-            {
-                // 데이터가 이미 존재함 -> 업데이트 (Update)
-                string inDate = getResult.FlattenRows()[0]["inDate"].ToString();
-                bro = Backend.GameData.UpdateV2(tableName, inDate, Backend.UserInDate , param);
-                Debug.Log($"[{tableName}] 데이터 업데이트 시도...");
-            }
-            else
-            {
-                // 데이터가 없음 -> 신규 생성 (Insert)
-                bro = Backend.GameData.Insert(tableName, param);
-                Debug.Log($"[{tableName}] 신규 데이터 생성 시도...");
-            }
-
-            if (bro.IsSuccess())
-            {
-                Debug.Log($"[{tableName}] 서버 저장 성공");
-                return true;
-            }
-            else
-            {
-                Debug.LogError($"[{tableName}] 서버 저장 실패: {bro.GetErrorCode()} - {bro.GetMessage()}");
-                return false;
-            }
-        });
+            Debug.Log($"{tableName} 서버 저장 성공");
+        }
+        else
+        {
+            Debug.LogError($"{tableName} 서버 저장 실패: {bro.GetStatusCode()} / {bro.GetErrorCode()}");
+        }
     }
 }
