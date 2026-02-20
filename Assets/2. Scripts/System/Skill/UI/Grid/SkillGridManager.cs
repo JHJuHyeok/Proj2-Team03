@@ -11,16 +11,27 @@ namespace SlayerLegend.Skill.UI.Grid
         [Header("그리드 설정")]
         [SerializeField] private int gridWidth = 6;
         [SerializeField] private int gridHeight = 6;
-        [SerializeField] private float cellSize = 80f;
+        [SerializeField] private float cellSize = 80f;  // 기본값 (자동 계산 시 무시됨)
         [SerializeField] private Vector2 gridOffset = Vector2.zero;
 
         [Header("셀 프리팹")]
         [SerializeField] private GameObject cellPrefab;
         [SerializeField] private Transform cellContainer;
 
+        [Header("자동 크기 조정")]
+        [Tooltip("체크하면 부모 크기에 맞춰 셀 크기를 자동으로 계산")]
+        [SerializeField] private bool autoCellSize = true;
+
+        [Tooltip("셀 간 간격 (픽셀)")]
+        [SerializeField] private float cellSpacing = 2f;
+
+        [Tooltip("여백 (픽셀)")]
+        [SerializeField] private float padding = 10f;
+
         // 그리드 데이터
         private SkillGridCell[,] cells;
         private SkillGridSaveData saveData;
+        private float calculatedCellSize;  // 실제 계산된 셀 크기
 
         // 이벤트
         public event Action<PlacedSkillData> OnSkillPlaced;
@@ -30,17 +41,95 @@ namespace SlayerLegend.Skill.UI.Grid
         // 프로퍼티
         public int GridWidth => gridWidth;
         public int GridHeight => gridHeight;
-        public float CellSize => cellSize;
+        public float CellSize => autoCellSize ? calculatedCellSize : cellSize;
         public Vector2Int GridSize => new Vector2Int(gridWidth, gridHeight);
 
         private void Awake()
         {
+            CalculateCellSize();
             InitializeGrid();
+        }
+
+        // 셀 크기 자동 계산
+        private void CalculateCellSize()
+        {
+            if (!autoCellSize)
+            {
+                calculatedCellSize = cellSize;
+                return;
+            }
+
+            RectTransform containerRect = cellContainer?.GetComponent<RectTransform>();
+            if (containerRect == null)
+            {
+                calculatedCellSize = cellSize;
+                return;
+            }
+
+            float availableWidth = containerRect.rect.width - padding * 2 - (gridWidth - 1) * cellSpacing;
+            float availableHeight = containerRect.rect.height - padding * 2 - (gridHeight - 1) * cellSpacing;
+
+            float cellWidth = availableWidth / gridWidth;
+            float cellHeight = availableHeight / gridHeight;
+
+            // 정사각형 셀을 위해 더 작은 값 사용
+            calculatedCellSize = Mathf.Min(cellWidth, cellHeight);
+
+            // 최소 크기 보장
+            calculatedCellSize = Mathf.Max(calculatedCellSize, 10f);
+        }
+
+        // 그리드 크기 변경 시 재계산
+        private void OnRectTransformDimensionsChange()
+        {
+            if (!Application.isPlaying) return;
+            if (cells == null) return;
+
+            CalculateCellSize();
+            UpdateCellPositions();
+        }
+
+        // 셀 위치 업데이트 (크기 변경 시)
+        private void UpdateCellPositions()
+        {
+            if (cells == null) return;
+
+            for (int y = 0; y < gridHeight; y++)
+            {
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    if (cells[x, y] != null)
+                    {
+                        UpdateCellPosition(cells[x, y], x, y);
+                    }
+                }
+            }
+        }
+
+        // 개별 셀 위치 업데이트
+        private void UpdateCellPosition(SkillGridCell cell, int x, int y)
+        {
+            RectTransform rectTransform = cell.GetComponent<RectTransform>();
+            if (rectTransform == null) return;
+
+            float currentCellSize = CellSize;
+            float gridTotalWidth = gridWidth * currentCellSize + (gridWidth - 1) * cellSpacing;
+            float gridTotalHeight = gridHeight * currentCellSize + (gridHeight - 1) * cellSpacing;
+
+            float startX = -gridTotalWidth / 2f + currentCellSize / 2f;
+            float startY = gridTotalHeight / 2f - currentCellSize / 2f;
+
+            float posX = startX + x * (currentCellSize + cellSpacing);
+            float posY = startY - y * (currentCellSize + cellSpacing);
+
+            rectTransform.anchoredPosition = new Vector2(posX, posY);
+            rectTransform.sizeDelta = new Vector2(currentCellSize, currentCellSize);
         }
 
         // 그리드 초기화
         public void InitializeGrid()
         {
+            CalculateCellSize();
             saveData = new SkillGridSaveData(gridWidth, gridHeight);
             cells = new SkillGridCell[gridWidth, gridHeight];
 
@@ -90,20 +179,22 @@ namespace SlayerLegend.Skill.UI.Grid
                 rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
                 rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
 
-                // 그리드 전체 크기
-                float gridTotalWidth = gridWidth * cellSize;
-                float gridTotalHeight = gridHeight * cellSize;
+                float currentCellSize = CellSize;
+
+                // 그리드 전체 크기 (간격 포함)
+                float gridTotalWidth = gridWidth * currentCellSize + (gridWidth - 1) * cellSpacing;
+                float gridTotalHeight = gridHeight * currentCellSize + (gridHeight - 1) * cellSpacing;
 
                 // 그리드 시작 위치 (좌상단, pivot 기준)
-                float startX = -gridTotalWidth / 2f + cellSize / 2f;
-                float startY = gridTotalHeight / 2f - cellSize / 2f;
+                float startX = -gridTotalWidth / 2f + currentCellSize / 2f;
+                float startY = gridTotalHeight / 2f - currentCellSize / 2f;
 
-                // 셀 위치 계산
-                float posX = startX + x * cellSize;
-                float posY = startY - y * cellSize;
+                // 셀 위치 계산 (간격 포함)
+                float posX = startX + x * (currentCellSize + cellSpacing);
+                float posY = startY - y * (currentCellSize + cellSpacing);
 
                 rectTransform.anchoredPosition = new Vector2(posX, posY);
-                rectTransform.sizeDelta = new Vector2(cellSize, cellSize);
+                rectTransform.sizeDelta = new Vector2(currentCellSize, currentCellSize);
             }
 
             // 셀 컴포넌트 초기화
@@ -301,24 +392,25 @@ namespace SlayerLegend.Skill.UI.Grid
         // itemWidth, itemHeight: 스킬이 차지하는 셀 수
         public Vector2 GetCellLocalPosition(Vector2Int gridPos, int itemWidth = 1, int itemHeight = 1)
         {
-            float gridTotalWidth = gridWidth * cellSize;
-            float gridTotalHeight = gridHeight * cellSize;
+            float currentCellSize = CellSize;
+            float gridTotalWidth = gridWidth * currentCellSize + (gridWidth - 1) * cellSpacing;
+            float gridTotalHeight = gridHeight * currentCellSize + (gridHeight - 1) * cellSpacing;
 
-            float startX = -gridTotalWidth / 2f + cellSize / 2f;
-            float startY = gridTotalHeight / 2f - cellSize / 2f;
+            float startX = -gridTotalWidth / 2f + currentCellSize / 2f;
+            float startY = gridTotalHeight / 2f - currentCellSize / 2f;
 
-            float posX = startX + gridPos.x * cellSize;
-            float posY = startY - gridPos.y * cellSize;
+            float posX = startX + gridPos.x * (currentCellSize + cellSpacing);
+            float posY = startY - gridPos.y * (currentCellSize + cellSpacing);
 
             // 멀티셀 스킬의 경우 중심 위치 보정
             // 예: 2x1 스킬은 오른쪽으로 0.5셀 이동해야 함
             if (itemWidth > 1)
             {
-                posX += (itemWidth - 1) * cellSize / 2f;
+                posX += (itemWidth - 1) * (currentCellSize + cellSpacing) / 2f;
             }
             if (itemHeight > 1)
             {
-                posY -= (itemHeight - 1) * cellSize / 2f;
+                posY -= (itemHeight - 1) * (currentCellSize + cellSpacing) / 2f;
             }
 
             return new Vector2(posX, posY);
@@ -437,17 +529,20 @@ namespace SlayerLegend.Skill.UI.Grid
                 return new Vector2Int(-1, -1);
             }
 
-            // 그리드 전체 크기 계산
-            float gridTotalWidth = gridWidth * cellSize;
-            float gridTotalHeight = gridHeight * cellSize;
+            float currentCellSize = CellSize;
+
+            // 그리드 전체 크기 계산 (간격 포함)
+            float gridTotalWidth = gridWidth * currentCellSize + (gridWidth - 1) * cellSpacing;
+            float gridTotalHeight = gridHeight * currentCellSize + (gridHeight - 1) * cellSpacing;
 
             // 그리드 시작 위치 (좌상단 기준)
             float startX = -gridTotalWidth / 2f;
             float startY = gridTotalHeight / 2f;
 
-            // 로컬 좌표를 그리드 좌표로 변환
-            int x = Mathf.FloorToInt((localPos.x - startX) / cellSize);
-            int y = Mathf.FloorToInt((startY - localPos.y) / cellSize);
+            // 로컬 좌표를 그리드 좌표로 변환 (간격 고려)
+            float cellWithSpacing = currentCellSize + cellSpacing;
+            int x = Mathf.FloorToInt((localPos.x - startX) / cellWithSpacing);
+            int y = Mathf.FloorToInt((startY - localPos.y) / cellWithSpacing);
 
             return new Vector2Int(x, y);
         }
@@ -458,8 +553,11 @@ namespace SlayerLegend.Skill.UI.Grid
             RectTransform gridRect = cellContainer?.GetComponent<RectTransform>();
             if (gridRect == null) return Vector2.zero;
 
-            float localX = gridOffset.x + gridPos.x * cellSize + cellSize / 2;
-            float localY = gridOffset.y - gridPos.y * cellSize - cellSize / 2;
+            float currentCellSize = CellSize;
+            float cellWithSpacing = currentCellSize + cellSpacing;
+
+            float localX = gridOffset.x + gridPos.x * cellWithSpacing + currentCellSize / 2;
+            float localY = gridOffset.y - gridPos.y * cellWithSpacing - currentCellSize / 2;
 
             Vector3 worldPos = gridRect.TransformPoint(new Vector3(localX, localY, 0f));
 

@@ -59,6 +59,12 @@ namespace SlayerLegend.Skill.UI.Grid
             UpdateUI();
         }
 
+        // 드래그 아이템 설정 (슬롯 클릭 후 아이템 생성 시 호출)
+        public void SetDraggableItem(SkillDraggableItem item)
+        {
+            draggableItem = item;
+        }
+
         // UI 업데이트
         public void UpdateUI()
         {

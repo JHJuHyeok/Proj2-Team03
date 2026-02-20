@@ -9,10 +9,12 @@ namespace SlayerLegend.Skill.UI.Grid
     public class PlacedSkillData
     {
         public string skillId;              // 스킬 ID
+        public string skillName;            // 스킬 이름 (로드 시 표시용)
         public int gridX;                   // 그리드 X 좌표
         public int gridY;                   // 그리드 Y 좌표
         public int rotation;                // 회전 (0, 90, 180, 270)
         public SkillShapeType shapeType;    // 스킬 모양 타입
+        public SkillType skillType;         // 스킬 타입 (액티브/패시브)
 
         // 편의 프로퍼티
         public Vector2Int GridPosition => new Vector2Int(gridX, gridY);
@@ -20,22 +22,26 @@ namespace SlayerLegend.Skill.UI.Grid
         // 생성자
         public PlacedSkillData() { }
 
-        public PlacedSkillData(string id, Vector2Int pos, int rot, SkillShapeType shape = SkillShapeType.OneByOne)
+        public PlacedSkillData(string id, Vector2Int pos, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active)
         {
             skillId = id;
+            skillName = string.IsNullOrEmpty(name) ? id : name;
             gridX = pos.x;
             gridY = pos.y;
             rotation = SkillShapeData.NormalizeRotation(rot);
             shapeType = shape;
+            skillType = type;
         }
 
-        public PlacedSkillData(string id, int x, int y, int rot, SkillShapeType shape = SkillShapeType.OneByOne)
+        public PlacedSkillData(string id, int x, int y, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active)
         {
             skillId = id;
+            skillName = string.IsNullOrEmpty(name) ? id : name;
             gridX = x;
             gridY = y;
             rotation = SkillShapeData.NormalizeRotation(rot);
             shapeType = shape;
+            skillType = type;
         }
 
         // 스킬이 차지하는 모든 셀 위치 반환

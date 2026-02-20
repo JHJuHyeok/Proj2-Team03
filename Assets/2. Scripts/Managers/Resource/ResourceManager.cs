@@ -31,13 +31,22 @@ namespace SlayerLegend.Resource
         public Sprite LoadSprite(string spriteName)
         {
             if (string.IsNullOrEmpty(spriteName))
+            {
+                Debug.LogWarning("[ResourceManager] spriteName이 null 또는 비어있음");
                 return null;
+            }
 
             if (_spriteCache.TryGetValue(spriteName, out var cachedSprite))
                 return cachedSprite;
 
             // 여러 경로 시도
             string[] paths = {
+                $"Skill/skillicon/skill_fire/{spriteName}",
+                $"Skill/skillicon/skill_water/{spriteName}",
+                $"Skill/skillicon/skill_earth/{spriteName}",
+                $"Skill/skillicon/skill_wind/{spriteName}",
+                $"Skill/skillicon/skill_none/{spriteName}",
+                $"Skill/skillicon/{spriteName}",
                 $"Skills/Icons/{spriteName}",
                 $"Slayer Legend/Image/icon/{spriteName}",
                 $"Sprites/{spriteName}",
@@ -50,11 +59,12 @@ namespace SlayerLegend.Resource
                 if (sprite != null)
                 {
                     _spriteCache[spriteName] = sprite;
+                    Debug.Log($"[ResourceManager] 스프라이트 로드 성공: {spriteName} → {path}");
                     return sprite;
                 }
             }
 
-            Debug.LogWarning($"Sprite not found: {spriteName}");
+            Debug.LogWarning($"[ResourceManager] Sprite not found: {spriteName}");
             return null;
         }
 

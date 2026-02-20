@@ -148,16 +148,8 @@ namespace SlayerLegend.Skill.UI.Grid
                 return;
             }
 
-            // 그리드 컨트롤러에 스킬 추가 (아직 배치되지 않은 상태)
-            var draggableItem = gridController?.AddSkillToInventory(
-                skill.id,
-                skill.name,
-                skill.GetShapeType(),
-                skill.type,
-                ResourceManager.Instance?.LoadSprite(skill.spriteName)
-            );
-
-            if (draggableItem == null) return;
+            // 스킬 데이터를 컨트롤러에 등록 (아이템 생성은 슬롯 클릭 시)
+            gridController?.RegisterSkillData(skill);
 
             // 슬롯 UI 생성
             GameObject slotObj = Instantiate(slotPrefab, slotContainer);
@@ -168,7 +160,7 @@ namespace SlayerLegend.Skill.UI.Grid
                 slot = slotObj.AddComponent<InventorySlotUI>();
             }
 
-            slot.Initialize(skill, draggableItem);
+            slot.Initialize(skill, null);  // draggableItem은 나중에 생성됨
             slot.OnSlotClicked += HandleSlotClicked;
 
             slots.Add(slot);
@@ -189,6 +181,26 @@ namespace SlayerLegend.Skill.UI.Grid
             selectedSlot.SetSelected(true);
 
             OnSkillSelected?.Invoke(slot.SkillData);
+
+            // 새로운 방식: 슬롯 클릭 시 아이템 생성
+            if (gridController != null && slot.SkillData != null)
+            {
+                // 이미 그리드에 있으면 아이템 생성 안 함
+                if (gridController.IsSkillOnGrid(slot.SkillData.id))
+                {
+                    Debug.Log($"[SkillInventoryUI] 스킬이 이미 그리드에 있음: {slot.SkillData.name}");
+                    return;
+                }
+
+                // 아이템 생성
+                var item = gridController.CreateDraggableItemFromSlot(slot.SkillData.id);
+                if (item != null)
+                {
+                    // 아이템 참조 업데이트
+                    slot.SetDraggableItem(item);
+                    Debug.Log($"[SkillInventoryUI] 슬롯에서 아이템 생성됨: {slot.SkillData.name}");
+                }
+            }
         }
 
         // 인벤토리 새로고침
