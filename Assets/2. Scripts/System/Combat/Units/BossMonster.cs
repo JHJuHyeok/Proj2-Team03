@@ -7,9 +7,29 @@ public class BossMonster : MonsterBase
 {
     private float _lastAttackTime = -999f;
     private float _attackRange = 4f; // 공격 범위
+    private double _attackPower;
 
     public override bool IsBoss => true;
     public override bool IsRewardBox => false;
+
+    public override void Initialize(MonsterData data, StageData stageData, Transform target)
+    {
+        _data = data;
+        _stageData = stageData;
+        _target = target;
+        _isDead = false;
+
+        // 보스 HP/공격력 초기화 (StageData에서 가져옴)
+        _maxHp = stageData.bossHp;
+        _currentHp = _maxHp;
+        _attackPower = stageData.bossAtk;
+
+        // Sprite Load
+        if (!string.IsNullOrEmpty(data.spriteName))
+        {
+            LoadSprite(data.spriteName);
+        }
+    }
 
     protected override void Update()
     {
@@ -46,8 +66,8 @@ public class BossMonster : MonsterBase
         var playerStats = _target.GetComponent<PlayerCombatStats>();
         if (playerStats != null)
         {
-            //playerStats.TakeDamage((double)_data.Attack);
-            //Debug.Log($"[{_data.name}] 플레이어에게 {(float)_data.Attack:F1} 데미지 공격");
+            playerStats.TakeDamage(_attackPower);
+            Debug.Log($"[{_data.name}] 플레이어에게 {_attackPower:F1} 데미지 공격");
         }
         else
         {
