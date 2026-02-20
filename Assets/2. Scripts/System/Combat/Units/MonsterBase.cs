@@ -8,21 +8,24 @@ using SlayerLegend.Skill;
 public abstract class MonsterBase : MonoBehaviour, IDamageable
 {
     protected MonsterData _data;
+    protected StageData _stageData;
     protected Transform _target;
     protected bool _isDead = false;
     protected double _currentHp;
     protected double _maxHp;
 
-    public virtual void Initialize(MonsterData data, Transform target)
+    public virtual void Initialize(MonsterData data, StageData stageData, Transform target)
     {
         _data = data;
+        _stageData = stageData;
         _target = target;
         _isDead = false;
 
-        // HP 초기화
-        //_maxHp = data.maxHp;
-        //_currentHp = _maxHp;
+        // HP 초기화 (StageData에서 가져옴)
+        _maxHp = stageData.monsterHp;
+        _currentHp = _maxHp;
 
+        Debug.Log($"[MonsterBase] 몬스터 데이터를 로드합니다: {data.name}");
         // Sprite Load
         if (!string.IsNullOrEmpty(data.spriteName))
         {
@@ -30,8 +33,9 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         }
     }
 
-    private async void LoadSprite(string spriteName)
+    protected async void LoadSprite(string spriteName)
     {
+        Debug.Log($"[MonsterBase] 스프라이트를 로드합니다: {spriteName}");
         var renderer = GetComponent<SpriteRenderer>();
 
         Sprite sprite = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2", spriteName);
@@ -39,6 +43,10 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         {
             renderer.sprite = sprite;
             renderer.enabled = true;
+        }
+        else
+        {
+            Debug.LogError($"[MonsterBase] 스프라이트를 로드할 수 없습니다: {spriteName}");
         }
     }
 

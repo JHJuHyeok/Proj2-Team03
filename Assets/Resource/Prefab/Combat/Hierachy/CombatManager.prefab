@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3987767493305694628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4040046117283290765}
+  - component: {fileID: 7795057899078670115}
+  - component: {fileID: 5155412141849453517}
+  - component: {fileID: 5287114227906103975}
+  - component: {fileID: 6588894918975592428}
+  m_Layer: 0
+  m_Name: CombatManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4040046117283290765
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3987767493305694628}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7795057899078670115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3987767493305694628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39d17f2b01693469a976aaf7a354c895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageManager: {fileID: 5155412141849453517}
+  spawnManager: {fileID: 5287114227906103975}
+  dropManager: {fileID: 6588894918975592428}
+  playerTransform: {fileID: 0}
+  playerStats: {fileID: 0}
+  damageNumberPrefab: {fileID: 7239377516473605472, guid: 9b4c94e3329e942e8bc2c80c5a6d8618, type: 3}
+  initialStageId: STG_01_01
+--- !u!114 &5155412141849453517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3987767493305694628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03367e3df0bd5487a8eefeed4986fc6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5287114227906103975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3987767493305694628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 758024996f944426c9ffa610d490506c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnInterval: 2
+  maxQueueSize: 20
+  queueSpacing: 2
+  queueBaseOffset: 1.5
+  commonMonsterPrefab: {fileID: 3580557240869132841, guid: 1ce16384ab25044e2a48c4cb1a978fe2, type: 3}
+  bossMonsterPrefab: {fileID: -4657195831821665170, guid: 2a1b0f76e8f9d4a6cb726a50bca03cdc, type: 3}
+  rewardBoxId: Box_001
+--- !u!114 &6588894918975592428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3987767493305694628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7847cac1f8754e138fa5d42bc7b65a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  goldDropPrefab: {fileID: 6739154011408642586, guid: 1ff10dadf28cb454e9c4de9a00783cb6, type: 3}
+  expDropPrefab: {fileID: 8992862536161950629, guid: f22cc7f16758b467f90b1ae01d3fa655, type: 3}
+  poolInitCount: 30
+  dropSpreadRadius: 0.5
