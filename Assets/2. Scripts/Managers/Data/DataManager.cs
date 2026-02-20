@@ -47,7 +47,7 @@ public static class DataManager
     {
         try
         {
-            Debug.Log("데이터 로드 시작");
+            Debug.Log("데이터베이스 로드 시작");
 
             await Task.WhenAll(
                 monsters.LoadAsync("Json/Monster/MonsterList"),
@@ -56,11 +56,11 @@ public static class DataManager
                 accessories.LoadAsync("Json/Equip/AccessorieList"),
                 stages.LoadAsync("Json/Stage/StageList")
             );
-            Debug.Log("데이터 로드 완료");
+            Debug.Log("데이터베이스 로드 완료");
         }
         catch (Exception e)
         {
-            Debug.LogError($"데이터 로드 실패: {e.Message}\n{e.StackTrace}");
+            Debug.LogError($"데이터베이스 로드 실패: {e.Message}\n{e.StackTrace}");
         }
     }
 

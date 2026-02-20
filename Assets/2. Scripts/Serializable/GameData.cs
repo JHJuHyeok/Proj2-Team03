@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 // 종합 성장 데이터
@@ -16,6 +17,20 @@ public class GameData : ISavable
     public List<int> gachaLevel = new();                        // 뽑기 레벨
 
     public long lastSaveTime { get; set; }           // 마지막 저장 시간
+
+    // 게임 데이터 초기화
+    public static GameData CreateDefault()
+    {
+        return new GameData
+        {
+            level = 1,
+            upgradeLevels = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
+            growthLevels = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
+            advanceGrade = "",
+            gachaLevel = new List<int> { 0, 0, 0 },
+            lastSaveTime = DateTime.UtcNow.Ticks
+        };
+    }
 }
 
 [System.Serializable]
