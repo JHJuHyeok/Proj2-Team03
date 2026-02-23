@@ -1,16 +1,118 @@
-using UnityEngine;
-using BackEnd;
+ï»¿using BackEnd;
 using Newtonsoft.Json;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
+using Unity.VisualScripting;
+using UnityEngine;
 
-//===============°ÔÀÓ ½ÃÀÛ ½Ã ·Îµù==============// 
+//===============ê²Œì„ ì‹œì‘ ì‹œ ë¡œë”©==============// 
 
 public class LoadingController : MonoBehaviour
 {
-    private async void Start()
+    /// <summary>
+    /// [ìŠ¹ë¬¸ ì¶”ê°€] 
+    /// - ê²Œì„ ì‹œì‘ ì‹œ ë¡œê·¸ì¸/ë°ì´í„°/ë¦¬ì†ŒìŠ¤/DB ë¡œë“œë¥¼ ë‹´ë‹¹
+    /// - ë¡œë”©ì´ ëë‚œ ë’¤ ì”¬ ì´ë™ì€ LoadingSceneFlow(ë˜ëŠ” ë‹¤ë¥¸ Flow)ì—ì„œ ì²˜ë¦¬
+    /// - LoadingSceneFlowì—ì„œ "ë°ì´í„° ë¡œë“œ ì™„ë£Œ í›„, í™”ë©´ í„°ì¹˜ë¡œ ì”¬ ì´ë™"ì„ ë§Œë“¤ê¸° ìœ„í•´
+    /// ë¡œë”© ìƒíƒœë¥¼ ì™¸ë¶€ì—ì„œ í™•ì¸í•  ìˆ˜ ìˆëŠ” í”„ë¡œí¼í‹° + await ê°€ëŠ¥í•œ RunAsync() ì§„ì…ì ì„ ì¶”ê°€í•¨.
+    /// </summary>
+
+    // ì™¸ë¶€ì—ì„œ ìƒíƒœ í™•ì¸ìš©
+    public bool IsRunning { get; private set; }     // í˜„ì¬ ë¡œë”© ì§„í–‰ ì¤‘ì¸ê°€?
+    public bool IsDone { get; private set; }        // ë¡œë”© í”„ë¡œì„¸ìŠ¤ê°€ ëë‚¬ëŠ”ê°€? (ì„±ê³µ/ì‹¤íŒ¨ í¬í•¨)
+    public bool IsSuccess { get; private set; }     // ìµœì¢… ì„±ê³µ ì—¬ë¶€
+    public bool HasError { get; private set; }      // ì—ëŸ¬ ë°œìƒ ì—¬ë¶€
+    public string ErrorMessage { get; private set; } // ì—ëŸ¬ ìƒì„¸(ë””ë²„ê¹…/í† ìŠ¤íŠ¸ ë“±ì— í™œìš©)
+
+    // (ì„ íƒ) ë¡œë”©ë°”/ë‹¨ê³„ UIê°€ í•„ìš”í•˜ë©´ í™œìš©
+    public float Progress { get; private set; }     // 0~1 ì§„í–‰ë¥ 
+    public string CurrentStep { get; private set; } // Auth / LoadGameData ë“± ë‹¨ê³„ëª…
+
+    private void Awake()
     {
-        // 1. ·Î±×ÀÎ ½ºÅÜ
+        ResetState();
+    }
+
+    private void ResetState()
+    {
+        IsRunning = false;
+        IsDone = false;
+        IsSuccess = false;
+        HasError = false;
+        ErrorMessage = string.Empty;
+
+        Progress = 0f;
+        CurrentStep = string.Empty;
+    }
+
+    // LoadingSceneFlowê°€ í˜¸ì¶œí•´ì„œ "ê¸°ë‹¤ë¦´ ìˆ˜ ìˆëŠ”" ì§„ì…ì 
+    // - ê¸°ì¡´ Start() ìë™ ì‹¤í–‰ ë°©ì‹ ëŒ€ì‹ , ì™¸ë¶€ Flowì—ì„œ ë¡œë”©ì„ ì œì–´í•˜ê¸° ìœ„í•œ í•¨ìˆ˜
+    // - ë‚´ë¶€ì—ì„œ AuthStep -> LoadGameDataStep ìˆœì„œë¡œ ì‹¤í–‰
+    public async Task<bool> RunAsync()
+    {
+        if (IsRunning) return false;
+
+        ResetState();
+        IsRunning = true;
+
+        try
+        {
+            // 1. ë¡œê·¸ì¸ ìŠ¤í…
+            CurrentStep = "Auth";
+            Progress = 0.05f;
+
+            bool loginSuccess = await AuthStep();
+            if (!loginSuccess)
+            {
+                // ê¸°ì¡´ ì½”ë“œ ì¡´ì¤‘: ì‹¤íŒ¨í•˜ë©´ ê²ŒìŠ¤íŠ¸ ê°€ì… ì‹œë„
+                BackendLogin.Instance.GuestSignUp();
+
+                Fail("AuthStep failed (backend token login).");
+                return false;
+            }
+
+            // 2. ì„œë²„ ë°ì´í„° í†µí•© ë¡œë“œ
+            CurrentStep = "LoadGameData";
+            Progress = 0.2f;
+
+            bool dataLoadSuccess = await LoadGameDataStep();
+            if (!dataLoadSuccess)
+            {
+                Fail("LoadGameDataStep failed.");
+                return false;
+            }
+
+            Progress = 1f;
+            CurrentStep = "Done";
+
+            IsSuccess = true;
+            IsDone = true;
+            IsRunning = false;
+            return true;
+        }
+        catch (System.Exception e)
+        {
+            Fail("Exception: " + e.Message);
+            Debug.LogError(e);
+            return false;
+        }
+    }
+
+    private void Fail(string msg)
+    {
+        HasError = true;
+        ErrorMessage = msg;
+
+        IsSuccess = false;
+        IsDone = true;
+        IsRunning = false;
+
+        CurrentStep = "Error";
+        Progress = 0f;
+    }
+    /*private async void Start()
+    {
+        // 1. ë¡œê·¸ì¸ ìŠ¤í…
         bool loginSuccess = await AuthStep();
         if (!loginSuccess)
         {
@@ -18,31 +120,32 @@ public class LoadingController : MonoBehaviour
             return;
         }
 
-        // 2. ¼­¹ö µ¥ÀÌÅÍ ÅëÇÕ ·Îµå
+        // 2. ì„œë²„ ë°ì´í„° í†µí•© ë¡œë“œ
         bool dataLoadSuccess = await LoadGameDataStep();
         if (!dataLoadSuccess) return;
 
-        // 4. ¾À ÀÌµ¿
-    }
+        // 4. ì”¬ ì´ë™
+    }*/
 
-    // ÀÚµ¿ ·Î±×ÀÎ
+    // ìë™ ë¡œê·¸ì¸
     private async Task<bool> AuthStep()
     {
         var bro = Backend.BMember.LoginWithTheBackendToken();
+        await Task.Yield(); // í˜¹ì‹œ ëª¨ë¥¼ í”„ë ˆì„ ë¶„ë¦¬(ì•ˆì „)
         return bro.IsSuccess();
     }
 
     private async Task<bool> LoadGameDataStep()
     {
-        // 1. ·ÎÄÃ ÀúÀå¼ÒÀÇ µ¥ÀÌÅÍ È£Ãâ
+        // 1. ë¡œì»¬ ì €ì¥ì†Œì˜ ë°ì´í„° í˜¸ì¶œ
         var localCurrency = LoadCurrencyFromLocal();
         var localData = LoadDataFromLocal();
 
-        // 2. ¼­¹ö Å×ÀÌºí¿¡¼­ µ¥ÀÌÅÍ È£Ãâ
+        // 2. ì„œë²„ í…Œì´ë¸”ì—ì„œ ë°ì´í„° í˜¸ì¶œ
         var currencyResult = BackendManager.Instance.GetDataAsync("UserCurrency");
         var dataResult = BackendManager.Instance.GetDataAsync("UserSave");
 
-        // 3. µ¥ÀÌÅÍ ºÒ·¯¿Ã ¶§±îÁö ´ë±â
+        // 3. ë°ì´í„° ë¶ˆëŸ¬ì˜¬ ë•Œê¹Œì§€ ëŒ€ê¸°
         await Task.WhenAll(currencyResult, dataResult);
 
         string currencyJson = await currencyResult;
@@ -51,10 +154,10 @@ public class LoadingController : MonoBehaviour
         CurrencyData serverCurrency;
         GameData serverData;
 
-        // 4. ¼­¹ö¿¡ µ¥ÀÌÅÍ°¡ ¾øÀ» °æ¿ì ÃÊ±âÈ­
+        // 4. ì„œë²„ì— ë°ì´í„°ê°€ ì—†ì„ ê²½ìš° ì´ˆê¸°í™”
         if (string.IsNullOrEmpty(currencyJson))
         {
-            Debug.Log("½Å±Ô ÀçÈ­ µ¥ÀÌÅÍ¸¦ »ı¼ºÇÏ°í ¼­¹ö¿¡ ÀúÀåÇÕ´Ï´Ù.");
+            Debug.Log("ì‹ ê·œ ì¬í™” ë°ì´í„°ë¥¼ ìƒì„±í•˜ê³  ì„œë²„ì— ì €ì¥í•©ë‹ˆë‹¤.");
             serverCurrency = CurrencyData.CreateDefault();
             await BackendManager.Instance.SaveDataAsync("UserCurrency", serverCurrency);
         }
@@ -65,7 +168,7 @@ public class LoadingController : MonoBehaviour
         
         if (string.IsNullOrEmpty(dataJson))
         {
-            Debug.Log("½Å±Ô °ÔÀÓ µ¥ÀÌÅÍ¸¦ »ı¼ºÇÏ°í ¼­¹ö¿¡ ÀúÀåÇÕ´Ï´Ù.");
+            Debug.Log("ì‹ ê·œ ê²Œì„ ë°ì´í„°ë¥¼ ìƒì„±í•˜ê³  ì„œë²„ì— ì €ì¥í•©ë‹ˆë‹¤.");
             serverData = GameData.CreateDefault();
             await BackendManager.Instance.SaveDataAsync("UserSave", serverData);
         }
@@ -74,26 +177,26 @@ public class LoadingController : MonoBehaviour
             serverData = JsonConvert.DeserializeObject<GameData>(dataJson);
         }
 
-        // 5. ÃÖ½Å ÀúÀå µ¥ÀÌÅÍ ºñ±³
+        // 5. ìµœì‹  ì €ì¥ ë°ì´í„° ë¹„êµ
         CurrencyData latestCurrency = DataSyncManager.ResolveLatestCurrency(localCurrency, serverCurrency);
         GameData latestData = DataSyncManager.ResolveLatestData(localData, serverData);
 
         if (latestCurrency != null && latestData != null)
         {
-            // 6. °¢ ¸Å´ÏÀúÀÇ µ¥ÀÌÅÍ ÃÊ±âÈ­
+            // 6. ê° ë§¤ë‹ˆì €ì˜ ë°ì´í„° ì´ˆê¸°í™”
             CurrencyManager.Instance.Init(latestCurrency);
             DataManager.Init(latestData);
 
-            // 7. ¾ÆÆ²¶ó½º ½ºÇÁ¶óÀÌÆ® ·Îµå
+            // 7. ì•„í‹€ë¼ìŠ¤ ìŠ¤í”„ë¼ì´íŠ¸ ë¡œë“œ
             await ResourcesLoadStep();
-            // 8. µ¥ÀÌÅÍº£ÀÌ½º ·Îµå
+            // 8. ë°ì´í„°ë² ì´ìŠ¤ ë¡œë“œ
             await DataManager.LoadAllDatabase();
 
-            Debug.Log("ÀüÃ¼ µ¥ÀÌÅÍ ·Îµå ¿Ï·á");
+            Debug.Log("ì „ì²´ ë°ì´í„° ë¡œë“œ ì™„ë£Œ");
             return true;
         }
 
-        Debug.Log("µ¥ÀÌÅÍ ·Îµå ½ÇÆĞ");
+        Debug.Log("ë°ì´í„° ë¡œë“œ ì‹¤íŒ¨");
         return false;
     }
 
@@ -118,7 +221,7 @@ public class LoadingController : MonoBehaviour
     private async Task ResourcesLoadStep()
     {
         await SpriteManager.LoadAllAtlasAsync();
-        await Task.Delay(100);      // ·Îµù Ã¼°¨µÇµµ·Ï »ìÂ¦ µô·¹ÀÌ
-        Debug.Log("¸®¼Ò½º ·Îµå ¿Ï·á");
+        await Task.Delay(100);      // ë¡œë”© ì²´ê°ë˜ë„ë¡ ì‚´ì§ ë”œë ˆì´
+        Debug.Log("ë¦¬ì†ŒìŠ¤ ë¡œë“œ ì™„ë£Œ");
     }
 }
