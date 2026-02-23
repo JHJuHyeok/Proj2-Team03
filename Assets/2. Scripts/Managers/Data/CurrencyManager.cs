@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -9,8 +10,6 @@ public class CurrencyManager : Singleton<CurrencyManager>
 {
     // 실시간 조회용 딕셔너리
     private Dictionary<CurrencyType, double> _currencies = new Dictionary<CurrencyType, double>();
-    // UI 갱신용 이벤트
-    public event Action<CurrencyType, double> OnCurrencyChanged;
     // 저장용 데이터
     public CurrencyData currencySave;
 
@@ -51,6 +50,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (amount <= 0) return;
 
         UpdateValue(type, amount);
+        InfoHandler.UpdateUserData();
     }
 
     /// <summary>
@@ -64,6 +64,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (!HasEnoughCurrency(type, amount)) return;
 
         UpdateValue(type, -amount);
+        InfoHandler.UpdateUserData();
     }
 
     /// <summary>
@@ -92,8 +93,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         else
             currencySave.currencies.Add(new Currency { type = type, value = _currencies[type] });
 
-        // 3. 이벤트 전달 및 로컬 저장
-        OnCurrencyChanged?.Invoke(type, _currencies[type]);
+        // 3. 로컬 저장
         SaveManager.Instance.SaveDataToLocal(currencySave);
     }
 }
