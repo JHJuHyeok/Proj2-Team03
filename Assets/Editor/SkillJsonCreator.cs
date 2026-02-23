@@ -9,27 +9,27 @@ public class SkillJsonCreator : EditorWindow
     private List<SkillData> skillDatas = new List<SkillData>();
     private Vector2 scrollPos;
 
-    // ¿¡µğÅÍ Ã¢ Ç¥½Ã
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¢ Ç¥ï¿½ï¿½
     [MenuItem("Tools/JSON/Skill JSON Creator")]
     public static void ShowWindow()
     {
         GetWindow<SkillJsonCreator>("SkillDatabase Creator");
     }
 
-    // ½ºÅ©·Ñ º¯¼ö
+    // ï¿½ï¿½Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     [SerializeField] bool boolBar = true;
 
     private void OnGUI()
     {
-        GUILayout.Label("½ºÅ³ JSON µ¥ÀÌÅÍ »ı¼º±â");
+        GUILayout.Label("ï¿½ï¿½Å³ JSON ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 
-        // »ó´Ü ¹öÆ°µé
+        // ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°ï¿½ï¿½
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("½ºÅ³ Ãß°¡"))
+        if (GUILayout.Button("ï¿½ï¿½Å³ ï¿½ß°ï¿½"))
         {
             skillDatas.Add(new SkillData());
         }
-        if (GUILayout.Button("JSON ÆÄÀÏ »ı¼º"))
+        if (GUILayout.Button("JSON ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½"))
         {
             ExportToJson();
         }
@@ -50,23 +50,23 @@ public class SkillJsonCreator : EditorWindow
         SkillData skill = skillDatas[index];
         EditorGUILayout.BeginVertical("box");
 
-        skill.id = EditorGUILayout.TextField("½ºÅ³ ID", skill.id);
-        skill.name = EditorGUILayout.TextField("½ºÅ³ ¸íÄª", skill.name);
-        skill.spriteName = EditorGUILayout.TextField("ÀÌ¹ÌÁö ÀÌ¸§", skill.spriteName);
-        skill.explain = EditorGUILayout.TextField("½ºÅ³ ¼³¸í", skill.explain);
-        skill.effect = EditorGUILayout.TextField("½ºÅ³ È¿°ú", skill.effect);
+        skill.id = EditorGUILayout.TextField("ï¿½ï¿½Å³ ID", skill.id);
+        skill.name = EditorGUILayout.TextField("ï¿½ï¿½Å³ ï¿½ï¿½Äª", skill.name);
+        skill.spriteName = EditorGUILayout.TextField("ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½", skill.spriteName);
+        skill.explain = EditorGUILayout.TextField("ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ï¿½", skill.explain);
+        skill.effect = EditorGUILayout.TextField("ï¿½ï¿½Å³ È¿ï¿½ï¿½", skill.effect);
 
-        skill.grade = (SkillGrade)EditorGUILayout.EnumPopup("½ºÅ³ µî±Ş", skill.grade);
-        skill.type = (SkillType)EditorGUILayout.EnumPopup("½ºÅ³ Å¸ÀÔ", skill.type);
-        skill.request = (SkillRequest)EditorGUILayout.EnumPopup("¹ßµ¿ ¹æ½Ä", skill.request);
-        skill.element = (SkillElement)EditorGUILayout.EnumPopup("½ºÅ³ ¼Ó¼º", skill.element);
+        skill.grade = (SkillGrade)EditorGUILayout.EnumPopup("ï¿½ï¿½Å³ ï¿½ï¿½ï¿½", skill.grade);
+        skill.type = (SkillType)EditorGUILayout.EnumPopup("ï¿½ï¿½Å³ Å¸ï¿½ï¿½", skill.type);
+        skill.request = (SkillRequest)EditorGUILayout.EnumPopup("ï¿½ßµï¿½ ï¿½ï¿½ï¿½", skill.request);
+        skill.element = (SkillElement)EditorGUILayout.EnumPopup("ï¿½ï¿½Å³ ï¿½Ó¼ï¿½", skill.element);
 
-        skill.maxLevel = EditorGUILayout.IntField("ÃÖ´ë ·¹º§", skill.maxLevel);
-        skill.needMp = EditorGUILayout.IntField("¿ä±¸ MP", skill.needMp);
-        skill.initialRate = EditorGUILayout.IntField("ÃÊ±â ¼öÄ¡", skill.initialRate);
-        skill.levelUpValue = EditorGUILayout.FloatField("·¹º§ º° »ó½ÂÄ¡", skill.levelUpValue);
+        skill.maxLevel = EditorGUILayout.IntField("ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½", skill.maxLevel);
+        skill.needMp = EditorGUILayout.IntField("ï¿½ä±¸ MP", skill.needMp);
+        skill.initialRate = EditorGUILayout.FloatField("ì´ˆê¸° ìˆ˜ì¹˜", skill.initialRate); // ì¡°ë¯¼í¬: initialRate íƒ€ì…ì´ floatë¡œ ë³€ê²½ë˜ì–´ IntField â†’ FloatFieldë¡œ ìˆ˜ì •
+        skill.levelUpValue = EditorGUILayout.FloatField("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ä¡", skill.levelUpValue);
 
-        if (GUILayout.Button("ÀÌ ÇÊµå »èÁ¦", GUILayout.Width(100)))
+        if (GUILayout.Button("ï¿½ï¿½ ï¿½Êµï¿½ ï¿½ï¿½ï¿½ï¿½", GUILayout.Width(100)))
         {
             skillDatas.RemoveAt(index);
         }
@@ -82,7 +82,7 @@ public class SkillJsonCreator : EditorWindow
             skillList = skillDatas
         };
 
-        // ÀúÀåµÉ ÁÖ¼Ò
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½
         string folder = "Assets/Resources/Json/Skill";
         if (!Directory.Exists(folder))
         {
@@ -98,7 +98,7 @@ public class SkillJsonCreator : EditorWindow
                 ObjectCreationHandling = ObjectCreationHandling.Replace
             };
 
-            // Json ÆÄÀÏ·Î º¯È¯
+            // Json ï¿½ï¿½ï¿½Ï·ï¿½ ï¿½ï¿½È¯
             string json = JsonConvert.SerializeObject(dataList, settings);
 
             string path = Path.Combine(folder, "SkillList.json");
@@ -106,11 +106,11 @@ public class SkillJsonCreator : EditorWindow
             File.WriteAllText(path, json);
 
             AssetDatabase.Refresh();
-            Debug.Log("½ºÅ³ ¸®½ºÆ® »ı¼º ¿Ï·á");
+            Debug.Log("ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½");
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"¿À·ù ¹ß»ı: {e.Message}");
+            Debug.LogError($"ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½: {e.Message}");
         }
     }
 }

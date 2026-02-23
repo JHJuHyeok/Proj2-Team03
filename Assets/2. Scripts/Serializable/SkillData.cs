@@ -26,7 +26,7 @@ public class SkillData
     public int maxLevel;            // 최대 레벨
     public float wantedDelay;       // 대기 시간 or 필요 공격 수
     public int needMp;              // 소비 MP
-    public int initialRate;         // 기본 수치 (%)
+    public float initialRate;       // 조민희: JSON에 소수점 값(3.5)이 있어 int → float로 변경         // 기본 수치 (%)
     public float levelUpValue;      // 레벨 당 수치 증가
 
     public SkillEffectData effectData;  // 조민희 추가: DoT/CC 효과 데이터

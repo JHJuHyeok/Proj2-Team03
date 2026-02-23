@@ -31,6 +31,10 @@ namespace SlayerLegend.Skill.UI.Grid
         // 셀 이미지 리스트
         private List<Image> cellImages = new List<Image>();
 
+        // 스킬 아이콘 저장 (조민희: 셀 이미지에 스킬 아이콘 표시용)
+        private Sprite skillIcon;
+        private string spriteName = "";  // 조민희: 원본 스프라이트 이름 (저장/로드용)
+
         // 상태
         private bool isDragging = false;
         private bool isOnGrid = false;
@@ -97,12 +101,16 @@ namespace SlayerLegend.Skill.UI.Grid
         }
 
         // 초기화
-        public void Initialize(string id, string name, SkillShapeType shape, SkillType type, Sprite icon = null)
+        public void Initialize(string id, string name, SkillShapeType shape, SkillType type, Sprite icon = null, string sprite = "")
         {
             skillId = id;
             skillName = name;
             shapeType = shape;
             skillType = type;
+
+            // 스킬 아이콘 저장 (조민희: 셀 이미지에 표시용)
+            skillIcon = icon;
+            spriteName = sprite;  // 조민희: 원본 스프라이트 이름 저장
 
             if (iconImage != null && icon != null)
             {
@@ -140,6 +148,7 @@ namespace SlayerLegend.Skill.UI.Grid
         }
 
         // 모양에 따른 시각적 크기 및 셀 이미지 업데이트
+        // 조민희: 전체 영역에 하나의 아이콘 표시 + 빈 공간에만 반투명 오버레이
         private void UpdateCellImages()
         {
             var shapeData = SkillShapeData.Create(shapeType);
@@ -161,26 +170,45 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 경계 계산
             var bounds = CalculateBounds(occupiedCells);
-            rectTransform.sizeDelta = new Vector2(bounds.size.x * cellSize, bounds.size.y * cellSize);
+            float totalWidth = bounds.size.x * cellSize;
+            float totalHeight = bounds.size.y * cellSize;
+            rectTransform.sizeDelta = new Vector2(totalWidth, totalHeight);
 
-            // 각 점유 셀에 이미지 생성
-            foreach (var cell in occupiedCells)
+            // 아이콘 이미지를 전체 영역에 표시 (조민희: 하나의 아이콘으로 채움)
+            if (iconImage != null && skillIcon != null)
             {
-                CreateCellImage(cell, cellSize, bounds);
+                iconImage.sprite = skillIcon;
+                // 부모 크기에 맞추기 위해 anchor 설정
+                iconImage.rectTransform.anchorMin = Vector2.zero;
+                iconImage.rectTransform.anchorMax = Vector2.one;
+                iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                iconImage.rectTransform.anchoredPosition = Vector2.zero;
+                iconImage.rectTransform.sizeDelta = new Vector2(-8f, -8f);  // 양쪽 여백 4px씩
+                iconImage.gameObject.SetActive(true);
             }
 
-            // 1x1 스킬은 기존 아이콘 사용
-            if (iconImage != null)
-                iconImage.gameObject.SetActive(shapeType == SkillShapeType.OneByOne);
+            // 빈 공간에만 반투명 오버레이 생성 (조민희: 점유된 셀은 선명하게, 빈 공간은 흐릿하게)
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            {
+                for (int y = bounds.yMin; y < bounds.yMax; y++)
+                {
+                    var cellPos = new Vector2Int(x, y);
+                    // 점유되지 않은 셀(빈 공간)에만 반투명 이미지 생성
+                    if (!occupiedCells.Exists(c => c.x == x && c.y == y))
+                    {
+                        CreateEmptyCellOverlay(cellPos, cellSize, bounds);
+                    }
+                }
+            }
         }
 
-        // 개별 셀 이미지 생성
-        private void CreateCellImage(Vector2Int cellPos, float cellSize, BoundsInt bounds)
+        // 빈 공간에 반투명 오버레이 생성 (조민희: 해당 영역의 아이콘을 흐릿하게)
+        private void CreateEmptyCellOverlay(Vector2Int cellPos, float cellSize, BoundsInt bounds)
         {
             if (cellImagesContainer == null) return;
 
-            GameObject cellObj = new GameObject($"Cell_{cellPos.x}_{cellPos.y}");
-            cellObj.transform.SetParent(cellImagesContainer, false);  // worldPositionStays = false로 스케일 유지
+            GameObject cellObj = new GameObject($"Empty_{cellPos.x}_{cellPos.y}");
+            cellObj.transform.SetParent(cellImagesContainer, false);
 
             RectTransform rect = cellObj.AddComponent<RectTransform>();
 
@@ -193,8 +221,10 @@ namespace SlayerLegend.Skill.UI.Grid
             rect.pivot = new Vector2(0.5f, 0.5f);
 
             Image img = cellObj.AddComponent<Image>();
-            img.sprite = GetCellSprite();
-            img.raycastTarget = true;
+            // 반투명 검은색으로 아이콘 흐릿하게 - 조민희
+            img.sprite = GetCellBackgroundSprite();
+            img.color = new Color(0f, 0f, 0f, 0.8f);  // 80% 불투명 (더 어둡게)
+            img.raycastTarget = false;
 
             cellImages.Add(img);
         }
@@ -225,9 +255,10 @@ namespace SlayerLegend.Skill.UI.Grid
             return new BoundsInt(minX, minY, 0, maxX - minX + 1, maxY - minY + 1, 1);
         }
 
-        // 셀 스프라이트 가져오기 (없으면 흰색 기본 스프라이트 생성)
-        private Sprite GetCellSprite()
+        // 셀 배경 스프라이트 가져오기 (조민희: 테두리용 흰색 스프라이트)
+        private Sprite GetCellBackgroundSprite()
         {
+            // 임시 셀 스프라이트 로드 시도
             Sprite sprite = Resources.Load<Sprite>("Skill/Grid/TempCellSprite");
             if (sprite != null) return sprite;
 
@@ -629,7 +660,9 @@ namespace SlayerLegend.Skill.UI.Grid
         // 현재 상태 정보 반환
         public PlacedSkillData GetPlacedData()
         {
-            return new PlacedSkillData(skillId, gridPosition, currentRotation, shapeType, skillName, skillType);
+            // spriteName이 있으면 사용, 없으면 skillIcon.name 사용 (fallback) - 조민희
+            string sprite = !string.IsNullOrEmpty(spriteName) ? spriteName : (skillIcon != null ? skillIcon.name : "");
+            return new PlacedSkillData(skillId, gridPosition, currentRotation, shapeType, skillName, skillType, sprite);
         }
 
         // 정적 메서드: 현재 드래그 중인 아이템 반환

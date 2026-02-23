@@ -134,7 +134,8 @@ namespace SlayerLegend.Skill.UI
                     skill.name,
                     skill.GetShapeType(),
                     skill.type,
-                    SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skill.spriteName)
+                    SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skill.spriteName),
+                    skill.spriteName  // 조민희: spriteName 추가
                 );
             }
         }
