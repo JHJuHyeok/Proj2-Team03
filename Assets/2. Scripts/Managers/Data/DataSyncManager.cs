@@ -5,7 +5,7 @@ public class DataSyncManager
     public static GameData ResolveLatestData(GameData localData, GameData serverData)
     {
         // 두 데이터가 전부 존재하지 않을 경우 : 새 데이터 반환
-        if (localData == null && serverData == null) return new GameData();
+        if (localData == null && serverData == null) return GameData.CreateDefault();
         // 하나의 데이터가 없을 경우 : 다른 쪽 데이터 반환
         if (localData == null) return serverData;
         if (serverData == null) return localData;
@@ -21,7 +21,7 @@ public class DataSyncManager
     public static CurrencyData ResolveLatestCurrency(CurrencyData localCurrency, CurrencyData serverCurrency)
     {
         // 두 재화정보가 전부 존재하지 않을 경우 : 새 데이터 반환
-        if (localCurrency == null && serverCurrency == null) return new CurrencyData();
+        if (localCurrency == null && serverCurrency == null) return CurrencyData.CreateDefault();
         // 하나의 재화정보가 없을 경우 : 다른 쪽 데이터 반환
         if (localCurrency == null) return serverCurrency;
         if (serverCurrency == null) return localCurrency;

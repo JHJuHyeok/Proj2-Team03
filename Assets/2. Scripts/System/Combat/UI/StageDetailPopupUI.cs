@@ -101,11 +101,11 @@ public class StageDetailPopupUI : MonoBehaviour
         if (expRewardText != null) expRewardText.text = currentStageData.expDrop.ToString("N0");
 
         // 골드/경험치 보상 (분당 획득량 = 기본값 * 80)
-        long goldPerMin = currentStageData.goldDrop * 80;
-        long expPerMin = currentStageData.expDrop * 80;
+        string goldPerMin = currentStageData.goldPerMin.ToString("N0");
+        string expPerMin = currentStageData.expPerMin.ToString("N0");
 
-        if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin:N0}/m";
-        if (autoExpRewardText != null) autoExpRewardText.text = $"{expPerMin:N0}/m";
+        if (autoGoldRewardText != null) autoGoldRewardText.text = $"{goldPerMin}/m";
+        if (autoExpRewardText != null) autoExpRewardText.text = $"{expPerMin}/m";
 
         // 드랍 확률
         if (dropPercentText != null)
@@ -134,7 +134,7 @@ public class StageDetailPopupUI : MonoBehaviour
             // 장비 아이콘 설정
             if (equipIconImage != null && !string.IsNullOrEmpty(equipData.spriteName))
             {
-                Sprite icon = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_UI.spriteatlasv2", equipData.spriteName);
+                Sprite icon = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Sword.spriteatlasv2", equipData.spriteName);
                 if (icon != null) equipIconImage.sprite = icon;
             }
 

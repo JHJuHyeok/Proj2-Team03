@@ -13,7 +13,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private float queueBaseOffset = 1.5f;
     [SerializeField] private MonsterBase commonMonsterPrefab;
     [SerializeField] private MonsterBase bossMonsterPrefab;
-    [SerializeField] private string rewardBoxId = "REWARD_BOX"; // 보상 상자 몬스터 ID
+    [SerializeField] private string rewardBoxId = "Box_001"; // 보상 상자 몬스터 ID
 
     private Coroutine _spawnCoroutine;
     private StageData _currentStageData;
@@ -165,6 +165,10 @@ public class SpawnManager : MonoBehaviour
                 {
                     SpawnEnemy(monsterData);
                 }
+                else
+                {
+                    Debug.LogError($"[SpawnManager] 몬스터 데이터를 찾을 수 없음! ID: '{_currentStageData.monsterId}', monsters DB 개수: {DataManager.monsters.GetAll().Count}");
+                }
             }
         }
 
@@ -222,7 +226,7 @@ public class SpawnManager : MonoBehaviour
         if (monster == null) return null;
 
         monster.transform.position = position;
-        monster.Initialize(data, _playerTransform);
+        monster.Initialize(data, _currentStageData, _playerTransform);
 
         // 몬스터 스프라이트를 왼쪽(플레이어 방향)으로 전환
         SpriteRenderer spriteRenderer = monster.GetComponentInChildren<SpriteRenderer>();

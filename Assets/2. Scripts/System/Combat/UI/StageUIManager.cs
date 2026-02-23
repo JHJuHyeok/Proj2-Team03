@@ -20,6 +20,12 @@ public class StageUIManager : MonoBehaviour
     [SerializeField] private RectTransform bossHpGauge;
     [SerializeField] private float bossGaugeMaxWidth = 450f;
 
+    [Header("버튼")]
+    [SerializeField] private Button areaPopupButton;
+    [SerializeField] private Button bossButton;
+
+    private AreaUIManager areaUIManager;
+
     private void Start()
     {
         // 이벤트 구독
@@ -36,6 +42,12 @@ public class StageUIManager : MonoBehaviour
             // 진행도 게이지 초기화 (0%에서 시작)
             SetGaugeWidth(progressGauge, 0f);
         }
+
+        areaUIManager = FindObjectOfType<AreaUIManager>();
+        // 버튼 클릭 이벤트를 코드로 연결
+        areaPopupButton.onClick.AddListener(() => areaUIManager.OpenPopup());
+        bossButton.onClick.AddListener(() => CombatManager.Instance.StartBossBattle());
+
     }
 
     private void OnDestroy()

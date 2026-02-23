@@ -70,15 +70,12 @@ public class SaveManager : Singleton<SaveManager>
         PrepareForSave(saveData);
         PrepareForSave(saveCurrency);
 
-        Task<bool> saveResultTask = SaveToBackend("UserSave", DataManager.CurrentSaveData);
-        Task<bool> saveCurrencyTask = SaveToBackend("UserCurrency", CurrencyManager.Instance.currencySave);
+        Task saveResultTask = SaveToBackend("UserSave", DataManager.CurrentSaveData);
+        Task saveCurrencyTask = SaveToBackend("UserCurrency", CurrencyManager.Instance.currencySave);
 
-        bool[] results = await Task.WhenAll(saveResultTask, saveCurrencyTask);
+        await Task.WhenAll(saveResultTask, saveCurrencyTask);
 
-        if (results[0] && results[1])
-        {
-            _isDirty = false;
-        }
+        _isDirty = false;
     }
 
     /// <summary>
@@ -93,9 +90,9 @@ public class SaveManager : Singleton<SaveManager>
         File.WriteAllText(Application.persistentDataPath + $"/temp_{data.ToString()}.json", json);
     }
 
-    private async Task<bool> SaveToBackend<T>(string tableName, T data) where T : ISavable
+    private async Task SaveToBackend<T>(string tableName, T data) where T : ISavable
     {
-        return await BackendManager.Instance.SaveDataAsync(tableName, data);
+        await BackendManager.Instance.SaveDataAsync(tableName, data);
     }
 
     /// <summary>

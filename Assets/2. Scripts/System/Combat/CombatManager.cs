@@ -33,7 +33,7 @@ public class CombatManager : MonoBehaviour
     public DamageNumber DamageNumberPrefab => damageNumberPrefab;
 
     [Header("Initial Stage")]
-    [SerializeField] private string initialStageId = "Stage_1";
+    [SerializeField] private string initialStageId = "STG_01_01";
 
     public CombatState CurrentState { get; private set; } = CombatState.Farming;
 
@@ -182,6 +182,11 @@ public class CombatManager : MonoBehaviour
     {
         if (stageData == null) return;
 
+        // 기존 몬스터 스폰 중지 및 풀로 반환
+        spawnManager.StopSpawning();
+        spawnManager.CleanUpEnemies();
+
+        // 새로운 스테이지 설정 및 해당 스테이지 몬스터 소환
         stageManager.SetStage(stageData);
         StartFarming();
     }
