@@ -48,8 +48,8 @@ namespace SlayerLegend.Skill.UI.Grid
                 gridManager.OnGridChanged += HandleGridChanged;
             }
 
-            // 저장된 데이터 로드
-            LoadGridData();
+            // 저장된 데이터 로드 - SkillGridInitializer가 제어하도록 변경 (조민희)
+            // LoadGridData(); // 주석 처리: DataManager 초기화 후 SkillGridInitializer에서 호출됨
         }
 
         private void OnDestroy()
@@ -66,7 +66,8 @@ namespace SlayerLegend.Skill.UI.Grid
             string skillName,
             SkillShapeType shapeType,
             SkillType skillType,
-            Sprite icon = null)
+            Sprite icon = null,
+            string sprite = "")  // 조민희: spriteName 추가
         {
             if (draggableItemPrefab == null || inventoryContainer == null)
             {
@@ -93,7 +94,7 @@ namespace SlayerLegend.Skill.UI.Grid
             }
 
             // 초기화
-            item.Initialize(skillId, skillName, shapeType, skillType, icon);
+            item.Initialize(skillId, skillName, shapeType, skillType, icon, sprite);  // 조민희: spriteName 추가
             item.SetGridManager(gridManager);
             item.SetInventoryContainer(inventoryContainer);
 
@@ -219,7 +220,7 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 초기화
             Sprite icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skillData.spriteName);
-            item.Initialize(skillData.id, skillData.name, skillData.GetShapeType(), skillData.type, icon);
+            item.Initialize(skillData.id, skillData.name, skillData.GetShapeType(), skillData.type, icon, skillData.spriteName);  // 조민희: spriteName 추가
             item.SetGridManager(gridManager);
             item.SetGridController(this);  // 컨트롤러 참조 설정 (삭제용)
             item.SetInventoryContainer(inventoryContainer);
@@ -303,16 +304,64 @@ namespace SlayerLegend.Skill.UI.Grid
                 return null;
             }
 
-            // 아이콘 로드 시도 (skillDataCache에서)
+            // 아이콘 로드 시도 (저장된 spriteName → skillDataCache → DataManager → 패턴 기반) - 조민희
             Sprite icon = null;
-            if (skillDataCache.TryGetValue(placedSkill.skillId, out var skillData))
+            SkillData skillData = null;
+
+            // 1차: 저장된 spriteName으로 바로 로드 (가장 확실)
+            if (!string.IsNullOrEmpty(placedSkill.spriteName))
+            {
+                icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(placedSkill.spriteName);
+                Debug.Log($"[SkillGridController] 1차 시도 (spriteName): {placedSkill.spriteName} → {(icon != null ? "성공" : "실패")}");
+            }
+
+            // 2차: 캐시에서 찾기
+            if (icon == null && skillDataCache.TryGetValue(placedSkill.skillId, out skillData))
             {
                 icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skillData.spriteName);
+                Debug.Log($"[SkillGridController] 2차 시도 (cache): {skillData.spriteName} → {(icon != null ? "성공" : "실패")}");
+            }
+
+            // 3차: DataManager에서 찾기 (fallback)
+            if (icon == null && DataManager.skills != null)
+            {
+                var allSkills = DataManager.skills.GetAll();
+                skillData = allSkills?.Find(s => s.id == placedSkill.skillId);
+                if (skillData != null)
+                {
+                    icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skillData.spriteName);
+                    Debug.Log($"[SkillGridController] 3차 시도 (DataManager): {skillData.spriteName} → {(icon != null ? "성공" : "실패")}");
+                    // 캐시에도 등록
+                    skillDataCache[placedSkill.skillId] = skillData;
+                }
+                else
+                {
+                    Debug.Log($"[SkillGridController] 3차 시도 (DataManager): 스킬 ID '{placedSkill.skillId}' 찾을 수 없음");
+                }
+            }
+
+            // 4차: skillId 패턴 기반 직접 로드 (자동 마이그레이션) - 조민희
+            if (icon == null)
+            {
+                icon = TryLoadIconBySkillIdPattern(placedSkill.skillId);
+                Debug.Log($"[SkillGridController] 4차 시도 (패턴 매칭): {placedSkill.skillId} → {(icon != null ? "성공" : "실패")}");
+            }
+
+            if (icon == null)
+            {
+                Debug.LogWarning($"[SkillGridController] 아이콘 로드 실패: {placedSkill.skillId}, spriteName: {placedSkill.spriteName}");
+            }
+
+            // 저장할 spriteName 결정 (조민희: 우선순위 - 기존 저장값 > skillData > 빈값)
+            string finalSpriteName = placedSkill.spriteName;
+            if (string.IsNullOrEmpty(finalSpriteName) && skillData != null)
+            {
+                finalSpriteName = skillData.spriteName;
             }
 
             // 초기화 (PlacedSkillData의 정보 사용)
             string displayName = string.IsNullOrEmpty(placedSkill.skillName) ? placedSkill.skillId : placedSkill.skillName;
-            item.Initialize(placedSkill.skillId, displayName, placedSkill.shapeType, placedSkill.skillType, icon);
+            item.Initialize(placedSkill.skillId, displayName, placedSkill.shapeType, placedSkill.skillType, icon, finalSpriteName);
             item.SetGridManager(gridManager);
             item.SetGridController(this);
             item.SetInventoryContainer(inventoryContainer);
@@ -456,6 +505,90 @@ namespace SlayerLegend.Skill.UI.Grid
         }
 
         #endregion
+
+        // skillId 패턴 기반 아이콘 로드 (자동 마이그레이션) - 조민희
+        // 예: "Fire_01" → Skill/skillicon/skill_fire/Fire_01 시도
+        // 확장: 다양한 파일명 패턴 시도 (숫자만 추출 등)
+        private Sprite TryLoadIconBySkillIdPattern(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId)) return null;
+
+            string lowerId = skillId.ToLower();
+            string elementFolder = "skill_none"; // 기본값
+
+            // 속성 폴더 결정
+            if (lowerId.StartsWith("fire") || lowerId.Contains("_fire"))
+                elementFolder = "skill_fire";
+            else if (lowerId.StartsWith("water") || lowerId.Contains("_water"))
+                elementFolder = "skill_water";
+            else if (lowerId.StartsWith("earth") || lowerId.Contains("_earth"))
+                elementFolder = "skill_earth";
+            else if (lowerId.StartsWith("wind") || lowerId.Contains("_wind"))
+                elementFolder = "skill_wind";
+
+            // 숫자 부분 추출 (예: Fire_04 → 04)
+            string numberPart = "";
+            var parts = skillId.Split('_');
+            if (parts.Length > 1)
+            {
+                numberPart = parts[parts.Length - 1];
+            }
+
+            // 가능한 경로들 시도 (다양한 패턴)
+            List<string> paths = new List<string>
+            {
+                $"Skill/skillicon/{elementFolder}/{skillId}",
+                $"Skill/skillicon/{elementFolder}/{skillId.ToLower()}",
+                $"Skill/skillicon/{skillId}",
+                $"Skill/skillicon/{skillId.ToLower()}",
+                $"Skill/skillicon/skill_none/{skillId}",
+                $"Skill/skillicon/skill_none/{skillId.ToLower()}"
+            };
+
+            // 숫자 패턴 추가 (예: Fire_04 → skill_fire/04, skill_fire/fire_04)
+            if (!string.IsNullOrEmpty(numberPart))
+            {
+                paths.Add($"Skill/skillicon/{elementFolder}/{numberPart}");
+                paths.Add($"Skill/skillicon/{elementFolder}/{elementFolder}_{numberPart}");
+                paths.Add($"Skill/skillicon/{numberPart}");
+
+                // 0 패딩 추가 (예: 4 → 04)
+                if (numberPart.Length == 1 && int.TryParse(numberPart, out _))
+                {
+                    string paddedNumber = "0" + numberPart;
+                    paths.Add($"Skill/skillicon/{elementFolder}/{paddedNumber}");
+                    paths.Add($"Skill/skillicon/{elementFolder}/{paddedNumber}_*");  // 와일드카드는 Resources.Load에서 작동 안함 but 로그용
+                }
+            }
+
+            // Unity Resources.Load는 와일드카드를 지원하지 않으므로
+            // 번호로 시작하는 파일 찾기 위해 Resources.LoadAll 사용 시도
+            if (!string.IsNullOrEmpty(numberPart))
+            {
+                string paddedNumber = numberPart.Length == 1 ? "0" + numberPart : numberPart;
+                var allSprites = Resources.LoadAll<Sprite>($"Skill/skillicon/{elementFolder}");
+                foreach (var sprite in allSprites)
+                {
+                    if (sprite.name.StartsWith(paddedNumber + "_"))
+                    {
+                        Debug.Log($"[SkillGridController] 번호 매칭 성공: {skillId} → {sprite.name}");
+                        return sprite;
+                    }
+                }
+            }
+
+            foreach (string path in paths)
+            {
+                var sprite = Resources.Load<Sprite>(path);
+                if (sprite != null)
+                {
+                    Debug.Log($"[SkillGridController] 패턴 매칭 성공: {skillId} → {path}");
+                    return sprite;
+                }
+            }
+
+            return null;
+        }
 
         #region 디버그/테스트
 

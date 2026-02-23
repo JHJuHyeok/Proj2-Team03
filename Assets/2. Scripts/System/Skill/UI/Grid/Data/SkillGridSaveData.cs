@@ -10,6 +10,7 @@ namespace SlayerLegend.Skill.UI.Grid
     {
         public string skillId;              // 스킬 ID
         public string skillName;            // 스킬 이름 (로드 시 표시용)
+        public string spriteName;           // 스프라이트 이름 (조민희: 아이콘 복원용)
         public int gridX;                   // 그리드 X 좌표
         public int gridY;                   // 그리드 Y 좌표
         public int rotation;                // 회전 (0, 90, 180, 270)
@@ -22,10 +23,11 @@ namespace SlayerLegend.Skill.UI.Grid
         // 생성자
         public PlacedSkillData() { }
 
-        public PlacedSkillData(string id, Vector2Int pos, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active)
+        public PlacedSkillData(string id, Vector2Int pos, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active, string sprite = "")
         {
             skillId = id;
             skillName = string.IsNullOrEmpty(name) ? id : name;
+            spriteName = sprite;
             gridX = pos.x;
             gridY = pos.y;
             rotation = SkillShapeData.NormalizeRotation(rot);
@@ -33,10 +35,11 @@ namespace SlayerLegend.Skill.UI.Grid
             skillType = type;
         }
 
-        public PlacedSkillData(string id, int x, int y, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active)
+        public PlacedSkillData(string id, int x, int y, int rot, SkillShapeType shape = SkillShapeType.OneByOne, string name = "", SkillType type = SkillType.Active, string sprite = "")
         {
             skillId = id;
             skillName = string.IsNullOrEmpty(name) ? id : name;
+            spriteName = sprite;
             gridX = x;
             gridY = y;
             rotation = SkillShapeData.NormalizeRotation(rot);
