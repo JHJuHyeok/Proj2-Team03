@@ -397,6 +397,7 @@ MonoBehaviour:
   _rankImage: {fileID: 0}
   _jewelText: {fileID: 557224997}
   _diamondText: {fileID: 2133602575}
+  getCurrButtons: []
 --- !u!4 &225186469
 Transform:
   m_ObjectHideFlags: 0
@@ -938,9 +939,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 225186467}
-        m_TargetAssemblyTypeName: InfoProvider, Assembly-CSharp
-        m_MethodName: 
+      - m_Target: {fileID: 225186468}
+        m_TargetAssemblyTypeName: InfoHandler, Assembly-CSharp
+        m_MethodName: GetDiamond3500
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
