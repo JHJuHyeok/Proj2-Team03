@@ -9,7 +9,6 @@ UIPopup
 public abstract class UIPopup : MonoBehaviour
 {
     [SerializeField] private PopupId popupId = PopupId.None;
-
     public PopupId PopupId => popupId;
 
     public virtual void OnOpen(object param)
@@ -20,5 +19,12 @@ public abstract class UIPopup : MonoBehaviour
     public virtual void OnClose()
     {
         gameObject.SetActive(false);
+    }
+
+    // 닫기 버튼에서 호출
+    public void CloseSelf()
+    {
+        if (PopupManager.Instance == null) return;
+        PopupManager.Instance.CloseIfTop(this);
     }
 }
