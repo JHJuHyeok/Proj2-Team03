@@ -6,12 +6,16 @@ namespace SlayerLegend.Skill.UI.Grid
 {
     // 스킬 그리드 컨트롤러
     // 그리드, 인벤토리, 저장/로드를 통합 관리
+    // 2026-02-24 조민희: SkillController 연동 기능 추가
     public class SkillGridController : MonoBehaviour
     {
         [Header("컴포넌트 참조")]
         [SerializeField] private SkillGridManager gridManager;
         [SerializeField] private Transform inventoryContainer;
         [SerializeField] private GameObject draggableItemPrefab;
+
+        [Header("스킬 시스템 연동")]
+        [SerializeField] private SkillController skillController;  // 조민희 추가: 스킬 컨트롤러 참조
 
         [Header("설정")]
         [SerializeField] private string saveKey = "SkillGridData";
@@ -37,6 +41,12 @@ namespace SlayerLegend.Skill.UI.Grid
             if (gridManager == null)
             {
                 gridManager = GetComponentInChildren<SkillGridManager>();
+            }
+
+            // 조민희 추가: SkillController 자동 찾기
+            if (skillController == null)
+            {
+                skillController = FindObjectOfType<SkillController>();
             }
         }
 
@@ -108,7 +118,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             OnSkillAddedToInventory?.Invoke(skillId);
 
-            Debug.Log($"[SkillGridController] 인벤토리에 스킬 추가: {skillName}");
             return item;
         }
 
@@ -138,8 +147,6 @@ namespace SlayerLegend.Skill.UI.Grid
             Destroy(item.gameObject);
 
             OnSkillRemovedFromInventory?.Invoke(skillId);
-
-            Debug.Log($"[SkillGridController] 인벤토리에서 스킬 제거: {skillId}");
         }
 
         // ===== 새로운 방식: 슬롯 클릭 → 아이템 생성 =====
@@ -172,7 +179,6 @@ namespace SlayerLegend.Skill.UI.Grid
             // 이미 그리드에 배치되어 있으면 생성 안 함
             if (IsSkillOnGrid(skillId))
             {
-                Debug.Log($"[SkillGridController] 스킬이 이미 그리드에 있음: {skillId}");
                 return null;
             }
 
@@ -183,7 +189,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 var placedSkill = gridManager.GetSaveData().GetPlacedSkill(skillId);
                 if (placedSkill != null)
                 {
-                    Debug.Log($"[SkillGridController] saveData에서 고아 스킬 제거: {skillId}");
                     gridManager.RemoveSkill(skillId);
                 }
             }
@@ -236,7 +241,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             OnSkillAddedToInventory?.Invoke(skillId);
 
-            Debug.Log($"[SkillGridController] 슬롯에서 아이템 생성: {skillData.name}");
             return item;
         }
 
@@ -266,8 +270,6 @@ namespace SlayerLegend.Skill.UI.Grid
             Destroy(item.gameObject);
 
             OnSkillRemovedFromInventory?.Invoke(skillId);
-
-            Debug.Log($"[SkillGridController] 아이템 삭제: {skillId}");
         }
 
         // ===== A안: 로드 시 아이템 복원 =====
@@ -312,14 +314,12 @@ namespace SlayerLegend.Skill.UI.Grid
             if (!string.IsNullOrEmpty(placedSkill.spriteName))
             {
                 icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(placedSkill.spriteName);
-                Debug.Log($"[SkillGridController] 1차 시도 (spriteName): {placedSkill.spriteName} → {(icon != null ? "성공" : "실패")}");
             }
 
             // 2차: 캐시에서 찾기
             if (icon == null && skillDataCache.TryGetValue(placedSkill.skillId, out skillData))
             {
                 icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skillData.spriteName);
-                Debug.Log($"[SkillGridController] 2차 시도 (cache): {skillData.spriteName} → {(icon != null ? "성공" : "실패")}");
             }
 
             // 3차: DataManager에서 찾기 (fallback)
@@ -330,13 +330,8 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (skillData != null)
                 {
                     icon = SlayerLegend.Resource.ResourceManager.Instance?.LoadSprite(skillData.spriteName);
-                    Debug.Log($"[SkillGridController] 3차 시도 (DataManager): {skillData.spriteName} → {(icon != null ? "성공" : "실패")}");
                     // 캐시에도 등록
                     skillDataCache[placedSkill.skillId] = skillData;
-                }
-                else
-                {
-                    Debug.Log($"[SkillGridController] 3차 시도 (DataManager): 스킬 ID '{placedSkill.skillId}' 찾을 수 없음");
                 }
             }
 
@@ -344,7 +339,6 @@ namespace SlayerLegend.Skill.UI.Grid
             if (icon == null)
             {
                 icon = TryLoadIconBySkillIdPattern(placedSkill.skillId);
-                Debug.Log($"[SkillGridController] 4차 시도 (패턴 매칭): {placedSkill.skillId} → {(icon != null ? "성공" : "실패")}");
             }
 
             if (icon == null)
@@ -378,7 +372,6 @@ namespace SlayerLegend.Skill.UI.Grid
             inventoryItems.Add(item);
             itemsById[placedSkill.skillId] = item;
 
-            Debug.Log($"[SkillGridController] 저장 데이터에서 아이템 복원: {displayName} at {placedSkill.GridPosition}");
             return item;
         }
 
@@ -425,14 +418,111 @@ namespace SlayerLegend.Skill.UI.Grid
 
         private void HandleItemPlaced(SkillDraggableItem item)
         {
-            Debug.Log($"[SkillGridController] 스킬 배치됨: {item.SkillName}");
             SaveGridData();
+
+            // 조민희 추가: 스킬을 SkillController에 등록
+            RegisterSkillToController(item.SkillId);
         }
 
         private void HandleItemRemoved(SkillDraggableItem item)
         {
-            Debug.Log($"[SkillGridController] 스킬 제거됨: {item.SkillName}");
             SaveGridData();
+
+            // 조민희 추가: 스킬을 SkillController에서 해제
+            DeregisterSkillFromController(item.SkillId);
+        }
+
+        // 조민희 추가: 스킬을 SkillController에 등록
+        private void RegisterSkillToController(string skillId)
+        {
+            if (skillController == null)
+            {
+                Debug.LogWarning("[SkillGridController] SkillController가 없습니다.");
+                return;
+            }
+
+            // 스킬 데이터 가져오기
+            if (!skillDataCache.TryGetValue(skillId, out var skillData))
+            {
+                // DataManager에서 찾기
+                if (DataManager.skills != null)
+                {
+                    skillData = DataManager.skills.Get(skillId);
+                    if (skillData != null)
+                    {
+                        skillDataCache[skillId] = skillData;
+                    }
+                }
+            }
+
+            if (skillData == null)
+            {
+                Debug.LogWarning($"[SkillGridController] 스킬 데이터를 찾을 수 없음: {skillId}");
+                return;
+            }
+
+            // 스킬 타입에 따라 등록
+            if (skillData.type == SkillType.Active)
+            {
+                var skill = skillController.CreateActiveSkill(skillData);
+                if (skill != null)
+                {
+                    skillController.AddActiveSkill(skill);
+                    UnityEngine.Debug.Log($"[SkillGridController] Active 스킬 등록: {skillData.name}");
+                }
+            }
+            else if (skillData.type == SkillType.Passive)
+            {
+                var skill = skillController.CreatePassiveSkill(skillData);
+                if (skill != null)
+                {
+                    skillController.AddPassiveSkill(skill);
+                    UnityEngine.Debug.Log($"[SkillGridController] Passive 스킬 등록: {skillData.name}");
+                }
+            }
+        }
+
+        // 조민희 추가: 스킬을 SkillController에서 해제
+        private void DeregisterSkillFromController(string skillId)
+        {
+            if (skillController == null)
+            {
+                return;
+            }
+
+            // 스킬 데이터 가져오기
+            SkillData skillData = null;
+            if (skillDataCache.TryGetValue(skillId, out skillData))
+            {
+                // 캐시에서 찾음
+            }
+            else if (DataManager.skills != null)
+            {
+                skillData = DataManager.skills.Get(skillId);
+            }
+
+            if (skillData == null)
+            {
+                // 데이터 없어도 ID로 제거 시도
+                bool removed = skillController.RemoveActiveSkill(skillId);
+                if (!removed)
+                {
+                    skillController.RemovePassiveSkill(skillId);
+                }
+                return;
+            }
+
+            // 스킬 타입에 따라 해제
+            if (skillData.type == SkillType.Active)
+            {
+                skillController.RemoveActiveSkill(skillId);
+                UnityEngine.Debug.Log($"[SkillGridController] Active 스킬 해제: {skillData.name}");
+            }
+            else if (skillData.type == SkillType.Passive)
+            {
+                skillController.RemovePassiveSkill(skillId);
+                UnityEngine.Debug.Log($"[SkillGridController] Passive 스킬 해제: {skillData.name}");
+            }
         }
 
         #region 저장/로드
@@ -448,8 +538,6 @@ namespace SlayerLegend.Skill.UI.Grid
             string json = saveData.ToJson();
             PlayerPrefs.SetString(saveKey, json);
             PlayerPrefs.Save();
-
-            Debug.Log($"[SkillGridController] 그리드 데이터 저장 완료 ({saveData.placedSkills.Count}개 스킬)");
         }
 
         // 그리드 데이터 로드
@@ -459,7 +547,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             if (!PlayerPrefs.HasKey(saveKey))
             {
-                Debug.Log("[SkillGridController] 저장된 데이터가 없습니다.");
                 return;
             }
 
@@ -468,7 +555,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             if (saveData == null || saveData.placedSkills.Count == 0)
             {
-                Debug.Log("[SkillGridController] 로드할 데이터가 없습니다.");
                 return;
             }
 
@@ -483,10 +569,11 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (item != null)
                 {
                     restoredCount++;
+
+                    // 조민희 추가: 로드된 스킬을 SkillController에 등록
+                    RegisterSkillToController(placedSkill.skillId);
                 }
             }
-
-            Debug.Log($"[SkillGridController] 그리드 데이터 로드 완료 ({restoredCount}/{saveData.placedSkills.Count}개 스킬 복원)");
         }
 
         // 저장 데이터 삭제
@@ -494,8 +581,6 @@ namespace SlayerLegend.Skill.UI.Grid
         {
             PlayerPrefs.DeleteKey(saveKey);
             PlayerPrefs.Save();
-
-            Debug.Log("[SkillGridController] 저장된 데이터 삭제");
         }
 
         // 저장 데이터 존재 여부
@@ -571,7 +656,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 {
                     if (sprite.name.StartsWith(paddedNumber + "_"))
                     {
-                        Debug.Log($"[SkillGridController] 번호 매칭 성공: {skillId} → {sprite.name}");
                         return sprite;
                     }
                 }
@@ -582,7 +666,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 var sprite = Resources.Load<Sprite>(path);
                 if (sprite != null)
                 {
-                    Debug.Log($"[SkillGridController] 패턴 매칭 성공: {skillId} → {path}");
                     return sprite;
                 }
             }
@@ -614,6 +697,18 @@ namespace SlayerLegend.Skill.UI.Grid
         [ContextMenu("Clear All")]
         public void ClearAll()
         {
+            // 조민희 추가: 모든 스킬을 SkillController에서 해제
+            if (skillController != null)
+            {
+                foreach (var item in inventoryItems)
+                {
+                    if (item.IsOnGrid)
+                    {
+                        DeregisterSkillFromController(item.SkillId);
+                    }
+                }
+            }
+
             // 모든 아이템 제거
             var itemsToRemove = new List<string>(itemsById.Keys);
             foreach (var id in itemsToRemove)
@@ -626,17 +721,15 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 gridManager.ClearGrid();
             }
-
-            Debug.Log("[SkillGridController] 전체 초기화 완료");
         }
 
         [ContextMenu("Print Status")]
         public void PrintStatus()
         {
-            Debug.Log($"=== 스킬 그리드 상태 ===");
-            Debug.Log($"인벤토리 스킬: {GetInventoryItems().Count}개");
-            Debug.Log($"배치된 스킬: {GetPlacedItems().Count}개");
-            Debug.Log($"그리드 사용률: {SkillGridValidator.CalculateGridUsage(gridManager) * 100:F1}%");
+            UnityEngine.Debug.Log($"=== 스킬 그리드 상태 ===");
+            UnityEngine.Debug.Log($"인벤토리 스킬: {GetInventoryItems().Count}개");
+            UnityEngine.Debug.Log($"배치된 스킬: {GetPlacedItems().Count}개");
+            UnityEngine.Debug.Log($"그리드 사용률: {SkillGridValidator.CalculateGridUsage(gridManager) * 100:F1}%");
         }
 
         #endregion

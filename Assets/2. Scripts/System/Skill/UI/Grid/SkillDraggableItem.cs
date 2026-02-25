@@ -278,7 +278,6 @@ namespace SlayerLegend.Skill.UI.Grid
             UpdateCellImages();
             UpdatePreview();
 
-            Debug.Log($"[SkillDraggableItem] {skillName} 회전: {currentRotation}도");
         }
 
         // 드래그 시작
@@ -323,7 +322,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             OnDragStarted?.Invoke(this);
 
-            Debug.Log($"[SkillDraggableItem] 드래그 시작: {skillName}");
         }
 
         // 드래그 중
@@ -355,7 +353,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 그리드 영역 내부인지 확인
             bool isInsideGrid = IsInsideGridArea();
-            Debug.Log($"[SkillDraggableItem] IsInsideGridArea: {isInsideGrid}, 스킬: {skillName}, 모양: {shapeType}");
 
             if (isInsideGrid)
             {
@@ -365,14 +362,12 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (!placed)
                 {
                     // 배치 실패 시 인벤토리로 복귀
-                    Debug.Log($"[SkillDraggableItem] TryPlaceOnGrid 실패, ReturnToInventory 호출");
                     ReturnToInventory();
                 }
             }
             else
             {
                 // 그리드 밖으로 드래그 시 인벤토리로 복귀
-                Debug.Log($"[SkillDraggableItem] 그리드 영역 밖, ReturnToInventory 호출");
                 ReturnToInventory();
             }
 
@@ -383,8 +378,6 @@ namespace SlayerLegend.Skill.UI.Grid
             }
 
             OnDragEnded?.Invoke(this);
-
-            Debug.Log($"[SkillDraggableItem] 드래그 종료: {skillName}");
         }
 
         // 그리드 영역 내부인지 확인 (스킬 모양 고려)
@@ -392,31 +385,24 @@ namespace SlayerLegend.Skill.UI.Grid
         {
             if (gridManager == null)
             {
-                Debug.Log("[SkillDraggableItem] IsInsideGridArea: gridManager가 null");
                 return false;
             }
 
             Vector2Int gridPos = gridManager.ScreenToGridPosition(Input.mousePosition);
-            Debug.Log($"[SkillDraggableItem] IsInsideGridArea: 마우스좌표={gridPos}");
 
             // 스킬이 차지하는 모든 좌표 계산
             var shapeData = SkillShapeData.Create(shapeType);
             var occupiedCells = shapeData.GetOccupiedCells(gridPos, currentRotation);
-
-            string cellsStr = string.Join(", ", occupiedCells.ConvertAll(c => $"({c.x},{c.y})"));
-            Debug.Log($"[SkillDraggableItem] IsInsideGridArea: 스킬이 차지하는 좌표들={cellsStr}");
 
             // 모든 좌표가 그리드 범위 내인지 확인
             foreach (var cell in occupiedCells)
             {
                 if (!gridManager.IsWithinGrid(cell))
                 {
-                    Debug.Log($"[SkillDraggableItem] IsInsideGridArea: 좌표 ({cell.x},{cell.y})가 그리드 범위 밖");
                     return false;  // 하나라도 범위 밖이면 false
                 }
             }
 
-            Debug.Log("[SkillDraggableItem] IsInsideGridArea: 모든 좌표가 그리드 범위 내");
             return true;
         }
 
@@ -436,16 +422,11 @@ namespace SlayerLegend.Skill.UI.Grid
                         {
                             currentRotation = newRotation;
                             UpdateCellImages();
-                            Debug.Log($"[SkillDraggableItem] 그리드에서 회전: {skillName} -> {currentRotation}도");
                         }
                         else
                         {
                             Debug.LogWarning($"[SkillDraggableItem] 회전 실패: {skillName}");
                         }
-                    }
-                    else
-                    {
-                        Debug.Log($"[SkillDraggableItem] 회전 불가: {skillName}");
                     }
                 }
                 else if (!isDragging)
@@ -492,7 +473,6 @@ namespace SlayerLegend.Skill.UI.Grid
             }
 
             Vector2Int targetPos = gridManager.ScreenToGridPosition(Input.mousePosition);
-            Debug.Log($"[SkillDraggableItem] TryPlaceOnGrid: 스킬={skillName}, 타겟좌표={targetPos}, 회전={currentRotation}, 모양={shapeType}");
 
             bool success = gridManager.TryPlaceSkill(skillId, targetPos, currentRotation, shapeType);
 
@@ -521,11 +501,9 @@ namespace SlayerLegend.Skill.UI.Grid
                 UpdateCellImages();
 
                 OnItemPlaced?.Invoke(this);
-                Debug.Log($"[SkillDraggableItem] 배치 성공: {skillName} at {targetPos}");
                 return true;
             }
 
-            Debug.Log($"[SkillDraggableItem] TryPlaceSkill 실패: 스킬={skillName}, 좌표={targetPos}");
             return false;
         }
 
@@ -555,7 +533,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (placedSkill != null && placedSkill.skillId == skillId)
                 {
                     gridManager.RemoveSkill(skillId);
-                    Debug.Log($"[SkillDraggableItem] ReturnToInventory: saveData에서 제거 {skillId}");
                 }
             }
 
@@ -565,7 +542,6 @@ namespace SlayerLegend.Skill.UI.Grid
             if (destroyOnRemove)
             {
                 OnItemRemoved?.Invoke(this);
-                Debug.Log($"[SkillDraggableItem] 아이템 삭제 요청: {skillName}");
 
                 if (gridController != null)
                 {
@@ -604,7 +580,6 @@ namespace SlayerLegend.Skill.UI.Grid
             UpdateCellImages();
 
             OnItemRemoved?.Invoke(this);
-            Debug.Log($"[SkillDraggableItem] 인벤토리로 복귀: {skillName}");
         }
 
         // 그리드에서 제거 (외부 호출용)

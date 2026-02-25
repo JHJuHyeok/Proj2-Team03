@@ -44,11 +44,19 @@ namespace SlayerLegend.Skill.Data
         [Tooltip("기절 지속 시간 (초)")]
         public float stunDuration = 1f;
 
+        [Tooltip("기절 확률 (0~100%)")]
+        [Range(0f, 100f)]
+        public float stunChance = 100f;
+
         [Tooltip("빙결 여부")]
         public bool isFreeze = false;
 
         [Tooltip("빙결 지속 시간 (초)")]
         public float freezeDuration = 2f;
+
+        [Tooltip("빙결 확률 (0~100%)")]
+        [Range(0f, 100f)]
+        public float freezeChance = 100f;
 
         [Tooltip("속박 여부")]
         public bool isRoot = false;
@@ -71,6 +79,23 @@ namespace SlayerLegend.Skill.Data
 
         [Tooltip("DoT 타입 (burn, poison 등)")]
         public string dotType = "burn";
+
+        // 조민희 추가: 타겟 제한 및 다회 타격 (2026-02-24)
+        [Header("타겟 제한 및 다회 타격")]
+        [Tooltip("최대 타겟 수 (-1 = 무제한)")]
+        public int maxTargets = -1;
+
+        [Tooltip("타격 횟수 (1 = 1회, 2 = 2회 등)")]
+        public int hitCount = 1;
+
+        [Tooltip("다회 타격 간격 (초)")]
+        public float hitInterval = 0.2f;
+
+        [Tooltip("랜덤 타격 모드 (매 타격마다 랜덤 적 선택)")]
+        public bool isRandomHit = false;
+
+        [Tooltip("마지막 타격 데미지 배율 (1.0 = 기본, 2.0 = 2배)")]
+        public float lastHitMultiplier = 1f;
 
         #region 유틸리티 메서드
 

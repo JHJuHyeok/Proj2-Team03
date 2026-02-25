@@ -217,7 +217,6 @@ namespace SlayerLegend.Skill.UI.Grid
             // 유효성 검사
             if (!CanPlaceSkill(skillId, position, rotation, shapeType, out string reason))
             {
-                Debug.Log($"[SkillGridManager] 배치 실패: {reason}");
                 return false;
             }
 
@@ -234,7 +233,6 @@ namespace SlayerLegend.Skill.UI.Grid
             OnSkillPlaced?.Invoke(placedSkill);
             OnGridChanged?.Invoke();
 
-            Debug.Log($"[SkillGridManager] 스킬 배치 성공: {skillId} at {position}, rotation: {rotation}");
             return true;
         }
 
@@ -297,7 +295,6 @@ namespace SlayerLegend.Skill.UI.Grid
             PlacedSkillData skill = saveData.GetPlacedSkill(skillId);
             if (skill == null)
             {
-                Debug.Log($"[SkillGridManager] 제거할 스킬이 없습니다: {skillId}");
                 return false;
             }
 
@@ -311,7 +308,6 @@ namespace SlayerLegend.Skill.UI.Grid
             OnSkillRemoved?.Invoke(skillId);
             OnGridChanged?.Invoke();
 
-            Debug.Log($"[SkillGridManager] 스킬 제거: {skillId}");
             return true;
         }
 
@@ -343,7 +339,6 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 // 불가능하면 원위치로 복구
                 ApplySkillToGrid(skill);
-                Debug.Log($"[SkillGridManager] 이동 실패: {reason}");
                 return false;
             }
 

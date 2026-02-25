@@ -45,9 +45,7 @@ namespace SlayerLegend.Skill.UI
                 // skills가 비어있으면 로드
                 if (DataManager.skills.GetAll() == null || DataManager.skills.GetAll().Count == 0)
                 {
-                    Debug.Log("[SkillGridInitializer] DataManager 초기화 중...");
                     await DataManager.LoadAllDatabase();
-                    Debug.Log("[SkillGridInitializer] DataManager 초기화 완료");
                 }
             }
 
@@ -85,8 +83,6 @@ namespace SlayerLegend.Skill.UI
 
             IsInitialized = true;
             OnInitializationComplete?.Invoke();
-
-            Debug.Log("[SkillGridInitializer] 초기화 완료");
         }
 
         // 스킬 데이터 로드
@@ -118,8 +114,6 @@ namespace SlayerLegend.Skill.UI
                 // 인벤토리 UI가 없으면 컨트롤러에 직접 추가
                 LoadSkillsToController(allSkills);
             }
-
-            Debug.Log($"[SkillGridInitializer] {allSkills.Count}개 스킬 로드 완료");
         }
 
         // 컨트롤러에 직접 스킬 추가
@@ -147,8 +141,6 @@ namespace SlayerLegend.Skill.UI
             {
                 gridController.SaveGridData();
             }
-
-            Debug.Log("[SkillGridInitializer] 저장 완료");
         }
 
         // 전체 초기화
@@ -174,8 +166,6 @@ namespace SlayerLegend.Skill.UI
 
             // 4. 스킬 데이터 다시 로드
             LoadSkillData();
-
-            Debug.Log("[SkillGridInitializer] 초기화 및 재로드 완료");
         }
 
         // 스킬 ID로 그리드에서 제거

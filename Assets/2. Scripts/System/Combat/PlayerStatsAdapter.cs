@@ -126,6 +126,101 @@ namespace SlayerLegend.Combat
             Debug.LogWarning($"[PlayerStatsAdapter] RemoveGoldGainPercentModifier: 미구현됨 (source: {source})");
         }
 
+        // 조민희 추가: 확장 버프 모디파이어
+        public void AddAttackSpeedModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddAttackSpeedModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void AddMoveSpeedModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddMoveSpeedModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void AddManaRegenModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddManaRegenModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void AddHealthRegenModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddHealthRegenModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void RemoveAttackSpeedModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveAttackSpeedModifier: 미구현됨 (source: {source})");
+        }
+
+        public void RemoveMoveSpeedModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveMoveSpeedModifier: 미구현됨 (source: {source})");
+        }
+
+        public void RemoveManaRegenModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveManaRegenModifier: 미구현됨 (source: {source})");
+        }
+
+        public void RemoveHealthRegenModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveHealthRegenModifier: 미구현됨 (source: {source})");
+        }
+
+        // 조민희 추가: Phase 8 특수 버프 모디파이어
+        public void AddEvasionModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddEvasionModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void AddCooldownReductionModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddCooldownReductionModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void AddMissingHpDamageModifier(object source, float value)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] AddMissingHpDamageModifier: 미구현됨 (source: {source}, value: {value})");
+        }
+
+        public void RemoveEvasionModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveEvasionModifier: 미구현됨 (source: {source})");
+        }
+
+        public void RemoveCooldownReductionModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveCooldownReductionModifier: 미구현됨 (source: {source})");
+        }
+
+        public void RemoveMissingHpDamageModifier(object source)
+        {
+            Debug.LogWarning($"[PlayerStatsAdapter] RemoveMissingHpDamageModifier: 미구현됨 (source: {source})");
+        }
+
+        // 조민희 추가: Phase 8 체력 조작
+        public void SacrificeHealth(float percent)
+        {
+            if (_stats == null) return;
+            float sacrificeAmount = MaxHealth * percent;
+            // PlayerCombatStats에 TakeDamage 메서드가 있을 수 있음
+            Debug.LogWarning($"[PlayerStatsAdapter] SacrificeHealth: {percent * 100}% 체력 소모 (미구현)");
+        }
+
+        public void RestoreHealth(float percent)
+        {
+            if (_stats == null) return;
+            float restoreAmount = MaxHealth * percent;
+            Debug.LogWarning($"[PlayerStatsAdapter] RestoreHealth: {percent * 100}% 체력 회복 (미구현)");
+        }
+
+        public void RestoreMana(float percent)
+        {
+            if (_stats == null) return;
+            float restoreAmount = MaxMana * percent;
+            Debug.LogWarning($"[PlayerStatsAdapter] RestoreMana: {percent * 100}% 마나 회복 (미구현)");
+        }
+
         // 선택사항: 외부에서 직접 PlayerCombatStats에 접근할 수 있는 프로퍼티
         public PlayerCombatStats Stats => _stats;
     }

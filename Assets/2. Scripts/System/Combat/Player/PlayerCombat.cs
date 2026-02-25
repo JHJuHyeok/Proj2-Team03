@@ -1,4 +1,5 @@
 using UnityEngine;
+using SlayerLegend.Skill;  // 조민희 추가: PassiveSkill OnAttack() 연동용
 
 // 플레이어의 자동 근접 전투를 처리함
 // 가장 가까운 적을 타켓팅하고 쿨다운에 맞춰 공격함
@@ -6,6 +7,7 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerCombatStats playerStats;
+    [SerializeField] private SkillController skillController;  // 조민희 추가: 패시브 스킬 연동
 
     [Header("Settings")]
     [SerializeField] private bool autoAttackEnabled = true;
@@ -96,8 +98,24 @@ public class PlayerCombat : MonoBehaviour
         string critText = isCritical ? " [치명타]" : "";
         // Debug.Log($"[PlayerCombat] {_currentTarget.gameObject.name}에게 {damage:F1} 데미지 공격{critText}");
 
+        // 조민희 추가: 패시브 스킬에 공격 알림 (누적형 버프용)
+        NotifyPassiveSkillsOnAttack();
+
         // 선택사항: 공격 애니메이션/이펙트 트리거
         OnAttackExecuted(isCritical);
+    }
+
+    /// <summary>
+    /// 조민희 추가: 패시브 스킬에 공격 알림 (공격 기반 누적 버프용)
+    /// </summary>
+    private void NotifyPassiveSkillsOnAttack()
+    {
+        if (skillController == null) return;
+
+        foreach (var passive in skillController.PassiveSkills)
+        {
+            passive?.OnAttack();
+        }
     }
 
     /// <summary>

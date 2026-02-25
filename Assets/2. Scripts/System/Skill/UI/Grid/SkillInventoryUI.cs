@@ -188,7 +188,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 // 이미 그리드에 있으면 아이템 생성 안 함
                 if (gridController.IsSkillOnGrid(slot.SkillData.id))
                 {
-                    Debug.Log($"[SkillInventoryUI] 스킬이 이미 그리드에 있음: {slot.SkillData.name}");
                     return;
                 }
 
@@ -198,7 +197,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 {
                     // 아이템 참조 업데이트
                     slot.SetDraggableItem(item);
-                    Debug.Log($"[SkillInventoryUI] 슬롯에서 아이템 생성됨: {slot.SkillData.name}");
                 }
             }
         }
@@ -260,7 +258,7 @@ namespace SlayerLegend.Skill.UI.Grid
 
         private void HandleSkillAdded(string skillId)
         {
-            Debug.Log($"[SkillInventoryUI] 스킬 추가됨: {skillId}");
+            // 스킬 추가됨
         }
 
         private void HandleSkillRemoved(string skillId)

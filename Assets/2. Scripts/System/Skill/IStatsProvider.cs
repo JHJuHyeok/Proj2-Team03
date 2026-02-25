@@ -36,6 +36,31 @@ namespace SlayerLegend.Skill
         void RemoveCriticalRateModifier(object source);
         void RemoveCriticalDamageModifier(object source);
         void RemoveGoldGainPercentModifier(object source);
+
+        // 조민희 추가: 확장 버프 모디파이어
+        void AddAttackSpeedModifier(object source, float value);
+        void AddMoveSpeedModifier(object source, float value);
+        void AddManaRegenModifier(object source, float value);
+        void AddHealthRegenModifier(object source, float value);
+
+        void RemoveAttackSpeedModifier(object source);
+        void RemoveMoveSpeedModifier(object source);
+        void RemoveManaRegenModifier(object source);
+        void RemoveHealthRegenModifier(object source);
+
+        // 조민희 추가: Phase 8 특수 버프 모디파이어
+        void AddEvasionModifier(object source, float value);
+        void AddCooldownReductionModifier(object source, float value);
+        void AddMissingHpDamageModifier(object source, float value);
+
+        void RemoveEvasionModifier(object source);
+        void RemoveCooldownReductionModifier(object source);
+        void RemoveMissingHpDamageModifier(object source);
+
+        // 조민희 추가: Phase 8 체력 조작
+        void SacrificeHealth(float percent);  // 체력 퍼센트 소모
+        void RestoreHealth(float percent);    // 체력 퍼센트 회복
+        void RestoreMana(float percent);      // 마나 퍼센트 회복
     }
 
     // 데미지를 받을 수 있는 대상 인터페이스

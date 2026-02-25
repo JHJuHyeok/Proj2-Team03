@@ -398,22 +398,46 @@ namespace SlayerLegend.Skill
                 totalDamage = stats.CalculateFinalDamage(isCritical);
             }
 
+            // 조민희 추가: 타겟 수 제한 및 다회 타격 설정 가져오기
+            int maxTargets = skillData.effectData?.maxTargets ?? -1;
+            int hitCount = skillData.effectData?.hitCount ?? 1;
+            float hitInterval = skillData.effectData?.hitInterval ?? 0.2f;
+            bool isRandomHit = skillData.effectData?.isRandomHit ?? false;
+
+            // 조민희 추가: CC 효과 설정 가져오기 (Phase 4)
+            bool isStun = skillData.effectData?.isStun ?? false;
+            float stunDuration = skillData.effectData?.stunDuration ?? 1f;
+            float stunChance = skillData.effectData?.stunChance ?? 100f;
+            bool isFreeze = skillData.effectData?.isFreeze ?? false;
+            float freezeDuration = skillData.effectData?.freezeDuration ?? 2f;
+            float freezeChance = skillData.effectData?.freezeChance ?? 100f;
+            float lastHitMultiplier = skillData.effectData?.lastHitMultiplier ?? 1f;
+
             // 폭발 오브젝트
             GameObject explosionObj = new GameObject($"Explosion_{skillData.name}");
             explosionObj.transform.position = spawnPosition;
 
-            // 폭발 로직 처리
+            // 폭발 로직 처리 (CC 효과 포함)
             var explosionLogic = explosionObj.AddComponent<Explosion>();
             explosionLogic.Initialize(radius, delay, effect,
                 totalDamage, isCritical, fireDirection,
                 dotDuration, dotDamage, dotTick, dotType,
-                cachedCaster.transform);
+                cachedCaster.transform, maxTargets, hitCount, hitInterval, isRandomHit,
+                isStun, stunDuration, stunChance,
+                isFreeze, freezeDuration, freezeChance,
+                lastHitMultiplier);
 
             string critText = isCritical ? " [치명타!]" : "";
-            Debug.Log($"[Skill] {skillData.name} 폭발 생성! → 예상 데미지: {totalDamage:F1}{critText}");
+            string targetInfo = maxTargets > 0 ? $"최대 {maxTargets}적" : "전체";
+            string hitInfo = hitCount > 1 ? $"{hitCount}회 타격" : "1회";
+            string ccInfo = "";
+            if (isStun) ccInfo += $" [스턴 {stunChance}%]";
+            if (isFreeze) ccInfo += $" [빙결 {freezeChance}%]";
+            Debug.Log($"[Skill] {skillData.name} 폭발 생성! → 예상 데미지: {totalDamage:F1}{critText} ({targetInfo}, {hitInfo}){ccInfo}");
 
-            // 일정 시간 후 제거
-            Destroy(explosionObj, 5f);
+            // 일정 시간 후 제거 (다회 타격 고려)
+            float destroyTime = hitCount > 1 ? 5f + (hitCount * hitInterval) : 5f;
+            Destroy(explosionObj, destroyTime);
         }
 
         public void ResetCooldown() => currentCooldown = 0f;

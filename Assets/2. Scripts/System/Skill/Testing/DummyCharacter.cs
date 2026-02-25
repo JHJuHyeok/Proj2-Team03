@@ -23,6 +23,17 @@ namespace SlayerLegend.Skill.Testing
 
         [Header("회복")]
         [SerializeField] private float manaRegenPerSecond = 30f;
+        [SerializeField] private float healthRegenPerSecond = 5f;
+
+        [Header("속도")]
+        [SerializeField] private float attackSpeed = 1.0f;    // 공격 속도 배율
+        [SerializeField] private float moveSpeed = 1.0f;      // 이동 속도 배율
+
+        // 재계산된 속도 스탯 (버프 반영)
+        private float _attackSpeed;
+        private float _moveSpeed;
+        private float _manaRegen;
+        private float _healthRegen;
 
         [Header("골드")]
         [SerializeField] private long startingGold = 10000L;
@@ -37,6 +48,12 @@ namespace SlayerLegend.Skill.Testing
         public float CriticalRate => _criticalRate;
         public double CriticalDamage => _criticalDamage;
 
+        // 조민희 추가: 확장 스탯 프로퍼티
+        public float AttackSpeed => _attackSpeed;
+        public float MoveSpeed => _moveSpeed;
+        public float ManaRegen => _manaRegen;
+        public float HealthRegen => _healthRegen;
+
         public long CurrentGold { get; private set; }
 
         // 버프 모디파이어 (source -> value)
@@ -48,6 +65,17 @@ namespace SlayerLegend.Skill.Testing
         private readonly Dictionary<object, float> _criticalDamageModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _goldGainPercentModifiers = new Dictionary<object, float>();
 
+        // 조민희 추가: 확장 버프 모디파이어
+        private readonly Dictionary<object, float> _attackSpeedModifiers = new Dictionary<object, float>();
+        private readonly Dictionary<object, float> _moveSpeedModifiers = new Dictionary<object, float>();
+        private readonly Dictionary<object, float> _manaRegenModifiers = new Dictionary<object, float>();
+        private readonly Dictionary<object, float> _healthRegenModifiers = new Dictionary<object, float>();
+
+        // 조민희 추가: Phase 8 특수 버프 모디파이어
+        private readonly Dictionary<object, float> _evasionModifiers = new Dictionary<object, float>();
+        private readonly Dictionary<object, float> _cooldownReductionModifiers = new Dictionary<object, float>();
+        private readonly Dictionary<object, float> _missingHpDamageModifiers = new Dictionary<object, float>();
+
         public event System.Action<long> OnGoldChanged;
 
         private void Awake()
@@ -56,6 +84,12 @@ namespace SlayerLegend.Skill.Testing
             _maxHealth = maxHealth;
             _criticalRate = criticalRate;
             _criticalDamage = criticalDamage;
+
+            // 조민희 추가: 확장 스탯 초기화
+            _attackSpeed = attackSpeed;
+            _moveSpeed = moveSpeed;
+            _manaRegen = manaRegenPerSecond;
+            _healthRegen = healthRegenPerSecond;
 
             CurrentHealth = _maxHealth;
             CurrentMana = maxMana;
@@ -70,10 +104,16 @@ namespace SlayerLegend.Skill.Testing
 
         private void Update()
         {
-            // 마나 자연 회복
+            // 마나 자연 회복 (버프 적용)
             if (CurrentMana < MaxMana)
             {
-                CurrentMana = Mathf.Min(MaxMana, CurrentMana + manaRegenPerSecond * Time.deltaTime);
+                CurrentMana = Mathf.Min(MaxMana, CurrentMana + _manaRegen * Time.deltaTime);
+            }
+
+            // 조민희 추가: 체력 자연 회복 (버프 적용)
+            if (CurrentHealth < MaxHealth)
+            {
+                CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + _healthRegen * Time.deltaTime);
             }
         }
 
@@ -154,6 +194,35 @@ namespace SlayerLegend.Skill.Testing
             _goldGainPercentModifiers[source] = value;
         }
 
+        // 조민희 추가: 확장 버프 모디파이어 Add
+        public void AddAttackSpeedModifier(object source, float value)
+        {
+            if (_attackSpeedModifiers.ContainsKey(source)) return;
+            _attackSpeedModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        public void AddMoveSpeedModifier(object source, float value)
+        {
+            if (_moveSpeedModifiers.ContainsKey(source)) return;
+            _moveSpeedModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        public void AddManaRegenModifier(object source, float value)
+        {
+            if (_manaRegenModifiers.ContainsKey(source)) return;
+            _manaRegenModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        public void AddHealthRegenModifier(object source, float value)
+        {
+            if (_healthRegenModifiers.ContainsKey(source)) return;
+            _healthRegenModifiers[source] = value;
+            RecalculateStats();
+        }
+
         public void RemoveAttackDamagePercentModifier(object source)
         {
             if (_attackDamagePercentModifiers.Remove(source))
@@ -193,6 +262,94 @@ namespace SlayerLegend.Skill.Testing
         public void RemoveGoldGainPercentModifier(object source)
         {
             _goldGainPercentModifiers.Remove(source);
+        }
+
+        // 조민희 추가: 확장 버프 모디파이어 Remove
+        public void RemoveAttackSpeedModifier(object source)
+        {
+            if (_attackSpeedModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        public void RemoveMoveSpeedModifier(object source)
+        {
+            if (_moveSpeedModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        public void RemoveManaRegenModifier(object source)
+        {
+            if (_manaRegenModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        public void RemoveHealthRegenModifier(object source)
+        {
+            if (_healthRegenModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        // 조민희 추가: Phase 8 특수 버프 모디파이어 Add
+        public void AddEvasionModifier(object source, float value)
+        {
+            if (_evasionModifiers.ContainsKey(source)) return;
+            _evasionModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        public void AddCooldownReductionModifier(object source, float value)
+        {
+            if (_cooldownReductionModifiers.ContainsKey(source)) return;
+            _cooldownReductionModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        public void AddMissingHpDamageModifier(object source, float value)
+        {
+            if (_missingHpDamageModifiers.ContainsKey(source)) return;
+            _missingHpDamageModifiers[source] = value;
+            RecalculateStats();
+        }
+
+        // 조민희 추가: Phase 8 특수 버프 모디파이어 Remove
+        public void RemoveEvasionModifier(object source)
+        {
+            if (_evasionModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        public void RemoveCooldownReductionModifier(object source)
+        {
+            if (_cooldownReductionModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        public void RemoveMissingHpDamageModifier(object source)
+        {
+            if (_missingHpDamageModifiers.Remove(source))
+                RecalculateStats();
+        }
+
+        // 조민희 추가: Phase 8 체력 조작
+        public void SacrificeHealth(float percent)
+        {
+            float sacrificeAmount = MaxHealth * percent;
+            CurrentHealth = Mathf.Max(0, CurrentHealth - sacrificeAmount);
+            Debug.Log($"[DummyCharacter] 체력 소모: -{sacrificeAmount:F1} ({percent * 100}%), 남은: {CurrentHealth:F1}");
+        }
+
+        public void RestoreHealth(float percent)
+        {
+            float restoreAmount = MaxHealth * percent;
+            CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + restoreAmount);
+            Debug.Log($"[DummyCharacter] 체력 회복: +{restoreAmount:F1} ({percent * 100}%), 현재: {CurrentHealth:F1}");
+        }
+
+        public void RestoreMana(float percent)
+        {
+            float restoreAmount = MaxMana * percent;
+            CurrentMana = Mathf.Min(MaxMana, CurrentMana + restoreAmount);
+            Debug.Log($"[DummyCharacter] 마나 회복: +{restoreAmount:F1} ({percent * 100}%), 현재: {CurrentMana:F1}");
         }
 
         private void RecalculateStats()
@@ -235,7 +392,52 @@ namespace SlayerLegend.Skill.Testing
             foreach (var mod in _criticalDamageModifiers.Values)
                 _criticalDamage += mod;
 
-            Debug.Log($"[DummyCharacter] 스탯 재계산 - ATK: {AttackDamage:F1}, HP: {_maxHealth:F1}, CRIT: {_criticalRate:P2}, CRIT_DMG: {_criticalDamage:F2}");
+            // 조민희 추가: 확장 스탯 재계산
+            // 공격 속도 재계산
+            _attackSpeed = attackSpeed;
+            foreach (var mod in _attackSpeedModifiers.Values)
+                _attackSpeed *= (1 + mod / 100f);
+
+            // 이동 속도 재계산
+            _moveSpeed = moveSpeed;
+            foreach (var mod in _moveSpeedModifiers.Values)
+                _moveSpeed *= (1 + mod / 100f);
+
+            // 마나 회복 재계산
+            _manaRegen = manaRegenPerSecond;
+            foreach (var mod in _manaRegenModifiers.Values)
+                _manaRegen *= (1 + mod / 100f);
+
+            // 체력 회복 재계산
+            _healthRegen = healthRegenPerSecond;
+            foreach (var mod in _healthRegenModifiers.Values)
+                _healthRegen *= (1 + mod / 100f);
+
+            // 조민희 추가: Phase 8 특수 스탯 재계산
+            // 회피율 (기본 0%)
+            float evasionRate = 0f;
+            foreach (var mod in _evasionModifiers.Values)
+                evasionRate += mod;
+
+            // 쿨타임 감소 (기본 0%)
+            float cooldownReduction = 0f;
+            foreach (var mod in _cooldownReductionModifiers.Values)
+                cooldownReduction += mod;
+
+            // 잃은 체력 비례 공격력 (기본 0%)
+            float missingHpDamageBonus = 0f;
+            foreach (var mod in _missingHpDamageModifiers.Values)
+                missingHpDamageBonus += mod;
+
+            // 잃은 체력 비례 공격력 보너스 적용
+            if (missingHpDamageBonus > 0)
+            {
+                float missingHpPercent = 1f - (CurrentHealth / MaxHealth);
+                double bonusDamage = AttackDamage * missingHpDamageBonus / 100.0 * missingHpPercent;
+                AttackDamage += bonusDamage;
+            }
+
+            Debug.Log($"[DummyCharacter] 스탯 재계산 - ATK: {AttackDamage:F1}, HP: {_maxHealth:F1}, CRIT: {_criticalRate:P2}, CRIT_DMG: {_criticalDamage:F2}, ATKSPD: {_attackSpeed:F2}, MOVSPD: {_moveSpeed:F2}, EVADE: {evasionRate:F1}%, CDR: {cooldownReduction:F1}%");
         }
         #endregion
 
