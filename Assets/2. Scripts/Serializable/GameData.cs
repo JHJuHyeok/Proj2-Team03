@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class GameData : ISavable
 {
     public int level;                                           // 레벨
+    public double currentExp;                                   // 현재 경험치
     public List<int> upgradeLevels = new();                     // 강화 레벨
     public List<int> growthLevels = new();                      // 성장 레벨
     public string advanceGrade;                                 // 승급 단계
