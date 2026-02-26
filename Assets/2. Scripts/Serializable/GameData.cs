@@ -25,6 +25,7 @@ public class GameData : ISavable
         return new GameData
         {
             level = 1,
+            currentExp = 0,
             upgradeLevels = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
             growthLevels = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
             advanceGrade = "",
