@@ -15,7 +15,7 @@ public enum StatType
     STR,            // 공격력
     HP,             // 체력
     VIT_HP,         // 체력 회복량
-    CTI_DMG,        // 크리티컬 데미지
+    CRI_DMG,        // 크리티컬 데미지
     CRI_Per,        // 크리티컬 확률
     MANA,           // 마나
     VIT_MANA,       // 마나 회복량

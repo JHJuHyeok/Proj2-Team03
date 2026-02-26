@@ -109,7 +109,7 @@ public static class StatUpgradeTable
                 }
             },
             {
-                StatType.CTI_DMG,
+                StatType.CRI_DMG,
                 new StatUpgradeRow()
                 {
                     maxLevel = 10000,

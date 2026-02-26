@@ -115,7 +115,7 @@ public class StatUpgrader : MonoBehaviour
             case StatType.VIT_HP:
                 cost = 100 * Mathf.Pow(basicRate, level);
                 break;
-            case StatType.CTI_DMG:
+            case StatType.CRI_DMG:
                 cost = 100 * Mathf.Pow(critDmgRate, level);
                 break;
             case StatType.CRI_Per:
@@ -148,7 +148,7 @@ public class StatUpgrader : MonoBehaviour
                 case StatType.STR: return level * 3;
                 case StatType.HP: return level * 30;
                 case StatType.VIT_HP: return level * 3;
-                case StatType.CTI_DMG: return level * 1;
+                case StatType.CRI_DMG: return level * 1;
                 case StatType.CRI_Per: return level * 0.1f;
                 default: return level * 1;
             }
@@ -160,7 +160,7 @@ public class StatUpgrader : MonoBehaviour
                 case StatType.STR: return level * 5;
                 case StatType.HP: return level * 30;
                 case StatType.VIT_HP: return level * 5;
-                case StatType.CTI_DMG: return level * 3;
+                case StatType.CRI_DMG: return level * 3;
                 case StatType.ADD_GOLD: return level * 0.5;
                 case StatType.ACC: return level * 3;
                 case StatType.DODGE: return level * 1;
@@ -177,7 +177,7 @@ public class StatUpgrader : MonoBehaviour
         double baseValue = 0;
         double multiplier = 0;
 
-        if (_targetStat != StatType.CTI_DMG &&
+        if (_targetStat != StatType.CRI_DMG &&
             _targetStat != StatType.CRI_Per &&
             _targetStat != StatType.ADD_GOLD)
         {
