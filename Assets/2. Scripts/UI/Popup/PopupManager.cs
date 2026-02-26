@@ -4,9 +4,8 @@ using UnityEngine;
 /*
 [승문]
 PopupManager
-- 팝업 등록(프리팹) / 생성 / 스택 관리
-- 뒤 팝업은 비활성화하고, 닫으면 이전 팝업 복귀
-- UIManager와 분리(기능 세분화)
+- PopupRoot 아래에 미리 배치된(비활성) 팝업들을 등록해서 SetActive로 관리
+- 스택 관리: 뒤 팝업 비활성화 / 닫으면 이전 팝업 복귀
 */
 public class PopupManager : MonoBehaviour
 {
@@ -15,8 +14,9 @@ public class PopupManager : MonoBehaviour
     [Header("Root")]
     [SerializeField] private Transform popupRoot;
 
-    [Header("Popup Prefabs")]
-    [SerializeField] private UIPopup[] popupPrefabs;
+    // ✅ 더 이상 "프리팹 Instantiate" 안 함 -> Root 아래에서 자동 수집
+    // [Header("Popup Prefabs")]
+    // [SerializeField] private UIPopup[] popupPrefabs;
 
     private readonly Dictionary<PopupId, UIPopup> prefabTable = new Dictionary<PopupId, UIPopup>();
     private readonly Stack<UIPopup> stack = new Stack<UIPopup>();
@@ -33,6 +33,8 @@ public class PopupManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         BuildPrefabTable();
+        // 시작 시 팝업들 모두 숨기고 스택 초기화
+        HideAll();
     }
 
     private void OnDestroy()
@@ -45,23 +47,30 @@ public class PopupManager : MonoBehaviour
     {
         prefabTable.Clear();
 
-        if (popupPrefabs == null) return;
-
-        for (int i = 0; i < popupPrefabs.Length; i++)
+        if (popupRoot == null)
         {
-            UIPopup p = popupPrefabs[i];
+            Debug.LogWarning("[PopupManager] popupRoot is null");
+            return;
+        }
+
+        // ✅ popupRoot 아래에 있는 UIPopup(자식 클래스 포함)을 전부 수집 (비활성 포함)
+        UIPopup[] pops = popupRoot.GetComponentsInChildren<UIPopup>(true);
+
+        for (int i = 0; i < pops.Length; i++)
+        {
+            UIPopup p = pops[i];
             if (p == null) continue;
 
             PopupId id = p.PopupId;
             if (id == PopupId.None)
             {
-                Debug.LogWarning("[PopupManager] PopupId is None. Check prefab: " + p.name);
+                Debug.LogWarning("[PopupManager] PopupId is None. Check object: " + p.name);
                 continue;
             }
 
             if (prefabTable.ContainsKey(id))
             {
-                Debug.LogWarning("[PopupManager] Duplicate PopupId: " + id + " / prefab: " + p.name);
+                Debug.LogWarning("[PopupManager] Duplicate PopupId: " + id + " / object: " + p.name);
                 continue;
             }
 
@@ -69,7 +78,22 @@ public class PopupManager : MonoBehaviour
         }
     }
 
-    // 팝업 열기: 현재 top을 숨기고, 새 팝업을 생성해 스택에 push
+    private void HideAll()
+    {
+        // popupRoot 아래 팝업 전부 비활성화
+        if (popupRoot != null)
+        {
+            UIPopup[] pops = popupRoot.GetComponentsInChildren<UIPopup>(true);
+            foreach (var p in pops)
+            {
+                if (p != null) p.gameObject.SetActive(false);
+            }
+        }
+
+        stack.Clear();
+    }
+
+    // ✅ 팝업 열기: 현재 top 숨기고, Root에 있는 해당 팝업을 활성화해서 스택에 push
     public UIPopup Open(PopupId id, object param = null)
     {
         if (id == PopupId.None)
@@ -84,9 +108,16 @@ public class PopupManager : MonoBehaviour
             return null;
         }
 
-        if (!prefabTable.TryGetValue(id, out UIPopup prefab) || prefab == null)
+        // 혹시 런타임에 PopupRoot 자식이 바뀌었을 수 있으니, 못 찾으면 한 번 리빌드 시도
+        if (!prefabTable.TryGetValue(id, out UIPopup instance) || instance == null)
         {
-            Debug.LogWarning("[PopupManager] Open failed. prefab not found: " + id);
+            BuildPrefabTable();
+            prefabTable.TryGetValue(id, out instance);
+        }
+
+        if (instance == null)
+        {
+            Debug.LogWarning("[PopupManager] Open failed. popup not found under popupRoot: " + id);
             return null;
         }
 
@@ -97,22 +128,15 @@ public class PopupManager : MonoBehaviour
             if (top != null) top.gameObject.SetActive(false);
         }
 
-        // 새 팝업 생성
-        UIPopup instance = Instantiate(prefab, popupRoot);
-
-        // (안전) 생성 직후 활성화 보장
+        // ✅ 클론 생성 X, 기존 오브젝트 활성화
         instance.gameObject.SetActive(true);
-
-        // 팝업 open 콜백
         instance.OnOpen(param);
 
-        // 스택 push
         stack.Push(instance);
-
         return instance;
     }
 
-    // 최상단 팝업 닫기
+    // ✅ 최상단 팝업 닫기 (Destroy X)
     public void CloseTop()
     {
         if (stack.Count <= 0) return;
@@ -121,7 +145,7 @@ public class PopupManager : MonoBehaviour
         if (top != null)
         {
             top.OnClose();
-            Destroy(top.gameObject);
+            top.gameObject.SetActive(false);
         }
 
         // 이전 팝업 복귀
@@ -132,7 +156,7 @@ public class PopupManager : MonoBehaviour
         }
     }
 
-    // 특정 ID 팝업이 "현재 top"일 때만 닫기 (닫기 버튼이 안전하게 동작하도록)
+    // 특정 팝업이 "현재 top"일 때만 닫기
     public void CloseIfTop(UIPopup popup)
     {
         if (popup == null) return;
@@ -144,7 +168,6 @@ public class PopupManager : MonoBehaviour
         CloseTop();
     }
 
-    // 모든 팝업 닫기
     public void CloseAll()
     {
         while (stack.Count > 0)
@@ -153,23 +176,19 @@ public class PopupManager : MonoBehaviour
             if (p == null) continue;
 
             p.OnClose();
-            Destroy(p.gameObject);
+            p.gameObject.SetActive(false);
         }
     }
 
-    public bool IsOpenAny()
-    {
-        return stack.Count > 0;
-    }
-
+    public bool IsOpenAny() => stack.Count > 0;
     public int OpenCount => stack.Count;
 
 #if UNITY_EDITOR
-    [ContextMenu("DEBUG/Rebuild Prefab Table")]
+    [ContextMenu("DEBUG/Rebuild Popup Table From Root")]
     private void Editor_RebuildPrefabTable()
     {
         BuildPrefabTable();
-        Debug.Log("[PopupManager] Prefab table rebuilt. Count=" + prefabTable.Count);
+        Debug.Log("[PopupManager] Table rebuilt from popupRoot. Count=" + prefabTable.Count);
     }
 #endif
 }
