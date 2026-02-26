@@ -106,16 +106,14 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// 조민희 추가: 패시브 스킬에 공격 알림 (공격 기반 누적 버프용)
+    /// 조민희 추가: 스킬에 공격 알림 (공격 기반 누적 버프 + AttackCount 발동용)
     /// </summary>
     private void NotifyPassiveSkillsOnAttack()
     {
         if (skillController == null) return;
 
-        foreach (var passive in skillController.PassiveSkills)
-        {
-            passive?.OnAttack();
-        }
+        // SkillController를 통해 모든 스킬에 알림
+        skillController.NotifyAttackToAllSkills();
     }
 
     /// <summary>
