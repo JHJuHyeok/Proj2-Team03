@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 288d0ecdab779864d9359b0c501edcdd, type: 3}
+  m_Name: SkillEffectDatabase
+  m_EditorClassIdentifier: 
+  effects:
+  - skillId: Fire_01
+    effectPrefab: {fileID: 7648191943018553345, guid: 0467d1e1703c78e41a0b6854fc86e733, type: 3}
+  - skillId: Fire_03
+    effectPrefab: {fileID: 5503930979848375166, guid: b110b996560587e42bbe8827a12c5f9f, type: 3}
+  - skillId: Fire_04
+    effectPrefab: {fileID: 8790698844189322593, guid: 6dc77b21d73ae1d43b671f30228c0b4e, type: 3}
+  - skillId: Fire_07
+    effectPrefab: {fileID: 4644935822580083181, guid: f18b3da511330e5439710dad832d4dd0, type: 3}
+  - skillId: Fire_08
+    effectPrefab: {fileID: 1542893458344728332, guid: ac23d7d19d5292043918e0db86671d49, type: 3}
+  - skillId: Fire_10
+    effectPrefab: {fileID: 3076807758859849866, guid: 696ebbf5e68166b4d87718ef7bc87344, type: 3}
+  - skillId: Water_01
+    effectPrefab: {fileID: 3303910055089435518, guid: c6e6ee95899eb164d90040b6497110bb, type: 3}
+  - skillId: Water_04
+    effectPrefab: {fileID: 339390268705764964, guid: 3b470d8b1aa5d5e4a9dc5c2cc0f88406, type: 3}
+  - skillId: Water_08
+    effectPrefab: {fileID: 2926690559491063540, guid: 2139dd27a0756f64fa9697b5bce6ceee, type: 3}
+  - skillId: Water_10
+    effectPrefab: {fileID: 5398040335042579167, guid: ad9c301b8d73d924f8c09258b1f517f5, type: 3}
+  - skillId: Wind_01
+    effectPrefab: {fileID: 8219379544112463369, guid: 567cc195d7e238f4fbc16f2487ee7944, type: 3}
+  - skillId: Wind_02
+    effectPrefab: {fileID: 3624842343531043292, guid: debe7faa9446ffb4bbf4b31b20cab13b, type: 3}
+  - skillId: Wind_04
+    effectPrefab: {fileID: 870694094020263292, guid: e2bc2008c8d733a468233e26ccc2a579, type: 3}
+  - skillId: Wind_06
+    effectPrefab: {fileID: 9202325326079144747, guid: 9975042a63c18d84c99a880eac96d024, type: 3}
+  - skillId: Wind_08
+    effectPrefab: {fileID: 4783911566234046951, guid: 9f4404829e3e30540b6ccf9e107bc3ff, type: 3}
+  - skillId: Wind_09
+    effectPrefab: {fileID: 5596181319466518663, guid: 73903ee82429d6d44b8515fa314236a2, type: 3}
+  - skillId: Wind_10
+    effectPrefab: {fileID: 3611940121966333033, guid: 3f7716b5182f3de40aef835fbd0afe37, type: 3}
+  - skillId: Earth_01
+    effectPrefab: {fileID: 865211945158243202, guid: 47f2f710c3e753a48bb6c2d8e66a36e4, type: 3}
+  - skillId: Earth_03
+    effectPrefab: {fileID: 1582146471711511763, guid: 0ff7265a1d340814f8d44f195cbfd1ed, type: 3}
+  - skillId: Earth_04
+    effectPrefab: {fileID: 4913670469978638423, guid: 7122f3d897a15174f9c98c331b0b556f, type: 3}
+  - skillId: Earth_08
+    effectPrefab: {fileID: 6769463147366933783, guid: 31788718b88ac884b9adc2424f7132a5, type: 3}
+  - skillId: Earth_09
+    effectPrefab: {fileID: 6769865345441244607, guid: 8f8ea4a6e2c24534fbac2825a0626112, type: 3}
+  - skillId: Earth_10
+    effectPrefab: {fileID: 5272386076204374055, guid: a82aab204adf80347bb10802205ff439, type: 3}

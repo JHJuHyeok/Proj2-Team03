@@ -123,25 +123,8 @@ namespace SlayerLegend.Skill
         {
             _hasExploded = true;
 
-            // 폭발 이펙트 생성
-            if (_effectPrefab != null)
-            {
-                GameObject effect = Instantiate(_effectPrefab, transform.position, Quaternion.identity);
-
-                // Animator가 있으면 루프 설정
-                var animator = effect.GetComponent<Animator>();
-                if (animator != null)
-                {
-                    // 애니메이션을 계속 반복 재생
-                    var clipInfos = animator.GetCurrentAnimatorClipInfo(0);
-                    if (clipInfos.Length > 0)
-                    {
-                        animator.Play(clipInfos[0].clip.name, 0, 0f);
-                    }
-                }
-
-                Destroy(effect, 5f);  // 이펙트 지속 시간 5초
-            }
+            // 조민희 수정: 중앙 이펙트 제거 - 대신 HitEnemy()에서 각 적 위치에 이펙트 생성
+            // 이펙트는 이제 각 적에게 데미지를 줄 때 해당 위치에 생성됨
 
             // 범위 내 모든 적 탐색
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _radius);
@@ -288,6 +271,13 @@ namespace SlayerLegend.Skill
             if (isLastHit && _lastHitMultiplier > 1f)
             {
                 finalDamage *= _lastHitMultiplier;
+            }
+
+            // 조민희 추가: 각 적 위치에 이펙트 생성
+            if (_effectPrefab != null && enemy != null)
+            {
+                GameObject hitEffect = Instantiate(_effectPrefab, enemy.transform.position, Quaternion.identity);
+                Destroy(hitEffect, 2f);  // 2초 후 제거
             }
 
             // 즉시 데미지

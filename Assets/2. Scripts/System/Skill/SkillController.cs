@@ -89,6 +89,22 @@ namespace SlayerLegend.Skill
             return true;
         }
 
+        // 조민희 추가: 공격 시 모든 스킬에 알림 (AttackCount 발동용)
+        public void NotifyAttackToAllSkills()
+        {
+            // 패시브 스킬에 알림 (누적형 버프)
+            foreach (var passive in passiveSkills)
+            {
+                passive?.OnAttack();
+            }
+
+            // 액티브 스킬에 알림 (AttackCount 발동 조건)
+            foreach (var active in activeSkills)
+            {
+                active?.OnAttack();
+            }
+        }
+
         // 액티브 스킬 제거
         public bool RemoveActiveSkill(string skillId)
         {

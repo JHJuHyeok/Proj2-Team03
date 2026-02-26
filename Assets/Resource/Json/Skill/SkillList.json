@@ -100,7 +100,19 @@
       "needMp": 15,
       "initialRate": 700,
       "levelUpValue": 70.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 2,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Fire_07",
@@ -168,7 +180,20 @@
       "needMp": 40,
       "initialRate": 700,
       "levelUpValue": 70.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 3,
+        "hitCount": 7,
+        "hitInterval": 0.3,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "lastHitMultiplier": 3.0,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Fire_11",
@@ -202,7 +227,19 @@
       "needMp": 20,
       "initialRate": 110,
       "levelUpValue": 11.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 5,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": true,
+        "maxTargets": 5,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Water_02",
@@ -236,7 +273,19 @@
       "needMp": 25,
       "initialRate": 310,
       "levelUpValue": 31.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 8,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": true,
+        "maxTargets": 8,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Water_04",
@@ -253,7 +302,19 @@
       "needMp": 25,
       "initialRate": 170,
       "levelUpValue": 17.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 3,
+        "hitCount": 7,
+        "hitInterval": 0.1,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Water_05",
@@ -321,7 +382,19 @@
       "needMp": 35,
       "initialRate": 670,
       "levelUpValue": 67.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 10,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": true,
+        "maxTargets": 10,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Water_09",
@@ -355,7 +428,19 @@
       "needMp": 35,
       "initialRate": 650,
       "levelUpValue": 65.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 10,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": true,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Water_11",
@@ -389,7 +474,19 @@
       "needMp": 15,
       "initialRate": 150,
       "levelUpValue": 15.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 5,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": 5,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_02",
@@ -406,7 +503,19 @@
       "needMp": 20,
       "initialRate": 80,
       "levelUpValue": 8.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 15,
+        "hitCount": 30,
+        "hitInterval": 0.1,
+        "isRandomHit": true,
+        "maxTargets": 1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_03",
@@ -440,7 +549,19 @@
       "needMp": 15,
       "initialRate": 500,
       "levelUpValue": 50.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 7,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": 7,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_05",
@@ -474,7 +595,19 @@
       "needMp": 10,
       "initialRate": 80,
       "levelUpValue": 8.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 3,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_07",
@@ -508,7 +641,19 @@
       "needMp": 15,
       "initialRate": 860,
       "levelUpValue": 86.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 10,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": 10,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_09",
@@ -525,7 +670,19 @@
       "needMp": 25,
       "initialRate": 170,
       "levelUpValue": 17.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 20,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": 10,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_10",
@@ -542,7 +699,19 @@
       "needMp": 20,
       "initialRate": 260,
       "levelUpValue": 26.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 7,
+        "hitCount": 6,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Wind_11",
@@ -576,7 +745,19 @@
       "needMp": 20,
       "initialRate": 610,
       "levelUpValue": 61.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 1,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": 1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_02",
@@ -610,7 +791,19 @@
       "needMp": 25,
       "initialRate": 660,
       "levelUpValue": 66.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 1,
+        "hitCount": 2,
+        "hitInterval": 0.3,
+        "isRandomHit": false,
+        "maxTargets": 1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_04",
@@ -627,7 +820,19 @@
       "needMp": 40,
       "initialRate": 1060,
       "levelUpValue": 106.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 5,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": true,
+        "stunDuration": 1,
+        "stunChance": 50,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_05",
@@ -695,7 +900,19 @@
       "needMp": 30,
       "initialRate": 750,
       "levelUpValue": 75.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 1,
+        "hitCount": 3,
+        "hitInterval": 0.3,
+        "isRandomHit": false,
+        "maxTargets": 1,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_09",
@@ -712,7 +929,19 @@
       "needMp": 40,
       "initialRate": 2580,
       "levelUpValue": 258.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 5,
+        "hitCount": 1,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "isStun": true,
+        "stunDuration": 1.5,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_10",
@@ -729,7 +958,20 @@
       "needMp": 55,
       "initialRate": 1000,
       "levelUpValue": 100.0,
-      "effectData": null
+      "effectData": {
+        "explosionRadius": 4,
+        "hitCount": 7,
+        "hitInterval": 0.2,
+        "isRandomHit": false,
+        "maxTargets": -1,
+        "lastHitMultiplier": 3.0,
+        "isStun": false,
+        "stunDuration": 1,
+        "stunChance": 100,
+        "isFreeze": false,
+        "freezeDuration": 2,
+        "freezeChance": 100
+      }
     },
     {
       "id": "Earth_11",

@@ -4,14 +4,19 @@ using SlayerLegend.Skill.StatusEffects;
 
 namespace SlayerLegend.Skill
 {
-    // 액티브 스킬: 쿨타임마다 자동 발동
-    // - Update()에서 쿨타임 감소 및 자동 발동
+    // 액티브 스킬: 쿨타임마다 자동 발동 또는 공격 횟수 기반 발동
+    // - Update()에서 쿨타임 감소 및 자동 발동 (Cooldown 모드)
+    // - OnAttack()에서 공격 카운트 증가 및 발동 (AttackCount 모드)
     // - 마나 소모, 발사체 생성, 데미지 계산
     public class ActiveSkill : SkillBase
     {
         [Header("액티브 스킬 상태")]
         [SerializeField] private float currentCooldown = 0f;
         [SerializeField] private bool isActive = false;
+
+        // 조민희 추가: AttackCount 모드 지원
+        [SerializeField] private int currentAttackCount = 0;
+        [SerializeField] private int requiredAttackCount = 0;
 
         [Header("발사체 설정")]
         [SerializeField] private SkillProjectile2D projectilePrefab;
@@ -31,6 +36,7 @@ namespace SlayerLegend.Skill
         private GameObject cachedCaster;
 
         public bool IsOnCooldown => currentCooldown > 0f;
+        public bool IsAttackCountMode => skillData != null && skillData.request == SkillRequest.AttackCount;
 
         public float CooldownNormalized
         {
@@ -42,6 +48,10 @@ namespace SlayerLegend.Skill
         }
 
         public float CurrentCooldown => currentCooldown;
+
+        // 조민희 추가: UI에서 공격 카운트 접근용
+        public int CurrentAttackCount => currentAttackCount;
+        public int RequiredAttackCount => requiredAttackCount;
 
         // 발사 방향 설정 (초기화 시 사용)
         public void SetFireDirection(Vector3 direction)
@@ -90,7 +100,17 @@ namespace SlayerLegend.Skill
         public void SetActive(bool active)
         {
             isActive = active;
-            if (active) CacheCaster();
+            if (active)
+            {
+                CacheCaster();
+
+                // 조민희 추가: AttackCount 모드 초기화
+                if (IsAttackCountMode)
+                {
+                    requiredAttackCount = (int)skillData.wantedDelay;
+                    currentAttackCount = 0;
+                }
+            }
         }
 
         // 캐스터(플레이어) 찾기
@@ -114,6 +134,9 @@ namespace SlayerLegend.Skill
         {
             if (!isActive) return;
 
+            // AttackCount 모드는 Update에서 처리하지 않음 (OnAttack에서 처리)
+            if (IsAttackCountMode) return;
+
             // 쿨타임 감소
             if (currentCooldown > 0f)
             {
@@ -125,6 +148,32 @@ namespace SlayerLegend.Skill
             if (skillData != null)
             {
                 // 폭발 스킬 여부 확인 (effectData 사용)
+                if (skillData.effectData != null && skillData.effectData.isBlastSkill)
+                {
+                    ExecuteBlastSkill();
+                }
+                else
+                {
+                    TryAutoCast();
+                }
+            }
+        }
+
+        // 조민희 추가: 공격 시 호출 (AttackCount 발동 조건용)
+        public void OnAttack()
+        {
+            if (!isActive || !IsAttackCountMode) return;
+
+            currentAttackCount++;
+            Debug.Log($"[ActiveSkill] {skillData?.name} 공격 카운트: {currentAttackCount}/{requiredAttackCount}");
+
+            // 필요 공격 수 도달 시 스킬 발동
+            if (currentAttackCount >= requiredAttackCount)
+            {
+                currentAttackCount = 0;  // 카운터 리셋
+                Debug.Log($"[ActiveSkill] {skillData?.name} 발동 조건 충족!");
+
+                // 폭발 스킬 여부 확인
                 if (skillData.effectData != null && skillData.effectData.isBlastSkill)
                 {
                     ExecuteBlastSkill();
@@ -162,14 +211,17 @@ namespace SlayerLegend.Skill
             Debug.Log($"[Skill] {skillData.name} 발동 시도...");
             ExecuteSkill(cachedCaster);
 
-            // 쿨타임 설정 (테스트용 오버라이드 지원)
-            if (overrideCooldown)
+            // 쿨타임 설정 (Cooldown 모드일 때만)
+            if (!IsAttackCountMode)
             {
-                currentCooldown = testCooldown * cooldownMultiplier;
-            }
-            else
-            {
-                currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+                if (overrideCooldown)
+                {
+                    currentCooldown = testCooldown * cooldownMultiplier;
+                }
+                else
+                {
+                    currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+                }
             }
         }
 
@@ -202,8 +254,17 @@ namespace SlayerLegend.Skill
             // 폭발 파라미터 가져오기 (effectData 사용)
             float explosionRadius = skillData.effectData?.explosionRadius ?? 3f;
             float explodeDelay = skillData.effectData?.explodeDelay ?? 0.5f;
-            // 폭발 이펙트: 인스펙터 설정 우선, 없으면 effectData 사용
-            GameObject explosionEffect = explosionEffectPrefab ?? skillData.effectData?.explosionEffect;
+
+            // 폭발 이펙트 로드 (우선순위: 인스펙터 설정 > 스킬 ID로 자동 로드 > effectData)
+            GameObject explosionEffect = explosionEffectPrefab;
+            if (explosionEffect == null && SkillEffectLoader.Instance != null)
+            {
+                explosionEffect = SkillEffectLoader.Instance.LoadEffect(skillData.id);
+            }
+            if (explosionEffect == null)
+            {
+                explosionEffect = skillData.effectData?.explosionEffect;
+            }
 
             // 화상 DoT 파라미터 가져오기 (effectData 사용)
             float dotDuration = skillData.effectData?.dotDuration ?? 3f;
@@ -215,14 +276,17 @@ namespace SlayerLegend.Skill
             ExecuteExplosion(explosionRadius, explodeDelay, explosionEffect,
                 dotDuration, damagePerTick, tickInterval, dotType);
 
-            // 쿨타임 설정
-            if (overrideCooldown)
+            // 쿨타임 설정 (Cooldown 모드일 때만)
+            if (!IsAttackCountMode)
             {
-                currentCooldown = testCooldown * cooldownMultiplier;
-            }
-            else
-            {
-                currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+                if (overrideCooldown)
+                {
+                    currentCooldown = testCooldown * cooldownMultiplier;
+                }
+                else
+                {
+                    currentCooldown = SkillCalculator.GetCooldown(skillData, currentLevel) * cooldownMultiplier;
+                }
             }
         }
 
@@ -243,9 +307,9 @@ namespace SlayerLegend.Skill
                 totalDamage += stats.AttackDamage;
                 isCritical = stats.IsCriticalHit();
                 totalDamage = stats.CalculateFinalDamage(isCritical);
-                string critText = isCritical ? " [치명타!]" : "";
-                Debug.Log($"{caster.name}이(가) {skillData.name} 발사!{critText} → 예상 데미지: {totalDamage:F1}");
             }
+
+            string critText = isCritical ? " [치명타!]" : "";
 
             // 발사체 생성 (지정된 방향으로 발사)
             if (projectilePrefab != null)
@@ -261,10 +325,43 @@ namespace SlayerLegend.Skill
 
                 Vector3 spawnPosition = caster.transform.position + offset;
                 SkillProjectile2D.Create(projectilePrefab, spawnPosition, totalDamage, isCritical, fireDirection);
+                Debug.Log($"[Skill] {caster.name}이(가) {skillData.name} 발사!{critText} → 데미지: {totalDamage:F1}");
             }
             else
             {
-                Debug.LogWarning($"[Skill] {skillData.name}에 발사체 프리팹이 없습니다.");
+                // 조민희 수정: 발사체 없이 직접 범위 공격
+                // effectData를 활용하여 Explosion 로직 재사용
+                float radius = skillData.effectData?.explosionRadius ?? 3f;
+                float dotDuration = skillData.effectData?.dotDuration ?? 3f;
+                double dotDamage = skillData.effectData?.dotDamagePerTick ?? 0.0;
+                float dotTick = skillData.effectData?.dotTickInterval ?? 1f;
+                string dotType = skillData.effectData?.dotType ?? "burn";
+
+                // 이펙트 로드 (우선순위: 인스펙터 설정 > SkillEffectLoader 자동 로드 > effectData)
+                GameObject effectPrefab = explosionEffectPrefab;
+                if (effectPrefab == null && SkillEffectLoader.Instance != null)
+                {
+                    effectPrefab = SkillEffectLoader.Instance.LoadEffect(skillData.id);
+                }
+                if (effectPrefab == null)
+                {
+                    effectPrefab = skillData.effectData?.explosionEffect;
+                }
+
+                // Explosion 로직 사용 (메서드 내부에서 effectData의 나머지 값들을 읽어옴)
+                ExecuteExplosion(radius, 0f, effectPrefab,
+                    dotDuration, dotDamage, dotTick, dotType);
+
+                string targetInfo = (skillData.effectData?.maxTargets ?? -1) > 0
+                    ? $"최대 {skillData.effectData.maxTargets}적"
+                    : "전체";
+                string hitInfo = (skillData.effectData?.hitCount ?? 1) > 1
+                    ? $"{skillData.effectData.hitCount}회 타격"
+                    : "1회";
+                string ccInfo = "";
+                if (skillData.effectData?.isStun ?? false) ccInfo += $" [스턴 {skillData.effectData.stunChance}%]";
+                if (skillData.effectData?.isFreeze ?? false) ccInfo += $" [빙결 {skillData.effectData.freezeChance}%]";
+                Debug.Log($"[Skill] {caster.name}이(가) {skillData.name} 시전!{critText} → 데미지: {totalDamage:F1} ({targetInfo}, {hitInfo}){ccInfo}");
             }
         }
 
