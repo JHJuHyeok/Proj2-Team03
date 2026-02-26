@@ -5,13 +5,18 @@ using UnityEngine.SceneManagement;
 /*
 [승문]
 LoadingSceneFlow
--로딩씬에서 데이터 로드 완료 후, "화면 터치"로 로비씬 이동
--버튼 없음
+- 시작: 로딩패널 OFF, 텍스트 OFF
+- 데이터 로드 완료: 텍스트 ON, 로딩패널 OFF
+- 터치: 텍스트 OFF, 로딩패널 ON, 로비씬 비동기 로드 -> 완료되면 씬 전환
 */
 public class LoadingSceneFlow : MonoBehaviour
 {
     [Header("Scene")]
-    [SerializeField] private string lobbySceneName = "Lobby Scene";
+    [SerializeField] private string lobbySceneName = "Lobby Scene"; // Build Settings 이름과 정확히 일치!
+
+    [Header("UI")]
+    [SerializeField] private GameObject readyTextGO;    // 터치해서 시작
+    [SerializeField] private GameObject loadingPanelGO; // 터치 후 띄울 로딩패널
 
     [Header("Refs")]
     [SerializeField] private LoadingController loadingController;
@@ -21,9 +26,12 @@ public class LoadingSceneFlow : MonoBehaviour
     [SerializeField] private bool retryOnFail = false;
     [SerializeField] private float retryDelaySec = 1.0f;
 
+    [Header("Transition")]
+    [SerializeField] private float minTransitionShowTime = 0.5f; // 터치 후 최소 표시 시간
+
     private bool _isRunning;
-    private bool _readyToEnter;   // 로드 완료 후 터치 대기
-    private bool _loadingOk;
+    private bool _readyToEnter;
+    private bool _isSceneLoading;
 
     private async void Start()
     {
@@ -42,6 +50,10 @@ public class LoadingSceneFlow : MonoBehaviour
             return;
         }
 
+        // 시작 상태: 둘 다 OFF
+        SetReadyUI(false);
+        SetLoadingUI(false);
+
         await RunLoadingAsync();
     }
 
@@ -50,35 +62,45 @@ public class LoadingSceneFlow : MonoBehaviour
         while (true)
         {
             _readyToEnter = false;
-            _loadingOk = false;
+            _isSceneLoading = false;
+
+            // 재시도 대비: 항상 초기 UI 정리
+            SetReadyUI(false);
+            SetLoadingUI(false);
 
             bool ok = await loadingController.RunAsync();
-            _loadingOk = ok;
 
             if (ok)
             {
-                // 이제부터 터치하면 넘어가게 대기
+                // 데이터 로드 완료 -> 텍스트 ON, 터치 대기
                 _readyToEnter = true;
-                break;
+                SetReadyUI(true);
+                return;
             }
 
             Debug.LogError("[LoadingSceneFlow] 로딩 실패: " + loadingController.ErrorMessage);
 
             if (!retryOnFail)
-                break;
+                return;
 
-            await Task.Delay((int)(retryDelaySec * 1000f));
+            await Task.Delay(Mathf.CeilToInt(retryDelaySec * 1000f));
         }
     }
 
     private void Update()
     {
         if (!_readyToEnter) return;
+        if (_isSceneLoading) return;
 
         if (IsPointerDown())
         {
-            // 터치(클릭)하면 로비로 이동
+            _isSceneLoading = true;
             _readyToEnter = false;
+
+            // 터치하면: 텍스트 OFF, 로딩패널 ON
+            SetReadyUI(false);
+            SetLoadingUI(true);
+
             _ = LoadLobbyAsync();
         }
     }
@@ -95,6 +117,7 @@ public class LoadingSceneFlow : MonoBehaviour
         if (string.IsNullOrEmpty(lobbySceneName))
         {
             Debug.LogError("[LoadingSceneFlow] lobbySceneName이 비어있습니다.");
+            _isSceneLoading = false;
             return;
         }
 
@@ -102,10 +125,35 @@ public class LoadingSceneFlow : MonoBehaviour
         if (op == null)
         {
             Debug.LogError("[LoadingSceneFlow] 씬 로드 실패: " + lobbySceneName);
+            _isSceneLoading = false;
             return;
         }
 
+        op.allowSceneActivation = false;
+
+        float start = Time.unscaledTime;
+
+        while (op.progress < 0.9f)
+            await Task.Yield();
+
+        float elapsed = Time.unscaledTime - start;
+        float remain = minTransitionShowTime - elapsed;
+        if (remain > 0f)
+            await Task.Delay(Mathf.CeilToInt(remain * 1000f));
+
+        op.allowSceneActivation = true;
+
         while (!op.isDone)
             await Task.Yield();
+    }
+
+    private void SetReadyUI(bool ready)
+    {
+        if (readyTextGO != null) readyTextGO.SetActive(ready);
+    }
+
+    private void SetLoadingUI(bool show)
+    {
+        if (loadingPanelGO != null) loadingPanelGO.SetActive(show);
     }
 }

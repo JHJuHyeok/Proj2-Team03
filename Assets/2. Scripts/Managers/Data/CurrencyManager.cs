@@ -12,6 +12,8 @@ public class CurrencyManager : Singleton<CurrencyManager>
     private Dictionary<CurrencyType, double> _currencies = new Dictionary<CurrencyType, double>();
     // 저장용 데이터
     public CurrencyData currencySave;
+    // 재화 변경 이벤트
+    public event Action<CurrencyType, double> OnCurrencyChanged;
 
     public void Init(CurrencyData data)
     {
@@ -50,7 +52,9 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (amount <= 0) return;
 
         UpdateValue(type, amount);
-        InfoHandler.UpdateUserData();
+        InfoHandler.UpdateUserData();       // <--- 제거할 코드
+
+        OnCurrencyChanged?.Invoke(type, amount);
     }
 
     /// <summary>
@@ -64,7 +68,9 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (!HasEnoughCurrency(type, amount)) return;
 
         UpdateValue(type, -amount);
-        InfoHandler.UpdateUserData();
+        InfoHandler.UpdateUserData();       // <--- 제거할 코드
+
+        OnCurrencyChanged?.Invoke(type, amount);
     }
 
     /// <summary>

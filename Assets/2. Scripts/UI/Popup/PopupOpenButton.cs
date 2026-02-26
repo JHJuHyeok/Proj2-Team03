@@ -7,12 +7,15 @@ PopupOpenButton
 */
 public class PopupOpenButton : MonoBehaviour
 {
-    [SerializeField] private PopupId popupId = PopupId.None;
+    [SerializeField] private PopupId popupId;
 
     public void Open()
     {
-        if (PopupManager.Instance == null) return;
-        if (popupId == PopupId.None) return;
+        if (PopupManager.Instance == null)
+        {
+            Debug.LogError("PopupManager가 없습니다.");
+            return;
+        }
 
         PopupManager.Instance.Open(popupId);
     }
