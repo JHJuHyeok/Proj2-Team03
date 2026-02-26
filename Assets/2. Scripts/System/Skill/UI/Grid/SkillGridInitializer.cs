@@ -48,6 +48,25 @@ namespace SlayerLegend.Skill.UI
                     await DataManager.LoadAllDatabase();
                 }
             }
+            else
+            {
+                // 데이터가 로드될 때까지 대기 (다른 곳에서 로드 중인 경우)
+                int maxWait = 100; // 최대 100회 대기 (약 5초)
+                int waitCount = 0;
+                while ((DataManager.skills.GetAll() == null || DataManager.skills.GetAll().Count == 0) && waitCount < maxWait)
+                {
+                    await System.Threading.Tasks.Task.Delay(50);
+                    waitCount++;
+                }
+
+                if (DataManager.skills.GetAll() == null || DataManager.skills.GetAll().Count == 0)
+                {
+                    Debug.LogError("[SkillGridInitializer] 데이터 로드 대기 시간 초과");
+                    return;
+                }
+
+                Debug.Log($"[SkillGridInitializer] 데이터 로드 대기 완료 ({waitCount * 50}ms)");
+            }
 
             Initialize();
         }

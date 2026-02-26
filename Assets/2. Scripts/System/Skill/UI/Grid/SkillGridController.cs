@@ -32,6 +32,10 @@ namespace SlayerLegend.Skill.UI.Grid
         public event System.Action<string> OnSkillAddedToInventory;
         public event System.Action<string> OnSkillRemovedFromInventory;
 
+        // 조민희 추가: 그리드 배치/제거 이벤트 (SkillSetPanelUI 연동용)
+        public event System.Action<string, SkillData> OnSkillPlaced;
+        public event System.Action<string, SkillData> OnSkillRemoved;
+
         // 프로퍼티
         public SkillGridManager GridManager => gridManager;
         public int InventoryCount => inventoryItems.Count;
@@ -422,14 +426,30 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 조민희 추가: 스킬을 SkillController에 등록
             RegisterSkillToController(item.SkillId);
+
+            // 조민희 추가: 이벤트 호출 (SkillSetPanelUI 연동)
+            if (skillDataCache.TryGetValue(item.SkillId, out var skillData))
+            {
+                OnSkillPlaced?.Invoke(item.SkillId, skillData);
+            }
         }
 
         private void HandleItemRemoved(SkillDraggableItem item)
         {
             SaveGridData();
 
+            // 조민희 추가: SkillData 캐시 (이벤트 호출 전에 저장)
+            SkillData removedSkillData = null;
+            skillDataCache.TryGetValue(item.SkillId, out removedSkillData);
+
             // 조민희 추가: 스킬을 SkillController에서 해제
             DeregisterSkillFromController(item.SkillId);
+
+            // 조민희 추가: 이벤트 호출 (SkillSetPanelUI 연동)
+            if (removedSkillData != null)
+            {
+                OnSkillRemoved?.Invoke(item.SkillId, removedSkillData);
+            }
         }
 
         // 조민희 추가: 스킬을 SkillController에 등록
