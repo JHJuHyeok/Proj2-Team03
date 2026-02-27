@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SlayerLegend.Skill
 {
-    // 조민희 추가: 폭발 스킬용 컴포넌트
+    //폭발 스킬용 컴포넌트
     // - 생성된 위치에서 일정 시간 대기 후 폭발
     // - 범위 내 모든 적에게 즉시 데미지 + DoT 적용
     // - 2026-02-24: 타겟 수 제한, 다회 타격 기능 추가
@@ -23,13 +23,13 @@ namespace SlayerLegend.Skill
         private string _dotType;
         private Transform _caster;
 
-        // 조민희 추가: 타겟 수 제한 및 다회 타격
+        //타겟 수 제한 및 다회 타격
         private int _maxTargets = -1;           // -1 = 무제한
         private int _hitCount = 1;              // 타격 횟수
         private float _hitInterval = 0.2f;      // 타격 간격
         private bool _isRandomHit = false;      // 랜덤 타격 모드 (뇌격류)
 
-        // 조민희 추가: CC 효과 (Phase 4)
+        //CC 효과 (Phase 4)
         private bool _isStun = false;
         private float _stunDuration = 1f;
         private float _stunChance = 100f;
@@ -37,7 +37,7 @@ namespace SlayerLegend.Skill
         private float _freezeDuration = 2f;
         private float _freezeChance = 100f;
 
-        // 조민희 추가: 마지막 타격 강화 (Phase 4)
+        //마지막 타격 강화 (Phase 4)
         private float _lastHitMultiplier = 1f;
         private int _currentHitIndex = 0;
 
@@ -123,7 +123,7 @@ namespace SlayerLegend.Skill
         {
             _hasExploded = true;
 
-            // 조민희 수정: 중앙 이펙트 제거 - 대신 HitEnemy()에서 각 적 위치에 이펙트 생성
+            //중앙 이펙트 제거 - 대신 HitEnemy()에서 각 적 위치에 이펙트 생성
             // 이펙트는 이제 각 적에게 데미지를 줄 때 해당 위치에 생성됨
 
             // 범위 내 모든 적 탐색
@@ -273,7 +273,7 @@ namespace SlayerLegend.Skill
                 finalDamage *= _lastHitMultiplier;
             }
 
-            // 조민희 추가: 각 적 위치에 이펙트 생성
+            //각 적 위치에 이펙트 생성
             if (_effectPrefab != null && enemy != null)
             {
                 GameObject hitEffect = Instantiate(_effectPrefab, enemy.transform.position, Quaternion.identity);

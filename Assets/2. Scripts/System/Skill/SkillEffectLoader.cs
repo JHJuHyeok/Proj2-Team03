@@ -6,7 +6,7 @@ namespace SlayerLegend.Skill
     /// 스킬 이펙트 로더
     /// - SkillEffectDatabase에서 프리팹 조회
     /// - 캐싱으로 성능 최적화
-    /// - 조민희 수정: Addressables → ScriptableObject 방식으로 변경 (2026-02-26)
+    /// - 2026-02-26: Addressables → ScriptableObject 방식으로 변경
     /// </summary>
     public class SkillEffectLoader : MonoBehaviour
     {

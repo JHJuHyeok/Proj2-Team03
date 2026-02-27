@@ -33,7 +33,7 @@ namespace SlayerLegend.Skill.UI.Grid
 
         // 스킬 아이콘 저장 (조민희: 셀 이미지에 스킬 아이콘 표시용)
         private Sprite skillIcon;
-        private string spriteName = "";  // 조민희: 원본 스프라이트 이름 (저장/로드용)
+        private string spriteName = "";  //원본 스프라이트 이름 (저장/로드용)
 
         // 상태
         private bool isDragging = false;
@@ -110,7 +110,7 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 스킬 아이콘 저장 (조민희: 셀 이미지에 표시용)
             skillIcon = icon;
-            spriteName = sprite;  // 조민희: 원본 스프라이트 이름 저장
+            spriteName = sprite;  //원본 스프라이트 이름 저장
 
             if (iconImage != null && icon != null)
             {
@@ -148,7 +148,7 @@ namespace SlayerLegend.Skill.UI.Grid
         }
 
         // 모양에 따른 시각적 크기 및 셀 이미지 업데이트
-        // 조민희: 전체 영역에 하나의 아이콘 표시 + 빈 공간에만 반투명 오버레이
+        //전체 영역에 하나의 아이콘 표시 + 빈 공간에만 반투명 오버레이
         private void UpdateCellImages()
         {
             var shapeData = SkillShapeData.Create(shapeType);

@@ -11,15 +11,15 @@ public class SkillTestInitializer : MonoBehaviour
 
     [Header("발사체 프리팹")]
     [SerializeField] private SkillProjectile2D fireballProjectile;
-    [SerializeField] private IceSpearProjectile iceSpearProjectile;  // 조민희 추가: 관통형 얼음 창
+    [SerializeField] private IceSpearProjectile iceSpearProjectile;  //관통형 얼음 창
     [SerializeField] private SkillProjectile2D meteorProjectile;
-    [SerializeField] private DoTProjectile poisonProjectile;  // 조민희 추가: DoT형 독 발사체
+    [SerializeField] private DoTProjectile poisonProjectile;  //DoT형 독 발사체
     // 참고: 블래스트 번은 폭발 스킬이므로 발사체 프리팹이 필요 없음
 
     [Header("폭발 이펙트 프리팹")]
     [SerializeField] private GameObject blastBurnEffect;  // 블래스트 번 폭발 이펙트
 
-    // 조민희 추가: 스킬 데이터 캐싱 (재생성용)
+    //스킬 데이터 캐싱 (재생성용)
     private struct SkillConfig
     {
         public string skillId;
@@ -34,7 +34,7 @@ public class SkillTestInitializer : MonoBehaviour
 
     private SkillConfig[] skillConfigs;
 
-    // 조민희 추가: 패시브 스킬 설정
+    //패시브 스킬 설정
     private struct PassiveSkillConfig
     {
         public string skillId;
@@ -43,7 +43,7 @@ public class SkillTestInitializer : MonoBehaviour
 
     private PassiveSkillConfig[] passiveSkillConfigs;
 
-    // 조민희 추가: 스킬 초기화 헬퍼 메서드
+    //스킬 초기화 헬퍼 메서드
     private void InitializeSkill(SkillData skillData, SkillProjectile2D projectile, Vector3 direction, string skillName, Vector3 offset = default, object randomX = null, GameObject explosionEffect = null)
     {
         if (skillData != null)
@@ -90,7 +90,7 @@ public class SkillTestInitializer : MonoBehaviour
 
     private void Start()
     {
-        // 조민희 추가: 스킬 설정 저장
+        //스킬 설정 저장
         skillConfigs = new SkillConfig[]
         {
             new SkillConfig { skillId = "fireball", projectile = fireballProjectile, direction = Vector3.right, name = "파이어볼" },
@@ -102,7 +102,7 @@ public class SkillTestInitializer : MonoBehaviour
 
         InitializeAllSkills();
 
-        // 조민희 추가: 패시브 스킬 설정
+        //패시브 스킬 설정
         passiveSkillConfigs = new PassiveSkillConfig[]
         {
             new PassiveSkillConfig { skillId = "attack_boost", name = "공격력 강화" }
@@ -111,7 +111,7 @@ public class SkillTestInitializer : MonoBehaviour
         InitializeAllPassiveSkills();
     }
 
-    // 조민희 추가: 패시브 스킬 초기화 헬퍼 메서드
+    //패시브 스킬 초기화 헬퍼 메서드
     private void InitializePassiveSkill(SkillData skillData, string skillName)
     {
         if (skillData != null)
@@ -126,7 +126,7 @@ public class SkillTestInitializer : MonoBehaviour
         }
     }
 
-    // 조민희 추가: 모든 패시브 스킬 초기화
+    //모든 패시브 스킬 초기화
     private void InitializeAllPassiveSkills()
     {
         foreach (var config in passiveSkillConfigs)
@@ -135,7 +135,7 @@ public class SkillTestInitializer : MonoBehaviour
         }
     }
 
-    // 조민희 추가: 모든 스킬 초기화
+    //모든 스킬 초기화
     private void InitializeAllSkills()
     {
         foreach (var config in skillConfigs)
@@ -145,7 +145,7 @@ public class SkillTestInitializer : MonoBehaviour
         }
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 모든 스킬 재생성
+    //인스펙터 버튼용 - 모든 스킬 재생성
     [ContextMenu("모든 스킬 재생성")]
     public void RecreateAllSkills()
     {
@@ -154,7 +154,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log("[SkillTestInitializer] 모든 스킬 재생성 완료");
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 모든 스킬 비활성화
+    //인스펙터 버튼용 - 모든 스킬 비활성화
     [ContextMenu("모든 스킬 비활성화")]
     public void DeactivateAllSkills()
     {
@@ -166,7 +166,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log($"[SkillTestInitializer] {activeSkills.Count}개 스킬 비활성화됨");
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 모든 스킬 활성화
+    //인스펙터 버튼용 - 모든 스킬 활성화
     [ContextMenu("모든 스킬 활성화")]
     public void ActivateAllSkills()
     {
@@ -178,7 +178,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log($"[SkillTestInitializer] {activeSkills.Count}개 스킬 활성화됨");
     }
 
-    // 조민희 추가: 모든 자식 스킬 제거
+    //모든 자식 스킬 제거
     private void RemoveAllSkills()
     {
         // 자식 오브젝트 중 ActiveSkill 컴포넌트를 가진 오브젝트 제거
@@ -195,7 +195,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log($"[SkillTestInitializer] {activeSkills.Length}개 스킬 제거됨");
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 특정 스킬만 재생성
+    //인스펙터 버튼용 - 특정 스킬만 재생성
     [ContextMenu("파이어볼 재생성")]
     public void RecreateFireball() => RecreateSkill("fireball", fireballProjectile, Vector3.right, "파이어볼");
 
@@ -211,7 +211,7 @@ public class SkillTestInitializer : MonoBehaviour
     [ContextMenu("블래스트 번 재생성")]
     public void RecreateBurn() => RecreateSkill("burn", null, Vector3.right, "블래스트 번", randomX: new Vector2(1f, 3f), explosionEffect: blastBurnEffect);
 
-    // 조민희 추가: 특정 스킬만 재생성
+    //특정 스킬만 재생성
     private void RecreateSkill(string skillId, SkillProjectile2D projectile, Vector3 direction, string skillName, Vector3 offset = default, object randomX = null, GameObject explosionEffect = null)
     {
         // 같은 ID의 스킬 찾아서 제거 (SkillController의 리스트에서 검색)
@@ -234,7 +234,7 @@ public class SkillTestInitializer : MonoBehaviour
 
     #region 패시브 스킬 테스트용 ContextMenu
 
-    // 조민희 추가: 인스펙터 버튼용 - 모든 패시브 스킬 재생성
+    //인스펙터 버튼용 - 모든 패시브 스킬 재생성
     [ContextMenu("모든 패시브 스킬 재생성")]
     public void RecreateAllPassiveSkills()
     {
@@ -243,7 +243,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log("[SkillTestInitializer] 모든 패시브 스킬 재생성 완료");
     }
 
-    // 조민희 추가: 모든 패시브 스킬 제거
+    //모든 패시브 스킬 제거
     private void RemoveAllPassiveSkills()
     {
         var passiveSkills = skillController.PassiveSkills;
@@ -257,7 +257,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log($"[SkillTestInitializer] {passiveSkills.Count}개 패시브 스킬 제거됨");
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 공격력 강화 재생성
+    //인스펙터 버튼용 - 공격력 강화 재생성
     [ContextMenu("공격력 강화 재생성")]
     public void RecreateAttackBoost()
     {
@@ -279,7 +279,7 @@ public class SkillTestInitializer : MonoBehaviour
         Debug.Log("[SkillTestInitializer] 공격력 강화 재생성 완료");
     }
 
-    // 조민희 추가: 인스펙터 버튼용 - 패시브 스킬 버프 효과 로그
+    //인스펙터 버튼용 - 패시브 스킬 버프 효과 로그
     [ContextMenu("패시브 스킬 버프 효과 확인")]
     public void LogPassiveBuffEffects()
     {

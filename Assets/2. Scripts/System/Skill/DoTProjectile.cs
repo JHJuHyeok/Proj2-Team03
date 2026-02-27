@@ -3,7 +3,7 @@ using SlayerLegend.Skill.StatusEffects;
 
 namespace SlayerLegend.Skill
 {
-    // 조민희 추가: DoT 발사체 (화상, 독 등 지속 데미지 스킬)
+    //DoT 발사체 (화상, 독 등 지속 데미지 스킬)
     // - 적과 충돌 시 즉시 데미지 + DoT 상태이상 적용
     // - 같은 종류의 DoT는 스택 중첩 (최대 5스택)
     public class DoTProjectile : SkillProjectile2D

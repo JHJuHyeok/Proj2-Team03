@@ -14,7 +14,7 @@ namespace SlayerLegend.Skill
         [SerializeField] private float currentCooldown = 0f;
         [SerializeField] private bool isActive = false;
 
-        // 조민희 추가: AttackCount 모드 지원
+        //AttackCount 모드 지원
         [SerializeField] private int currentAttackCount = 0;
         [SerializeField] private int requiredAttackCount = 0;
 
@@ -22,7 +22,7 @@ namespace SlayerLegend.Skill
         [SerializeField] private SkillProjectile2D projectilePrefab;
         [SerializeField] private Vector3 fireDirection = Vector3.right;  // 발사 방향
         [SerializeField] private Vector3 spawnOffset = Vector3.zero;   // 발사 위치 오프셋
-        [SerializeField] private Vector2 randomXRange = Vector2.zero;  // 조민희 추가: X좌표 랜덤 범위 (min, max)
+        [SerializeField] private Vector2 randomXRange = Vector2.zero;  //X좌표 랜덤 범위 (min, max)
 
         [Header("폭발 설정")]
         [SerializeField] private GameObject explosionEffectPrefab;  // 폭발 이펙트 (인스펙터에서 설정 가능)
@@ -31,7 +31,7 @@ namespace SlayerLegend.Skill
         [SerializeField] private float cooldownMultiplier = 1f;
         [SerializeField] private bool overrideCooldown = false;
         [SerializeField] private float testCooldown = 1f;
-        [SerializeField] private bool testNoManaCost = false;  // 조민희 추가: 테스트용 무한 마나
+        [SerializeField] private bool testNoManaCost = false;  //테스트용 무한 마나
 
         private GameObject cachedCaster;
 
@@ -49,7 +49,7 @@ namespace SlayerLegend.Skill
 
         public float CurrentCooldown => currentCooldown;
 
-        // 조민희 추가: UI에서 공격 카운트 접근용
+        //UI에서 공격 카운트 접근용
         public int CurrentAttackCount => currentAttackCount;
         public int RequiredAttackCount => requiredAttackCount;
 
@@ -71,7 +71,7 @@ namespace SlayerLegend.Skill
         }
 
         // 테스트용 쿨타임 설정 (초기화 시 사용)
-        // 조민희 추가: 테스트를 위해 쿨타임 오버라이드 설정
+        //테스트를 위해 쿨타임 오버라이드 설정
         public void SetTestCooldown(float cooldown)
         {
             overrideCooldown = true;
@@ -104,7 +104,7 @@ namespace SlayerLegend.Skill
             {
                 CacheCaster();
 
-                // 조민희 추가: AttackCount 모드 초기화
+                //AttackCount 모드 초기화
                 if (IsAttackCountMode)
                 {
                     requiredAttackCount = (int)skillData.wantedDelay;
@@ -129,7 +129,7 @@ namespace SlayerLegend.Skill
             cachedCaster = gameObject;
         }
 
-        // 조민희 추가: Update()에서 쿨타임 처리 및 스킬 자동 발동
+        //Update()에서 쿨타임 처리 및 스킬 자동 발동
         private void Update()
         {
             if (!isActive) return;
@@ -159,7 +159,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 공격 시 호출 (AttackCount 발동 조건용)
+        //공격 시 호출 (AttackCount 발동 조건용)
         public void OnAttack()
         {
             if (!isActive || !IsAttackCountMode) return;
@@ -194,7 +194,7 @@ namespace SlayerLegend.Skill
             var stats = cachedCaster.GetComponent<IStatsProvider>();
             int manaCost = SkillCalculator.GetManaCost(skillData);
 
-            // 조민희 추가: 테스트용 무한 마나 모드
+            //테스트용 무한 마나 모드
             if (!testNoManaCost)
             {
                 if (stats != null && manaCost > 0)
@@ -225,7 +225,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 폭발 스킬 전용 실행 메서드
+        //폭발 스킬 전용 실행 메서드
         protected virtual void ExecuteBlastSkill()
         {
             // 마나 소모 체크
@@ -316,7 +316,7 @@ namespace SlayerLegend.Skill
             {
                 Vector3 offset = spawnOffset;
 
-                // 조민희 추가: X좌표 랜덤 범위가 설정되어 있으면 적용
+                //X좌표 랜덤 범위가 설정되어 있으면 적용
                 if (randomXRange.x != 0 || randomXRange.y != 0)
                 {
                     float randomX = Random.Range(randomXRange.x, randomXRange.y);
@@ -329,7 +329,7 @@ namespace SlayerLegend.Skill
             }
             else
             {
-                // 조민희 수정: 발사체 없이 직접 범위 공격
+                //발사체 없이 직접 범위 공격
                 // effectData를 활용하여 Explosion 로직 재사용
                 float radius = skillData.effectData?.explosionRadius ?? 3f;
                 float dotDuration = skillData.effectData?.dotDuration ?? 3f;
@@ -468,7 +468,7 @@ namespace SlayerLegend.Skill
             damageable?.TakeDamage(damage);
         }
 
-        // 조민희 추가: 폭발 스킬은 발사체 없이 직접 폭발 로직
+        //폭발 스킬은 발사체 없이 직접 폭발 로직
         private void ExecuteExplosion(float radius, float delay, GameObject effect,
             float dotDuration, double dotDamage, float dotTick, string dotType)
         {
@@ -495,13 +495,13 @@ namespace SlayerLegend.Skill
                 totalDamage = stats.CalculateFinalDamage(isCritical);
             }
 
-            // 조민희 추가: 타겟 수 제한 및 다회 타격 설정 가져오기
+            //타겟 수 제한 및 다회 타격 설정 가져오기
             int maxTargets = skillData.effectData?.maxTargets ?? -1;
             int hitCount = skillData.effectData?.hitCount ?? 1;
             float hitInterval = skillData.effectData?.hitInterval ?? 0.2f;
             bool isRandomHit = skillData.effectData?.isRandomHit ?? false;
 
-            // 조민희 추가: CC 효과 설정 가져오기 (Phase 4)
+            //CC 효과 설정 가져오기 (Phase 4)
             bool isStun = skillData.effectData?.isStun ?? false;
             float stunDuration = skillData.effectData?.stunDuration ?? 1f;
             float stunChance = skillData.effectData?.stunChance ?? 100f;

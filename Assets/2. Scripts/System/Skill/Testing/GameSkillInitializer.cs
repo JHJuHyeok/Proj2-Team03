@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using SlayerLegend.Skill;
 using System.Collections.Generic;
 
@@ -63,10 +64,22 @@ namespace SlayerLegend.Skill.Testing
             };
         }
 
-        private async void Start()
+        private IEnumerator Start()
         {
             // DataManager가 스킬 데이터를 로드할 때까지 대기
-            await DataManager.LoadAllDatabase();
+            // (CombatManager에서 이미 로드 중이므로 완료될 때까지 대기)
+            int waitCount = 0;
+            while (DataManager.skills.Get("Fire_01") == null && waitCount < 100)
+            {
+                yield return new WaitForSeconds(0.1f);
+                waitCount++;
+            }
+
+            if (DataManager.skills.Get("Fire_01") == null)
+            {
+                Debug.LogWarning("[GameSkillInitializer] 스킬 데이터 로드 실패");
+                yield break;
+            }
 
             if (initializeOnStart)
             {

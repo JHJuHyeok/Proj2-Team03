@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace SlayerLegend.Skill
 {
-    // 조민희 추가: 누적형 버프 타입 (Phase 7)
+    //누적형 버프 타입 (Phase 7)
     public enum AccumulateType
     {
         None,           // 일반 버프 (누적 없음)
@@ -13,7 +13,7 @@ namespace SlayerLegend.Skill
         AttackBased     // 공격 기반 누적 (N회 공격마다)
     }
 
-    // 조민희 추가: 특수 발동 타입 (Phase 8)
+    //특수 발동 타입 (Phase 8)
     public enum SpecialActivationType
     {
         None,               // 일반 즉시 발동
@@ -38,12 +38,12 @@ namespace SlayerLegend.Skill
             { PassiveBuffType.CriticalRate, (s, src, v) => s.AddCriticalRateModifier(src, v) },
             { PassiveBuffType.CriticalDamage, (s, src, v) => s.AddCriticalDamageModifier(src, v) },
             { PassiveBuffType.GoldGainPercent, (s, src, v) => s.AddGoldGainPercentModifier(src, v) },
-            // 조민희 추가: 확장 버프
+            //확장 버프
             { PassiveBuffType.AttackSpeedPercent, (s, src, v) => s.AddAttackSpeedModifier(src, v) },
             { PassiveBuffType.MoveSpeedPercent, (s, src, v) => s.AddMoveSpeedModifier(src, v) },
             { PassiveBuffType.ManaRegenPercent, (s, src, v) => s.AddManaRegenModifier(src, v) },
             { PassiveBuffType.HealthRegenPercent, (s, src, v) => s.AddHealthRegenModifier(src, v) },
-            // 조민희 추가: Phase 8 특수 버프
+            //Phase 8 특수 버프
             { PassiveBuffType.CooldownReduction, (s, src, v) => s.AddCooldownReductionModifier(src, v) },
             { PassiveBuffType.Evasion, (s, src, v) => s.AddEvasionModifier(src, v) },
             { PassiveBuffType.DamageBasedOnMissingHp, (s, src, v) => s.AddMissingHpDamageModifier(src, v) },
@@ -63,12 +63,12 @@ namespace SlayerLegend.Skill
             { PassiveBuffType.CriticalRate, (s, src) => s.RemoveCriticalRateModifier(src) },
             { PassiveBuffType.CriticalDamage, (s, src) => s.RemoveCriticalDamageModifier(src) },
             { PassiveBuffType.GoldGainPercent, (s, src) => s.RemoveGoldGainPercentModifier(src) },
-            // 조민희 추가: 확장 버프
+            //확장 버프
             { PassiveBuffType.AttackSpeedPercent, (s, src) => s.RemoveAttackSpeedModifier(src) },
             { PassiveBuffType.MoveSpeedPercent, (s, src) => s.RemoveMoveSpeedModifier(src) },
             { PassiveBuffType.ManaRegenPercent, (s, src) => s.RemoveManaRegenModifier(src) },
             { PassiveBuffType.HealthRegenPercent, (s, src) => s.RemoveHealthRegenModifier(src) },
-            // 조민희 추가: Phase 8 특수 버프
+            //Phase 8 특수 버프
             { PassiveBuffType.CooldownReduction, (s, src) => s.RemoveCooldownReductionModifier(src) },
             { PassiveBuffType.Evasion, (s, src) => s.RemoveEvasionModifier(src) },
             { PassiveBuffType.DamageBasedOnMissingHp, (s, src) => s.RemoveMissingHpDamageModifier(src) },
@@ -82,7 +82,7 @@ namespace SlayerLegend.Skill
         [Header("패시브 스킬 상태")]
         [SerializeField] private bool isActive = false;
 
-        // 조민희 추가: 누적형 버프 (Phase 7)
+        //누적형 버프 (Phase 7)
         [Header("누적형 버프 설정")]
         [SerializeField] private int currentStacks = 0;         // 현재 스택 수
         [SerializeField] private int attackCounter = 0;         // 공격 카운터 (공격 기반 누적용)
@@ -91,7 +91,7 @@ namespace SlayerLegend.Skill
         private float lastAttackTime;                            // 마지막 공격 시간 (감소용)
         private float lastStackTime;                             // 마지막 스택 획득 시간 (만료용)
 
-        // 조민희 추가: IStatsProvider 캐싱 (Phase 7 개선)
+        //IStatsProvider 캐싱 (Phase 7 개선)
         private IStatsProvider cachedStats;
         private IStatsProvider CachedStats
         {
@@ -103,7 +103,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 특수 스킬 설정 (Phase 8)
+        //특수 스킬 설정 (Phase 8)
         [Header("특수 스킬 설정 (Phase 8)")]
         private Coroutine specialCoroutine;              // 특수 발동 코루틴
         private Coroutine buffDurationCoroutine;         // 버프 지속 코루틴
@@ -165,7 +165,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 누적형 버프 타입 (Phase 7)
+        //누적형 버프 타입 (Phase 7)
         private AccumulateType AccumulateType
         {
             get
@@ -187,7 +187,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 누적 주기 (Phase 7)
+        //누적 주기 (Phase 7)
         private float AccumulateInterval
         {
             get
@@ -203,7 +203,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 공격 기반 누적 필요 횟수 (Phase 7)
+        //공격 기반 누적 필요 횟수 (Phase 7)
         private int AttacksNeeded
         {
             get
@@ -219,7 +219,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 스킬별 최대 스택 수 (Phase 7 개선)
+        //스킬별 최대 스택 수 (Phase 7 개선)
         private int MaxStacks
         {
             get
@@ -241,13 +241,13 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 스택 감소 설정 (Phase 7 개선)
+        //스택 감소 설정 (Phase 7 개선)
         // 공격 기반 누적 스킬에서 일정 시간 공격 안 하면 스택 감소
         private float StackDecayDelay => 8f;           // N초 후 감소 시작
         private float StackDecayInterval => 2f;        // N초마다 1스택 감소
         private bool EnableStackDecay => AccumulateType == AccumulateType.AttackBased;
 
-        // 조민희 추가: 스택 효과 공식 (Phase 7 개선)
+        //스택 효과 공식 (Phase 7 개선)
         // 스택당 효과 계산 (첫 스택 100%, 이후 80%씩 적용 - 감소하는 효과)
         private float GetStackEffectMultiplier(int stackNumber)
         {
@@ -264,10 +264,10 @@ namespace SlayerLegend.Skill
             return multiplier;
         }
 
-        // 조민희 추가: 누적형 스킬 여부
+        //누적형 스킬 여부
         public bool IsAccumulating => AccumulateType != AccumulateType.None;
 
-        // 조민희 추가: 특수 발동 타입 (Phase 8)
+        //특수 발동 타입 (Phase 8)
         private SpecialActivationType SpecialType
         {
             get
@@ -292,10 +292,10 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 특수 스킬 여부
+        //특수 스킬 여부
         public bool IsSpecialSkill => SpecialType != SpecialActivationType.None;
 
-        // 조민희 추가: 지연 발동 시간 (Phase 8)
+        //지연 발동 시간 (Phase 8)
         private float DelayedActivationTime
         {
             get
@@ -311,7 +311,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 버프 지속 시간 (Phase 8)
+        //버프 지속 시간 (Phase 8)
         private float BuffDuration
         {
             get
@@ -330,7 +330,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 체력 소모 비율 (Phase 8)
+        //체력 소모 비율 (Phase 8)
         private float HealthSacrificePercent
         {
             get
@@ -361,14 +361,14 @@ namespace SlayerLegend.Skill
             lastStackTime = Time.time;
             combatStartTime = Time.time;  // Phase 8: 전투 시작 시간
 
-            // 조민희 추가: Phase 8 특수 스킬 처리
+            //Phase 8 특수 스킬 처리
             if (IsSpecialSkill)
             {
                 ActivateSpecialSkill();
                 return;
             }
 
-            // 조민희 추가: 누적형 버프 처리 (Phase 7)
+            //누적형 버프 처리 (Phase 7)
             if (IsAccumulating)
             {
                 if (AccumulateType == AccumulateType.TimeBased)
@@ -389,7 +389,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 특수 스킬 활성화 (Phase 8)
+        //특수 스킬 활성화 (Phase 8)
         private void ActivateSpecialSkill()
         {
             switch (SpecialType)
@@ -411,7 +411,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 체력 소모형 버프 발동 (Phase 8)
+        //체력 소모형 버프 발동 (Phase 8)
         private void ActivateHealthSacrificeBuff()
         {
             if (CachedStats == null) return;
@@ -430,7 +430,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 지연 발동 코루틴 (Phase 8)
+        //지연 발동 코루틴 (Phase 8)
         private IEnumerator DelayedBuffCoroutine()
         {
             // 지연 시간 대기
@@ -449,7 +449,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 주기적 회복 코루틴 (Phase 8)
+        //주기적 회복 코루틴 (Phase 8)
         private IEnumerator PeriodicRestoreCoroutine()
         {
             // 전투 중 주기적으로 회복
@@ -466,7 +466,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 버프 지속 시간 코루틴 (Phase 8)
+        //버프 지속 시간 코루틴 (Phase 8)
         private IEnumerator BuffDurationCoroutine()
         {
             yield return new WaitForSeconds(BuffDuration);
@@ -495,7 +495,7 @@ namespace SlayerLegend.Skill
 
             isActive = false;
 
-            // 조민희 추가: Phase 8 특수 스킬 정리
+            //Phase 8 특수 스킬 정리
             if (IsSpecialSkill)
             {
                 if (specialCoroutine != null)
@@ -518,7 +518,7 @@ namespace SlayerLegend.Skill
                 return;
             }
 
-            // 조민희 추가: 누적형 버프 정리 (Phase 7)
+            //누적형 버프 정리 (Phase 7)
             if (IsAccumulating)
             {
                 if (accumulateCoroutine != null)
@@ -542,7 +542,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 시간 기반 누적 코루틴 (Phase 7)
+        //시간 기반 누적 코루틴 (Phase 7)
         private IEnumerator TimeBasedAccumulateCoroutine()
         {
             while (isActive)
@@ -556,7 +556,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 스택 감소 코루틴 (Phase 7 개선)
+        //스택 감소 코루틴 (Phase 7 개선)
         // 공격 기반 누적 스킬에서 일정 시간 공격 안 하면 스택 감소
         private IEnumerator StackDecayCoroutine()
         {
@@ -572,7 +572,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 공격 시 호출 (공격 기반 누적용) (Phase 7)
+        //공격 시 호출 (공격 기반 누적용) (Phase 7)
         public void OnAttack()
         {
             if (!isActive || AccumulateType != AccumulateType.AttackBased) return;
@@ -592,7 +592,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 스택 추가 (Phase 7 개선)
+        //스택 추가 (Phase 7 개선)
         private void AddStack()
         {
             currentStacks++;
@@ -615,7 +615,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 스택 제거 (Phase 7 개선)
+        //스택 제거 (Phase 7 개선)
         private void RemoveStack()
         {
             if (currentStacks <= 0) return;
@@ -641,7 +641,7 @@ namespace SlayerLegend.Skill
             }
         }
 
-        // 조민희 추가: 모든 스택 제거 (Phase 7)
+        //모든 스택 제거 (Phase 7)
         private void RemoveAllStacks()
         {
             if (CachedStats != null && RemoveActions.TryGetValue(BuffType, out var removeAction))

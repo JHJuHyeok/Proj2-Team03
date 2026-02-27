@@ -3807,6 +3807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillController: {fileID: 1277772636}
   skillGridController: {fileID: 1920203785}
+  earlyGridDataLoader: {fileID: 0}
   skillButtons:
   - {fileID: 880636893}
   - {fileID: 1718705213}
@@ -5696,8 +5697,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5041713311786863777, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
+      propertyPath: playerStats
+      value: 
+      objectReference: {fileID: 1277772629}
+    - target: {fileID: 5041713311786863777, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
+      propertyPath: skillController
+      value: 
+      objectReference: {fileID: 1277772636}
     - target: {fileID: 7149423618129184523, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
       propertyPath: m_Name
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 7149423618129184523, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
+      propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -5710,6 +5723,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7149423618129184523, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1277772636}
+    - targetCorrespondingSourceObject: {fileID: 7149423618129184523, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1277772639}
   m_SourcePrefab: {fileID: 100100000, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
 --- !u!1 &409362764
 GameObject:
@@ -14054,6 +14070,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 111057270}
     m_Modifications:
+    - target: {fileID: 1169552095022665515, guid: 612cb3fb5a39d7c44a875a88eb6f716f, type: 3}
+      propertyPath: skillController
+      value: 
+      objectReference: {fileID: 1277772636}
     - target: {fileID: 2062059724864101977, guid: 612cb3fb5a39d7c44a875a88eb6f716f, type: 3}
       propertyPath: autoInitializeDataManager
       value: 0
@@ -15041,6 +15061,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeSkills: []
   passiveSkills: []
+--- !u!114 &1277772639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420315758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29d713b9c81f9e1448bdfb0a0e1ea613, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillController: {fileID: 1277772636}
+  saveKey: SkillGridData
+  loadOnStart: 1
 --- !u!224 &1293195729 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7212476274861950501, guid: 5ce819cb2d8817f4c8f6a5b8c7cc600e, type: 3}
@@ -16134,7 +16169,7 @@ MonoBehaviour:
   iceSpearProjectile: {fileID: 0}
   meteorProjectile: {fileID: 0}
   diagonalProjectile: {fileID: 0}
-  initializeOnStart: 1
+  initializeOnStart: 0
   useTestMode: 0
 --- !u!4 &1437579917
 Transform:

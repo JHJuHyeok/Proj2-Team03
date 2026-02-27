@@ -80,7 +80,7 @@ namespace SlayerLegend.Skill.Data
         [Tooltip("DoT 타입 (burn, poison 등)")]
         public string dotType = "burn";
 
-        // 조민희 추가: 타겟 제한 및 다회 타격 (2026-02-24)
+        //타겟 제한 및 다회 타격 (2026-02-24)
         [Header("타겟 제한 및 다회 타격")]
         [Tooltip("최대 타겟 수 (-1 = 무제한)")]
         public int maxTargets = -1;

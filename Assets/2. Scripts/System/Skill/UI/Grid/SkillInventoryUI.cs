@@ -15,6 +15,7 @@ namespace SlayerLegend.Skill.UI.Grid
         [SerializeField] private SkillGridController gridController;
         [SerializeField] private Transform slotContainer;
         [SerializeField] private GameObject slotPrefab;
+        [SerializeField] private EarlyGridDataLoader earlyGridDataLoader;  // 조민희 추가
 
         [Header("필터링")]
         [SerializeField] private Toggle showActiveToggle;
@@ -45,11 +46,13 @@ namespace SlayerLegend.Skill.UI.Grid
         {
             InitializeToggles();
             SubscribeToGridController();
+            SubscribeToEarlyGridDataLoader();  // 조민희 추가
         }
 
         private void OnDestroy()
         {
             UnsubscribeFromGridController();
+            UnsubscribeFromEarlyGridDataLoader();  // 조민희 추가
         }
 
         // 토글 초기화
@@ -82,6 +85,11 @@ namespace SlayerLegend.Skill.UI.Grid
                 gridController.OnGridUpdated += HandleGridUpdated;
                 gridController.OnSkillAddedToInventory += HandleSkillAdded;
                 gridController.OnSkillRemovedFromInventory += HandleSkillRemoved;
+                // 조민희 추가: 스킬 배치/제거 이벤트 구독
+                gridController.OnSkillPlaced += HandleSkillPlaced;
+                gridController.OnSkillRemoved += HandleSkillRemovedFromGrid;
+                // 조민희 추가: 그리드 데이터 로드 완료 이벤트 구독
+                gridController.OnGridDataLoaded += HandleGridDataLoaded;
             }
         }
 
@@ -93,6 +101,40 @@ namespace SlayerLegend.Skill.UI.Grid
                 gridController.OnGridUpdated -= HandleGridUpdated;
                 gridController.OnSkillAddedToInventory -= HandleSkillAdded;
                 gridController.OnSkillRemovedFromInventory -= HandleSkillRemoved;
+                // 조민희 추가: 스킬 배치/제거 이벤트 구독 해제
+                gridController.OnSkillPlaced -= HandleSkillPlaced;
+                gridController.OnSkillRemoved -= HandleSkillRemovedFromGrid;
+                // 조민희 추가: 그리드 데이터 로드 완료 이벤트 구독 해제
+                gridController.OnGridDataLoaded -= HandleGridDataLoaded;
+            }
+        }
+
+        // 조민희 추가: EarlyGridDataLoader 이벤트 구독
+        private void SubscribeToEarlyGridDataLoader()
+        {
+            if (earlyGridDataLoader == null)
+            {
+                earlyGridDataLoader = FindObjectOfType<EarlyGridDataLoader>();
+            }
+
+            if (earlyGridDataLoader != null)
+            {
+                earlyGridDataLoader.OnEarlyGridDataLoaded += HandleEarlyGridDataLoaded;
+
+                // 이미 로드가 완료된 경우 즉시 상태 갱신
+                if (earlyGridDataLoader.LoadedSkillIds.Count > 0)
+                {
+                    HandleEarlyGridDataLoaded(earlyGridDataLoader.LoadedSkillIds);
+                }
+            }
+        }
+
+        // 조민희 추가: EarlyGridDataLoader 이벤트 구독 해제
+        private void UnsubscribeFromEarlyGridDataLoader()
+        {
+            if (earlyGridDataLoader != null)
+            {
+                earlyGridDataLoader.OnEarlyGridDataLoaded -= HandleEarlyGridDataLoaded;
             }
         }
 
@@ -269,6 +311,81 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (selectedSlot == slot)
                 {
                     selectedSlot = null;
+                }
+            }
+
+            UpdateCountDisplay();
+        }
+
+        /// <summary>
+        /// 스킬이 그리드에 배치되었을 때 호출 (조민희 추가)
+        /// </summary>
+        private void HandleSkillPlaced(string skillId, SkillData skillData)
+        {
+            if (slotsBySkillId.TryGetValue(skillId, out var slot))
+            {
+                slot.SetPlacedState(true);
+            }
+            UpdateCountDisplay();
+        }
+
+        /// <summary>
+        /// 스킬이 그리드에서 제거되었을 때 호출 (조민희 추가)
+        /// </summary>
+        private void HandleSkillRemovedFromGrid(string skillId, SkillData skillData)
+        {
+            if (slotsBySkillId.TryGetValue(skillId, out var slot))
+            {
+                slot.SetPlacedState(false);
+            }
+            UpdateCountDisplay();
+        }
+
+        /// <summary>
+        /// 그리드 데이터 로드 완료 시 호출 (조민희 추가)
+        /// </summary>
+        private void HandleGridDataLoaded()
+        {
+            RefreshSlotPlacedStates();
+        }
+
+        /// <summary>
+        /// 게임 시작 시 그리드 데이터 로드 완료 시 호출 (조민희 추가)
+        /// </summary>
+        private void HandleEarlyGridDataLoaded(System.Collections.Generic.List<string> skillIds)
+        {
+            // 슬롯이 생성된 후에만 상태 갱신
+            if (slots.Count > 0)
+            {
+                RefreshSlotPlacedStates();
+            }
+        }
+
+        /// <summary>
+        /// 모든 슬롯의 배치 상태 갱신 (조민희 추가)
+        /// </summary>
+        public void RefreshSlotPlacedStates()
+        {
+            if (gridController == null) return;
+
+            // 그리드에 배치된 스킬 ID 목록 가져오기
+            var placedItems = gridController.GetPlacedItems();
+            var placedSkillIds = new HashSet<string>();
+            foreach (var item in placedItems)
+            {
+                if (item != null)
+                {
+                    placedSkillIds.Add(item.SkillId);
+                }
+            }
+
+            // 모든 슬롯 상태 갱신
+            foreach (var slot in slots)
+            {
+                if (slot != null && !string.IsNullOrEmpty(slot.SkillId))
+                {
+                    bool isPlaced = placedSkillIds.Contains(slot.SkillId);
+                    slot.SetPlacedState(isPlaced);
                 }
             }
 

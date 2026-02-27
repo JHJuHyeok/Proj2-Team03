@@ -24,15 +24,22 @@ namespace SlayerLegend.Skill.UI.Grid
         [SerializeField] private Color passiveColor = new Color(0.6f, 0.4f, 0.8f, 1f);
         [SerializeField] private Color selectedColor = new Color(0.9f, 0.7f, 0.2f, 1f);
 
+        [Header("배치 상태 색상 (조민희 추가)")]
+        [SerializeField] private Color placedColor = new Color(0.15f, 0.15f, 0.15f, 1f);  // 검은색
+        [SerializeField] private Color placedOverlayColor = new Color(0.1f, 0.1f, 0.1f, 0.6f);  // 오버레이용
+
         private SkillData skillData;
         private SkillDraggableItem draggableItem;
         private bool isSelected = false;
+        private bool isPlaced = false;  //그리드 배치 상태
+        private Color originalColor;    //원래 색상 저장
 
         public event System.Action<InventorySlotUI> OnSlotClicked;
 
         public SkillData SkillData => skillData;
         public SkillDraggableItem DraggableItem => draggableItem;
         public bool IsSelected => isSelected;
+        public string SkillId => skillData?.id ?? "";  //스킬 ID 노출
 
         private void Awake()
         {
@@ -95,7 +102,9 @@ namespace SlayerLegend.Skill.UI.Grid
             // 배경색 (액티브/패시브)
             if (background != null)
             {
-                background.color = skillData.type == SkillType.Active ? activeColor : passiveColor;
+                originalColor = skillData.type == SkillType.Active ? activeColor : passiveColor;
+                //배치 상태면 placedColor 유지
+                background.color = isPlaced ? placedColor : originalColor;
             }
 
             // 모양 표시기 (시각적 힌트)
@@ -131,15 +140,37 @@ namespace SlayerLegend.Skill.UI.Grid
                 }
                 else
                 {
-                    if (skillData == null)
-                    {
-                        background.color = passiveColor;
-                        return;
-                    }
-                    background.color = skillData.type == SkillType.Active ? activeColor : passiveColor;
+                    //배치 상태 고려
+                    background.color = isPlaced ? placedColor : originalColor;
                 }
             }
         }
+
+        /// <summary>
+        /// 그리드 배치 상태 설정 (조민희 추가)
+        /// </summary>
+        public void SetPlacedState(bool placed)
+        {
+            isPlaced = placed;
+
+            if (background != null)
+            {
+                if (placed)
+                {
+                    background.color = placedColor;
+                }
+                else
+                {
+                    // 선택 상태면 선택 색상 유지, 아니면 원래 색상
+                    background.color = isSelected ? selectedColor : originalColor;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 현재 배치 상태 반환 (조민희 추가)
+        /// </summary>
+        public bool IsPlaced => isPlaced;
 
         // 슬롯 클릭 핸들러
         private void HandleSlotClicked()

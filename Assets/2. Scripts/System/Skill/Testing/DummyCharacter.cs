@@ -48,7 +48,7 @@ namespace SlayerLegend.Skill.Testing
         public float CriticalRate => _criticalRate;
         public double CriticalDamage => _criticalDamage;
 
-        // 조민희 추가: 확장 스탯 프로퍼티
+        //확장 스탯 프로퍼티
         public float AttackSpeed => _attackSpeed;
         public float MoveSpeed => _moveSpeed;
         public float ManaRegen => _manaRegen;
@@ -65,13 +65,13 @@ namespace SlayerLegend.Skill.Testing
         private readonly Dictionary<object, float> _criticalDamageModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _goldGainPercentModifiers = new Dictionary<object, float>();
 
-        // 조민희 추가: 확장 버프 모디파이어
+        //확장 버프 모디파이어
         private readonly Dictionary<object, float> _attackSpeedModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _moveSpeedModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _manaRegenModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _healthRegenModifiers = new Dictionary<object, float>();
 
-        // 조민희 추가: Phase 8 특수 버프 모디파이어
+        //Phase 8 특수 버프 모디파이어
         private readonly Dictionary<object, float> _evasionModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _cooldownReductionModifiers = new Dictionary<object, float>();
         private readonly Dictionary<object, float> _missingHpDamageModifiers = new Dictionary<object, float>();
@@ -85,7 +85,7 @@ namespace SlayerLegend.Skill.Testing
             _criticalRate = criticalRate;
             _criticalDamage = criticalDamage;
 
-            // 조민희 추가: 확장 스탯 초기화
+            //확장 스탯 초기화
             _attackSpeed = attackSpeed;
             _moveSpeed = moveSpeed;
             _manaRegen = manaRegenPerSecond;
@@ -110,7 +110,7 @@ namespace SlayerLegend.Skill.Testing
                 CurrentMana = Mathf.Min(MaxMana, CurrentMana + _manaRegen * Time.deltaTime);
             }
 
-            // 조민희 추가: 체력 자연 회복 (버프 적용)
+            //체력 자연 회복 (버프 적용)
             if (CurrentHealth < MaxHealth)
             {
                 CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + _healthRegen * Time.deltaTime);
@@ -194,7 +194,7 @@ namespace SlayerLegend.Skill.Testing
             _goldGainPercentModifiers[source] = value;
         }
 
-        // 조민희 추가: 확장 버프 모디파이어 Add
+        //확장 버프 모디파이어 Add
         public void AddAttackSpeedModifier(object source, float value)
         {
             if (_attackSpeedModifiers.ContainsKey(source)) return;
@@ -264,7 +264,7 @@ namespace SlayerLegend.Skill.Testing
             _goldGainPercentModifiers.Remove(source);
         }
 
-        // 조민희 추가: 확장 버프 모디파이어 Remove
+        //확장 버프 모디파이어 Remove
         public void RemoveAttackSpeedModifier(object source)
         {
             if (_attackSpeedModifiers.Remove(source))
@@ -289,7 +289,7 @@ namespace SlayerLegend.Skill.Testing
                 RecalculateStats();
         }
 
-        // 조민희 추가: Phase 8 특수 버프 모디파이어 Add
+        //Phase 8 특수 버프 모디파이어 Add
         public void AddEvasionModifier(object source, float value)
         {
             if (_evasionModifiers.ContainsKey(source)) return;
@@ -311,7 +311,7 @@ namespace SlayerLegend.Skill.Testing
             RecalculateStats();
         }
 
-        // 조민희 추가: Phase 8 특수 버프 모디파이어 Remove
+        //Phase 8 특수 버프 모디파이어 Remove
         public void RemoveEvasionModifier(object source)
         {
             if (_evasionModifiers.Remove(source))
@@ -330,7 +330,7 @@ namespace SlayerLegend.Skill.Testing
                 RecalculateStats();
         }
 
-        // 조민희 추가: Phase 8 체력 조작
+        //Phase 8 체력 조작
         public void SacrificeHealth(float percent)
         {
             float sacrificeAmount = MaxHealth * percent;
@@ -392,7 +392,7 @@ namespace SlayerLegend.Skill.Testing
             foreach (var mod in _criticalDamageModifiers.Values)
                 _criticalDamage += mod;
 
-            // 조민희 추가: 확장 스탯 재계산
+            //확장 스탯 재계산
             // 공격 속도 재계산
             _attackSpeed = attackSpeed;
             foreach (var mod in _attackSpeedModifiers.Values)
@@ -413,7 +413,7 @@ namespace SlayerLegend.Skill.Testing
             foreach (var mod in _healthRegenModifiers.Values)
                 _healthRegen *= (1 + mod / 100f);
 
-            // 조민희 추가: Phase 8 특수 스탯 재계산
+            //Phase 8 특수 스탯 재계산
             // 회피율 (기본 0%)
             float evasionRate = 0f;
             foreach (var mod in _evasionModifiers.Values)

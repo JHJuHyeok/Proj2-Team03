@@ -17,6 +17,7 @@ namespace SlayerLegend.UI
         [Header("참조")]
         [SerializeField] private SkillController skillController;
         [SerializeField] private SkillGridController skillGridController;
+        [SerializeField] private EarlyGridDataLoader earlyGridDataLoader;  //게임 시작 시 로드용
 
         [Header("버튼 목록 (에디터에서 할당)")]
         [SerializeField] private List<SkillSetButtonUI> skillButtons = new List<SkillSetButtonUI>();
@@ -47,16 +48,29 @@ namespace SlayerLegend.UI
                 }
             }
 
+            //EarlyGridDataLoader 찾기 (게임 시작 시 그리드 데이터 로드용)
+            if (earlyGridDataLoader == null)
+            {
+                earlyGridDataLoader = FindObjectOfType<EarlyGridDataLoader>();
+            }
+
             // 이벤트 구독
             if (skillGridController != null)
             {
                 skillGridController.OnSkillPlaced += HandleSkillPlaced;
                 skillGridController.OnSkillRemoved += HandleSkillRemoved;
+                skillGridController.OnGridDataLoaded += HandleGridDataLoaded;  //그리드 데이터 로드 완료 이벤트
                 Debug.Log("[SkillSetPanelUI] 이벤트 구독 완료");
             }
             else
             {
                 Debug.LogWarning("[SkillSetPanelUI] SkillGridController를 찾을 수 없습니다!");
+            }
+
+            //EarlyGridDataLoader 이벤트 구독 (게임 시작 시 그리드 데이터 로드)
+            if (earlyGridDataLoader != null)
+            {
+                earlyGridDataLoader.OnEarlyGridDataLoaded += HandleEarlyGridDataLoaded;
             }
 
             // 초기화 지연 (GameSkillInitializer가 스킬을 로드할 시간 확보)
@@ -70,6 +84,13 @@ namespace SlayerLegend.UI
             {
                 skillGridController.OnSkillPlaced -= HandleSkillPlaced;
                 skillGridController.OnSkillRemoved -= HandleSkillRemoved;
+                skillGridController.OnGridDataLoaded -= HandleGridDataLoaded;  // 조민희 추가
+            }
+
+            //EarlyGridDataLoader 구독 해제
+            if (earlyGridDataLoader != null)
+            {
+                earlyGridDataLoader.OnEarlyGridDataLoaded -= HandleEarlyGridDataLoaded;
             }
         }
 
@@ -113,6 +134,26 @@ namespace SlayerLegend.UI
                 // 버튼 전체 갱신 (shift 효과)
                 RefreshButtonsFromQueue();
             }
+        }
+
+        /// <summary>
+        /// 그리드 데이터 로드 완료 이벤트 핸들러 (게임 재시작 시 호출)
+        /// 조민희 추가
+        /// </summary>
+        private void HandleGridDataLoaded()
+        {
+            // 배치된 스킬들을 큐에 로드
+            LoadPlacedSkillsToQueue();
+        }
+
+        /// <summary>
+        /// 게임 시작 시 그리드 데이터 로드 완료 이벤트 핸들러
+        /// 조민희 추가
+        /// </summary>
+        private void HandleEarlyGridDataLoaded(List<string> skillIds)
+        {
+            // 배치된 스킬들을 큐에 로드
+            LoadPlacedSkillsToQueue();
         }
 
         /// <summary>
@@ -211,6 +252,13 @@ namespace SlayerLegend.UI
         private void LoadPlacedSkillsToQueue()
         {
             if (skillController == null) return;
+
+            //이미 로드된 상태면 중복 방지
+            if (placedSkillQueue.Count > 0)
+            {
+                Debug.Log("[SkillSetPanelUI] 이미 스킬이 로드됨, 중복 로드 방지");
+                return;
+            }
 
             placedSkillQueue.Clear();
             skillMap.Clear();

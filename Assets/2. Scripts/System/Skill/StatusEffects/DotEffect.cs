@@ -4,13 +4,13 @@ namespace SlayerLegend.Skill.StatusEffects
 {
     // 도트 데미지 (Damage over Time)
     // 일정 간격으로 지속 데미지를 입히는 상태이상
-    // 조민희 추가: 스택 시스템 (최대 5스택)
+    //스택 시스템 (최대 5스택)
     public class DotEffect : StatusEffect
     {
         [Header("도트 데미지 설정")]
         [SerializeField] private double damagePerTick = 10.0;
         [SerializeField] private float tickInterval = 1f;
-        [SerializeField] private int maxStack = 5;  // 조민희 추가: 최대 스택 수
+        [SerializeField] private int maxStack = 5;  //최대 스택 수
 
         private float tickTimer = 0f;
         private IDamageable target;
@@ -18,7 +18,7 @@ namespace SlayerLegend.Skill.StatusEffects
         private bool isPercentageBased;  // 체력 비례 여부
         private float targetMaxHp;        // 대상 최대 체력 (비례 계산용)
 
-        // 조민희 추가: 스택 시스템 변수
+        //스택 시스템 변수
         private int currentStack = 1;           // 현재 스택 수
         private string stackKey;                 // 스택 식별용 (같은 종류의 스택만 중첩)
 
@@ -27,10 +27,10 @@ namespace SlayerLegend.Skill.StatusEffects
         public IDamageable Target => target;
         public bool IsPercentageBased => isPercentageBased;
         public float TargetMaxHp => targetMaxHp;
-        public int CurrentStack => currentStack;  // 조민희 추가: 현재 스택 조회
+        public int CurrentStack => currentStack;  //현재 스택 조회
 
         // 도트 데미지 초기화
-        // 조민희 추가: stackKey 파라미터 - 같은 종류의 스택만 중첩
+        //stackKey 파라미터 - 같은 종류의 스택만 중첩
         public void Initialize(float totalDuration, double perTickDamage, float interval, IDamageable damageTarget, GameObject damageSource, bool percentageBased = false, float maxHp = 0f, string stackKey = "default")
         {
             duration = totalDuration;
@@ -78,7 +78,7 @@ namespace SlayerLegend.Skill.StatusEffects
         {
             if (target == null) return;
 
-            // 조민희 추가: 스택을 적용한 데미지 계산
+            //스택을 적용한 데미지 계산
             double actualDamage = damagePerTick * currentStack;
 
             // 체력 비례 데미지 계산
@@ -99,7 +99,7 @@ namespace SlayerLegend.Skill.StatusEffects
                 ApplyDotDamage();
             }
 
-            // 조민희 추가: 스택 관리 (2스택 이상이면 지속시간만 초기화)
+            //스택 관리 (2스택 이상이면 지속시간만 초기화)
             if (currentStack > 1)
             {
                 currentStack--;
@@ -115,7 +115,7 @@ namespace SlayerLegend.Skill.StatusEffects
             }
         }
 
-        // 조민희 추가: 스택 추가 (같은 종류의 DoT 중첩)
+        //스택 추가 (같은 종류의 DoT 중첩)
         public void AddStack(float additionalDuration, double additionalDamage, GameObject newSource)
         {
             if (currentStack < maxStack)
