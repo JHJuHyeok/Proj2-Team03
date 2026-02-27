@@ -6,6 +6,16 @@ EnumUI
 */
 public static class EnumUI
 {
+    // 특정 Enum이 포함되어 있는지 확인용 메서드 - 주혁
+    public static bool IsAny(this SlotKey key, params SlotKey[] targetKeys)
+    {
+        for (int i = 0; i < targetKeys.Length; i++)
+        {
+            if (key == targetKeys[i]) return true;
+        }
+        return false;
+    }
+
     public enum TabType
     {
         Enhance,
