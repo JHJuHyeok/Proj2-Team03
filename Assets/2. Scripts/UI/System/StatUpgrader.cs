@@ -13,14 +13,11 @@ public class StatUpgrader : MonoBehaviour
 {
     [Header("설정")]
     [SerializeField] private StatType _targetStat;          // 성장시킬 스탯
-    [SerializeField] private UsedTab _currentTab;           // 이 스크립트가 사용될 위치
     // GameData의 upgradeLevels 또는 growthLevels에서 변경시킬 스탯 인덱스
     [SerializeField] private int _upgradeIndex;
 
     [Header("UI 연결")]
-    [SerializeField] private TMP_Text _levelText;           // 현재 레벨
-    [SerializeField] private TMP_Text _valueText;           // 스탯 수치
-    [SerializeField] private TMP_Text _costText;            // 강화 비용
+    [SerializeField] private EnhanceSlotUI _slotUI;         // 각 슬롯 정보
 
     #region 업그레이드 별 재화 상승치
     private static float basicRate = 1.02f;
@@ -31,28 +28,39 @@ public class StatUpgrader : MonoBehaviour
     // 세이브 데이터 접근 프로퍼티
     private GameData _saveData => DataManager.CurrentSaveData;
 
+    // 각 업그레이드 레벨 참조 리스트 반환 메서드
+    private List<int> GetTargetLevels(EnumUI.SlotKey key) => key switch
+    {
+        EnumUI.SlotKey.ENH_STR or
+        EnumUI.SlotKey.ENH_HP or
+        EnumUI.SlotKey.ENH_VIT or
+        EnumUI.SlotKey.ENH_CRI_PROB or
+        EnumUI.SlotKey.ENH_CRI_DMG
+        => _saveData.upgradeLevels,
+
+        EnumUI.SlotKey.GRO_STR or
+        EnumUI.SlotKey.GRO_HP or
+        EnumUI.SlotKey.GRO_VIT or
+        EnumUI.SlotKey.GRO_CRI or
+        EnumUI.SlotKey.GRO_LUK or
+        EnumUI.SlotKey.GRO_ACC or
+        EnumUI.SlotKey.GRO_DODGE
+        => _saveData.growthLevels,
+
+        _ => null
+    };
+
     private int CurrentLevel
     {
         get
         {
-            return _currentTab switch
-            {
-                UsedTab.Upgrade => _saveData.upgradeLevels[_upgradeIndex],
-                UsedTab.Growth => _saveData.growthLevels[_upgradeIndex],
-                _ => 0
-            };
+            var array = GetTargetLevels(_slotUI.key);
+            return array != null ? array[_upgradeIndex] : 0;
         }
         set
         {
-            switch (_currentTab)
-            {
-                case UsedTab.Upgrade:
-                    _saveData.upgradeLevels[_upgradeIndex] = value;
-                    break;
-                case UsedTab.Growth:
-                    _saveData.growthLevels[_upgradeIndex] = value;
-                    break;
-            }
+            var array = GetTargetLevels(_slotUI.key);
+            if (array != null) array[_upgradeIndex] = value;
         }
     }
 
@@ -61,13 +69,32 @@ public class StatUpgrader : MonoBehaviour
         RefreshUI();
     }
 
+    private EnumUI.SlotKey[] UpgradeEnums =
+    {
+        EnumUI.SlotKey.ENH_STR,
+        EnumUI.SlotKey.ENH_HP,
+        EnumUI.SlotKey.ENH_VIT,
+        EnumUI.SlotKey.ENH_CRI_PROB,
+        EnumUI.SlotKey.ENH_CRI_DMG
+    };
+    private EnumUI.SlotKey[] GrowthEnums =
+    {
+        EnumUI.SlotKey.GRO_STR,
+        EnumUI.SlotKey.GRO_HP,
+        EnumUI.SlotKey.GRO_VIT,
+        EnumUI.SlotKey.GRO_CRI,
+        EnumUI.SlotKey.GRO_LUK,
+        EnumUI.SlotKey.GRO_ACC,
+        EnumUI.SlotKey.GRO_DODGE
+    };
+
     /// <summary>
     /// 버튼에 부착할 업그레이드 스크립트
     /// </summary>
     public void TryUpgrade()
     {
         // 강화 칸에 적용 시
-        if (_currentTab == UsedTab.Upgrade)
+        if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
         {
             double cost = CalculateCost(_targetStat, CurrentLevel);
 
@@ -85,7 +112,7 @@ public class StatUpgrader : MonoBehaviour
             }
         }
         // 성장 탭에 적용 시
-        else if (_currentTab == UsedTab.Growth)
+        else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
         {
             if (CurrencyManager.Instance.GetAmount(CurrencyType.StatPoint) > 0)
             {
@@ -105,7 +132,7 @@ public class StatUpgrader : MonoBehaviour
     /// <param name="stat"> 변경 스탯 타입 </param>
     /// <param name="level"> 각 업그레이드 칸의 레벨 </param>
     /// <returns> 필요 금액 </returns>
-    private double CalculateCost(StatType stat, int level)
+    private long CalculateCost(StatType stat, int level)
     {
         double cost;
         switch (stat)
@@ -126,22 +153,22 @@ public class StatUpgrader : MonoBehaviour
                 break;
         }
 
-        return cost;
+        return (long)cost;
     }
 
     private void RefreshUI()
     {
-        if (_levelText != null)
-            _levelText.text = $"Lv.{CurrentLevel}";
-        if (_costText != null)
-            _costText.text = CalculateCost(_targetStat, CurrentLevel).ToString("#,##0");
-        if (_valueText != null)
-            _valueText.text = $"{GetCurrentStatValue(CurrentLevel)}->{GetCurrentStatValue(CurrentLevel + 1)}";
+        if (_slotUI != null)
+        {
+            _slotUI.SetLevel(CurrentLevel);
+            _slotUI.SetCostGold(CalculateCost(_targetStat, CurrentLevel));
+            _slotUI.SetValueChange(GetStatValue(CurrentLevel), GetStatValue(CurrentLevel + 1));
+        }
     }
 
-    private double GetCurrentStatValue(int level)
+    private double GetStatValue(int level)
     {
-        if (_currentTab == UsedTab.Upgrade)
+        if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
         {
             switch (_targetStat)
             {
@@ -181,7 +208,7 @@ public class StatUpgrader : MonoBehaviour
             _targetStat != StatType.CRI_Per &&
             _targetStat != StatType.ADD_GOLD)
         {
-            baseValue = GetCurrentStatValue(CurrentLevel);
+            baseValue = GetStatValue(CurrentLevel);
 
             List<StatValue> stats = new List<StatValue>()
             {
@@ -192,14 +219,14 @@ public class StatUpgrader : MonoBehaviour
                 }
             };
 
-            if (_currentTab ==  UsedTab.Upgrade)
+            if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Upgrade, stats);
-            else
+            else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Growth, stats);
         }
         else
         {
-            multiplier = GetCurrentStatValue(CurrentLevel);
+            multiplier = GetStatValue(CurrentLevel);
 
             List<StatValue> stats = new List<StatValue>()
             {
@@ -210,9 +237,9 @@ public class StatUpgrader : MonoBehaviour
                 }
             };
 
-            if (_currentTab == UsedTab.Upgrade)
+            if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Upgrade, stats);
-            else
+            else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Growth, stats);
         }
     }
