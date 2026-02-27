@@ -13,10 +13,16 @@ EnhanceSlotUI
   강화에 필요한 골드(코스트)
 -컨테이너 자동 배정을 위해 SetKey(EnumUI.SlotKey) 제공
 */
+
+/* [주혁] - StatUpgrader에서 참조하기 위해 일부 내용 수정
+    * EnumUI.SlotKey key 접근자 private -> public으로 변경
+    * 메서드 SetValueChange의 매개변수 long -> double로 변경
+*/
+
 public class EnhanceSlotUI : MonoBehaviour
 {
     [Header("Key")]
-    [SerializeField] private EnumUI.SlotKey key;
+    public EnumUI.SlotKey key;
 
     [Header("Icon (Prefab Local)")]
     [SerializeField] private Image iconImage;
@@ -69,7 +75,7 @@ public class EnhanceSlotUI : MonoBehaviour
         levelText.text = lvPrefix + level.ToString("000");
     }
 
-    public void SetValueChange(long before, long after)
+    public void SetValueChange(double before, double after)
     {
         if (changeText == null) return;
         changeText.text = before.ToString("N0") + arrow + after.ToString("N0");

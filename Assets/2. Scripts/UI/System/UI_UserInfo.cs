@@ -6,17 +6,23 @@ public class UI_UserInfo : MonoBehaviour
 {
     [SerializeField] private TMP_Text _levelText;
     [SerializeField] private TMP_Text _nicknameText;
+    [SerializeField] private string _format = "{0:00#}";
 
     private void OnEnable()
     {
-        // 나중에 레벨 관련 스크립트 생기면 Event 만들어서 구독
+        LevelManager.Instance.OnLevelUp += Refresh;
 
-        Refresh();
+        _nicknameText.text = Backend.UserNickName;
     }
 
-    public void Refresh()
+    private void OnDisable()
     {
-        _levelText.text = $"Lv.{DataManager.CurrentSaveData.level}";
-        _nicknameText.text = Backend.UserNickName;
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.OnLevelUp -= Refresh;
+    }
+
+    private void Refresh(int level)
+    {
+        _levelText.text = string.Format(_format, level);
     }
 }

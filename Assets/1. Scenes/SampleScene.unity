@@ -372,32 +372,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 225186469}
-  - component: {fileID: 225186468}
+  - component: {fileID: 225186470}
   m_Layer: 0
-  m_Name: InfoProvider
+  m_Name: StatUpgrader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &225186468
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 225186467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dce7fe0fe2a5c484fb7bfb055cb810e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _levelText: {fileID: 1929389639}
-  _nicknameText: {fileID: 980798164}
-  _rankImage: {fileID: 0}
-  _jewelText: {fileID: 557224997}
-  _diamondText: {fileID: 2133602575}
-  getCurrButtons: []
 --- !u!4 &225186469
 Transform:
   m_ObjectHideFlags: 0
@@ -413,6 +395,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &225186470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225186467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c7c20202af2e404c8e426ec298355f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetStat: 0
+  _currentTab: 0
+  _upgradeIndex: 0
+  _levelText: {fileID: 1929389639}
+  _valueText: {fileID: 980798164}
+  _costText: {fileID: 557224997}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -939,7 +939,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 225186468}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InfoHandler, Assembly-CSharp
         m_MethodName: GetDiamond3500
         m_Mode: 1
@@ -1425,9 +1425,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 225186468}
-        m_TargetAssemblyTypeName: InfoProvider, Assembly-CSharp
-        m_MethodName: UpdateUserData
+      - m_Target: {fileID: 225186470}
+        m_TargetAssemblyTypeName: StatUpgrader, Assembly-CSharp
+        m_MethodName: TryUpgrade
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -31,7 +31,7 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
     {
         get
         {
-            double value = GetStatValue(StatType.CTI_DMG) / 100.0;
+            double value = GetStatValue(StatType.CRI_DMG) / 100.0;
             return value > 0 ? value : 2.0; // 기본값 200%
         }
     }
@@ -122,7 +122,7 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
             StatType.MANA => 100,          // 최대 마나
             StatType.STR => 50,            // 공격력
             StatType.CRI_Per => 10,        // 치명타 확률 (10%)
-            StatType.CTI_DMG => 200,       // 치명타 데미지 (200%)
+            StatType.CRI_DMG => 200,       // 치명타 데미지 (200%)
             StatType.ACC => 100,           // 명중률 (100%)
             StatType.DODGE => 5,           // 회피율 (5%)
             StatType.ADD_GOLD => 0,        // 추가 골드 획득량
