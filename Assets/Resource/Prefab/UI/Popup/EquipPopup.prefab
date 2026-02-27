@@ -154,7 +154,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &9104379518094300014
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1211,6 +1211,7 @@ GameObject:
   - component: {fileID: 8424651072519363596}
   - component: {fileID: 3630391919550952755}
   - component: {fileID: 9149115411826330897}
+  - component: {fileID: 2731898245158759863}
   m_Layer: 5
   m_Name: EXIT Button
   m_TagString: Untagged
@@ -1320,6 +1321,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2731898245158759863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1720521390418711798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d68aeaa7df5464c43831b35d10e07fdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1732259036325665846
 GameObject:
   m_ObjectHideFlags: 0
@@ -3071,7 +3084,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3710593357048864111
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3104,7 +3117,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f921811239d56354dacff1d48bb11a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupId: 2
+  popupId: 3
+  titleText: {fileID: 0}
+  iconImage: {fileID: 0}
+  weaponSprite: {fileID: 0}
+  accessorySprite: {fileID: 0}
 --- !u!1 &6606385964786294591
 GameObject:
   m_ObjectHideFlags: 0
