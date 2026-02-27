@@ -24,8 +24,8 @@ namespace SlayerLegend.UI
         // 배치 순서대로 스킬 ID를 저장하는 큐
         private List<string> placedSkillQueue = new List<string>();
 
-        // 스킬 ID → ActiveSkill 매핑 (빠른 조회용)
-        private Dictionary<string, ActiveSkill> skillMap = new Dictionary<string, ActiveSkill>();
+        // 스킬 ID → ISkillDisplayable 매핑 (빠른 조회용) - Active/Passive 모두 지원
+        private Dictionary<string, ISkillDisplayable> skillMap = new Dictionary<string, ISkillDisplayable>();
 
         private void Start()
         {
@@ -84,17 +84,17 @@ namespace SlayerLegend.UI
                 return;
             }
 
-            // SkillController에서 ActiveSkill 찾기
-            ActiveSkill activeSkill = FindActiveSkill(skillId);
-            if (activeSkill == null)
+            // SkillController에서 스킬 찾기 (Active/Passive 모두)
+            ISkillDisplayable skill = FindSkill(skillId);
+            if (skill == null)
             {
-                Debug.LogWarning($"[SkillSetPanelUI] ActiveSkill을 찾을 수 없음: {skillId}");
+                Debug.LogWarning($"[SkillSetPanelUI] 스킬을 찾을 수 없음: {skillId}");
                 return;
             }
 
             // 큐에 추가
             placedSkillQueue.Add(skillId);
-            skillMap[skillId] = activeSkill;
+            skillMap[skillId] = skill;
 
             // 버튼 전체 갱신
             RefreshButtonsFromQueue();
@@ -132,18 +132,18 @@ namespace SlayerLegend.UI
                 string skillId = placedSkillQueue[i];
                 var button = skillButtons[i];
 
-                if (button != null && skillMap.TryGetValue(skillId, out var activeSkill))
+                if (button != null && skillMap.TryGetValue(skillId, out var skill))
                 {
-                    Sprite icon = ResourceManager.Instance?.LoadSprite(activeSkill.Data.spriteName);
-                    button.SetSkill(activeSkill, icon);
+                    Sprite icon = ResourceManager.Instance?.LoadSprite(skill.Data.spriteName);
+                    button.SetSkill(skill, icon);
                 }
             }
         }
 
         /// <summary>
-        /// ActiveSkill 찾기
+        /// 스킬 찾기 (Active/Passive 모두)
         /// </summary>
-        private ActiveSkill FindActiveSkill(string skillId)
+        private ISkillDisplayable FindSkill(string skillId)
         {
             // 캐시에서 먼저 찾기
             if (skillMap.TryGetValue(skillId, out var cached))
@@ -151,10 +151,19 @@ namespace SlayerLegend.UI
                 return cached;
             }
 
-            // SkillController에서 찾기
+            // SkillController에서 ActiveSkill 찾기
             if (skillController != null)
             {
                 foreach (var skill in skillController.ActiveSkills)
+                {
+                    if (skill != null && skill.Data != null && skill.Data.id == skillId)
+                    {
+                        return skill;
+                    }
+                }
+
+                // PassiveSkill 찾기
+                foreach (var skill in skillController.PassiveSkills)
                 {
                     if (skill != null && skill.Data != null && skill.Data.id == skillId)
                     {
@@ -197,7 +206,7 @@ namespace SlayerLegend.UI
         }
 
         /// <summary>
-        /// 그리드에 배치된 스킬들을 큐에 로드
+        /// 그리드에 배치된 스킬들을 큐에 로드 (Active/Passive 모두)
         /// </summary>
         private void LoadPlacedSkillsToQueue()
         {
@@ -208,6 +217,16 @@ namespace SlayerLegend.UI
 
             // SkillController의 ActiveSkills에서 배치된 스킬들 가져오기
             foreach (var skill in skillController.ActiveSkills)
+            {
+                if (skill != null && skill.Data != null)
+                {
+                    placedSkillQueue.Add(skill.Data.id);
+                    skillMap[skill.Data.id] = skill;
+                }
+            }
+
+            // PassiveSkills에서 배치된 스킬들 가져오기
+            foreach (var skill in skillController.PassiveSkills)
             {
                 if (skill != null && skill.Data != null)
                 {

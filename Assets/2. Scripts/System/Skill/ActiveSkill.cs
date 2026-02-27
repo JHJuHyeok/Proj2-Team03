@@ -8,7 +8,7 @@ namespace SlayerLegend.Skill
     // - Update()에서 쿨타임 감소 및 자동 발동 (Cooldown 모드)
     // - OnAttack()에서 공격 카운트 증가 및 발동 (AttackCount 모드)
     // - 마나 소모, 발사체 생성, 데미지 계산
-    public class ActiveSkill : SkillBase
+    public class ActiveSkill : SkillBase, ISkillDisplayable
     {
         [Header("액티브 스킬 상태")]
         [SerializeField] private float currentCooldown = 0f;
@@ -544,5 +544,55 @@ namespace SlayerLegend.Skill
             base.OnLevelUp();
             Debug.Log($"{skillData.name} 액티브 스킬 레벨업! 쿨타임: {SkillCalculator.GetCooldown(skillData, currentLevel):F1}초");
         }
+
+        #region ISkillDisplayable 구현
+
+        public string SkillId => skillData?.id ?? "";
+        public SkillData Data => skillData;
+        bool ISkillDisplayable.IsActive => isActive;
+
+        public string GetDisplayText()
+        {
+            if (skillData == null) return "";
+
+            // AttackCount 모드
+            if (skillData.request == SkillRequest.AttackCount)
+            {
+                int remaining = requiredAttackCount - currentAttackCount;
+                return $"{remaining}";
+            }
+
+            // Cooldown 모드
+            if (IsOnCooldown)
+            {
+                int seconds = Mathf.CeilToInt(currentCooldown);
+                return $"{seconds}";
+            }
+
+            // 쿨타임 완료 상태
+            return "";
+        }
+
+        public Color GetDisplayColor()
+        {
+            if (skillData == null) return Color.white;
+
+            // AttackCount 모드 - 청록색
+            if (skillData.request == SkillRequest.AttackCount)
+            {
+                return new Color(0f, 1f, 1f); // Cyan
+            }
+
+            // Cooldown 모드 - 빨간색
+            if (IsOnCooldown)
+            {
+                return Color.red;
+            }
+
+            // 준비 완료 - 초록색
+            return Color.green;
+        }
+
+        #endregion
     }
 }

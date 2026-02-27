@@ -21,15 +21,15 @@ namespace SlayerLegend.UI
         [SerializeField] private Color cooldownColor = Color.red;
         [SerializeField] private Color attackCountColor = Color.cyan;
 
-        private ActiveSkill linkedSkill;
+        private ISkillDisplayable linkedSkill;
         private SkillData skillData;
 
         /// <summary>
-        /// 스킬 연결 및 초기화
+        /// 스킬 연결 및 초기화 (Active/Passive 모두 지원)
         /// </summary>
-        public void SetSkill(ActiveSkill skill, Sprite icon)
+        public void SetSkill(ISkillDisplayable skill, Sprite icon)
         {
-            linkedSkill = skill;
+                linkedSkill = skill;
             skillData = skill?.Data;
 
             if (iconImage != null && icon != null)
@@ -65,68 +65,37 @@ namespace SlayerLegend.UI
             if (linkedSkill == null || skillData == null)
                 return;
 
-            UpdateCooldownDisplay();
+            UpdateSkillDisplay();
         }
 
         /// <summary>
-        /// 쿨타임/공격횟수 표시 갱신
+        /// 스킬 표시 갱신 (Active/Passive 공통)
         /// </summary>
-        private void UpdateCooldownDisplay()
+        private void UpdateSkillDisplay()
         {
             if (cooldownText == null) return;
 
-            // 디버그: skillData 확인
-            if (skillData == null)
-            {
-                Debug.LogWarning($"[SkillSetButtonUI] skillData가 null입니다.");
-                return;
-            }
+            // ISkillDisplayable 인터페이스를 통한 표시 (Active/Passive 모두 지원)
+            string displayText = linkedSkill.GetDisplayText();
+            Color displayColor = linkedSkill.GetDisplayColor();
 
-            // AttackCount 모드인 경우
-            if (skillData.request == SkillRequest.AttackCount)
+            if (string.IsNullOrEmpty(displayText))
             {
-                // 디버그: 값 확인
-                if (linkedSkill != null)
-                {
-                    int remaining = linkedSkill.RequiredAttackCount - linkedSkill.CurrentAttackCount;
-                    cooldownText.text = $"{remaining}";
-                    cooldownText.color = attackCountColor;
-                    cooldownText.gameObject.SetActive(true);
-
-                    // 디버그 로그 (한 번만)
-                    if (linkedSkill.CurrentAttackCount == 0)
-                    {
-                        Debug.Log($"[SkillSetButtonUI] {skillData.name}: AttackCount 모드 - 필요: {linkedSkill.RequiredAttackCount}, 현재: {linkedSkill.CurrentAttackCount}");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"[SkillSetButtonUI] linkedSkill이 null입니다.");
-                }
+                // 표시할 텍스트가 없으면 숨김
+                cooldownText.gameObject.SetActive(false);
             }
-            // Cooldown 모드인 경우
             else
             {
-                if (linkedSkill.IsOnCooldown)
-                {
-                    // 1초 단위로 표시 (올림) - 숫자만
-                    int seconds = Mathf.CeilToInt(linkedSkill.CurrentCooldown);
-                    cooldownText.text = $"{seconds}";
-                    cooldownText.color = cooldownColor;
-                    cooldownText.gameObject.SetActive(true);
-                }
-                else
-                {
-                    // 쿨타임이 아니면 텍스트 숨김
-                    cooldownText.gameObject.SetActive(false);
-                }
+                cooldownText.text = displayText;
+                cooldownText.color = displayColor;
+                cooldownText.gameObject.SetActive(true);
             }
         }
 
         /// <summary>
         /// 현재 연결된 스킬 반환
         /// </summary>
-        public ActiveSkill GetLinkedSkill() => linkedSkill;
+        public ISkillDisplayable GetLinkedSkill() => linkedSkill;
 
         /// <summary>
         /// 스킬이 연결되어 있는지 확인

@@ -63,8 +63,11 @@ namespace SlayerLegend.Skill.Testing
             };
         }
 
-        private void Start()
+        private async void Start()
         {
+            // DataManager가 스킬 데이터를 로드할 때까지 대기
+            await DataManager.LoadAllDatabase();
+
             if (initializeOnStart)
             {
                 InitializeAllSkills();

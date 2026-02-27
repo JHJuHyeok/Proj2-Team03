@@ -26,7 +26,7 @@ namespace SlayerLegend.Skill
     // - Activate()로 버프 적용, Deactivate()로 제거
     // - 레벨에 따른 버프 효과 증가
     // - Phase 7: 누적형 버프 지원 (시간/공격 기반)
-    public class PassiveSkill : SkillBase
+    public class PassiveSkill : SkillBase, ISkillDisplayable
     {
         // 버프 타입별 처리 로직 매핑
         private static readonly Dictionary<PassiveBuffType, Action<IStatsProvider, object, float>> ApplyActions = new()
@@ -698,5 +698,103 @@ namespace SlayerLegend.Skill
         {
             if (isActive) Deactivate();
         }
+
+        #region ISkillDisplayable 구현
+
+        public string SkillId => skillData?.id ?? "";
+        public SkillData Data => skillData;
+        bool ISkillDisplayable.IsActive => isActive;
+
+        public string GetDisplayText()
+        {
+            if (skillData == null) return "";
+
+            // 특수 스킬인 경우
+            if (IsSpecialSkill)
+            {
+                return GetSpecialSkillDisplayText();
+            }
+
+            // 누적형 스킬인 경우
+            if (IsAccumulating)
+            {
+                return $"{currentStacks}";
+            }
+
+            // 일반 패시브 스킬
+            return isActive ? "ON" : "OFF";
+        }
+
+        public Color GetDisplayColor()
+        {
+            if (skillData == null) return Color.gray;
+
+            // 특수 스킬인 경우
+            if (IsSpecialSkill)
+            {
+                return GetSpecialSkillDisplayColor();
+            }
+
+            // 누적형 스킬인 경우
+            if (IsAccumulating)
+            {
+                // 스택이 있으면 주황색, 없으면 회색
+                return currentStacks > 0 ? new Color(1f, 0.5f, 0f) : Color.gray;
+            }
+
+            // 일반 패시브 스킬
+            return isActive ? new Color(0f, 0.8f, 0f) : Color.gray; // 초록/회색
+        }
+
+        private string GetSpecialSkillDisplayText()
+        {
+            switch (SpecialType)
+            {
+                case SpecialActivationType.HealthSacrifice:
+                    // 체력 소모형: 버프 활성화 여부 표시
+                    return isSpecialBuffActive ? "ON" : "RDY";
+
+                case SpecialActivationType.DelayedBuff:
+                    // 지연 발동형: 남은 시간 또는 활성화 여부
+                    if (isSpecialBuffActive)
+                        return "ON";
+                    else
+                    {
+                        float elapsed = Time.time - combatStartTime;
+                        float remaining = DelayedActivationTime - elapsed;
+                        return remaining > 0 ? $"{Mathf.CeilToInt(remaining)}" : "RDY";
+                    }
+
+                case SpecialActivationType.PeriodicRestore:
+                    // 주기적 회복: 활성화 상태만 표시
+                    return isActive ? "ON" : "OFF";
+
+                default:
+                    return isActive ? "ON" : "OFF";
+            }
+        }
+
+        private Color GetSpecialSkillDisplayColor()
+        {
+            switch (SpecialType)
+            {
+                case SpecialActivationType.HealthSacrifice:
+                    // 체력 소모형: 빨간색 (활성) / 회색 (대기)
+                    return isSpecialBuffActive ? Color.red : Color.gray;
+
+                case SpecialActivationType.DelayedBuff:
+                    // 지연 발동형: 노란색 (대기) / 초록색 (활성)
+                    return isSpecialBuffActive ? Color.green : Color.yellow;
+
+                case SpecialActivationType.PeriodicRestore:
+                    // 주기적 회복: 초록색 (활성) / 회색 (비활성)
+                    return isActive ? new Color(0f, 0.8f, 0f) : Color.gray;
+
+                default:
+                    return isActive ? Color.green : Color.gray;
+            }
+        }
+
+        #endregion
     }
 }
