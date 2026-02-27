@@ -39,15 +39,35 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
 
     // 지역 데이터 로드
     private void LoadAreaData()
-    {var areaList = DataManager.stages.GetAll();
+    {
+        var areaList = DataManager.stages.GetAll();
         if (areaList == null || areaList.Count == 0)
         {
             Debug.LogWarning("[AreaUIManager] 지역 데이터가 없습니다.");
             return;
         }
 
-        // 첫 번째 지역으로 초기화
-        SetArea(0);
+        // 현재 진행 중인 스테이지가 속한 지역을 찾아서 표시
+        int targetAreaIndex = 0;
+        string currentStageId = CombatManager.Instance?.StageManager?.CurrentStageData?.id;
+
+        if (!string.IsNullOrEmpty(currentStageId))
+        {
+            for (int i = 0; i < areaList.Count; i++)
+            {
+                if (areaList[i].stageList == null) continue;
+                foreach (var stage in areaList[i].stageList)
+                {
+                    if (stage.id == currentStageId)
+                    {
+                        targetAreaIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        SetArea(targetAreaIndex);
     }
 
     // 팝업 열기

@@ -24,13 +24,24 @@ public class BossMonster : MonsterBase
         _currentHp = _maxHp;
         _attackPower = stageData.bossAtk;
 
-        // Sprite Load
+        // SpriteRenderer 캐싱
+        if (_renderer == null)
+            _renderer = GetComponent<SpriteRenderer>();
+
+        // Animator 캐싱
+        if (_animator == null)
+            _animator = GetComponent<Animator>();
+
+        // Sprite Load (base의 LoadSprite + PreloadSprites 호출)
         if (!string.IsNullOrEmpty(data.spriteName))
         {
             LoadSprite(data.spriteName);
+            PreloadSprites(data.spriteName);
         }
-    }
 
+        // 기본 상태: Idle
+        SetAnimState(ANIM_STATE_IDLE);
+    }
     protected override void Update()
     {
         base.Update();
