@@ -28,6 +28,7 @@ public class GrowthSlotUI : MonoBehaviour
     [SerializeField] private string maxLvPrefix = "Max Lv.";
     [SerializeField] private string lvPrefix = "Lv.";
     [SerializeField] private string arrow = " -> ";
+    [SerializeField] private string numFormat = "N0";
 
     [HideInInspector]
     public List<int> maxLevels = new List<int> { 1000, 1000, 1000, 200, 1000, 200, 200 };
@@ -81,6 +82,6 @@ public class GrowthSlotUI : MonoBehaviour
         if (bottomInfoText == null) return;
 
         string ko = EnumUITables.GetKoreanName(key);
-        bottomInfoText.text = ko + " +" + before.ToString("N0") + arrow + "+" + after.ToString("N0");
+        bottomInfoText.text = ko + " +" + before.ToString(numFormat) + arrow + "+" + after.ToString(numFormat);
     }
 }
