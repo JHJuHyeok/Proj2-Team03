@@ -12,6 +12,7 @@ public class UI_UserInfo : MonoBehaviour
     {
         LevelManager.Instance.OnLevelUp += Refresh;
 
+        Refresh(DataManager.CurrentSaveData.level);
         _nicknameText.text = Backend.UserNickName;
     }
 
@@ -23,6 +24,6 @@ public class UI_UserInfo : MonoBehaviour
 
     private void Refresh(int level)
     {
-        _levelText.text = string.Format(_format, level);
+        _levelText.text = "Lv." + string.Format(_format, level);
     }
 }

@@ -55,19 +55,30 @@ public class StatUpgrader : MonoBehaviour
     {
         get
         {
-            var array = GetTargetLevels(_enhanceSlotUI.key);
+            List<int> array = null;
+            if (_enhanceSlotUI != null)
+                array = GetTargetLevels(_enhanceSlotUI.key);
+            else if (_growthSlotUI != null)
+                array = GetTargetLevels(_growthSlotUI.key);
             return array != null ? array[_upgradeIndex] : 0;
         }
         set
         {
-            var array = GetTargetLevels(_enhanceSlotUI.key);
+            List<int> array = null;
+            if (_enhanceSlotUI != null)
+                array = GetTargetLevels(_enhanceSlotUI.key);
+            else if (_growthSlotUI != null)
+                array = GetTargetLevels(_growthSlotUI.key);
             if (array != null) array[_upgradeIndex] = value;
         }
     }
 
     private void OnEnable()
     {
-        RefreshUI();
+        if (transform.parent.TryGetComponent<EnhanceSlotUI>(out _enhanceSlotUI))
+            RefreshUI();
+        else if (transform.parent.TryGetComponent<GrowthSlotUI>(out _growthSlotUI))
+            RefreshUI();
     }
 
     private EnumUI.SlotKey[] UpgradeEnums =
@@ -95,7 +106,7 @@ public class StatUpgrader : MonoBehaviour
     public void TryUpgrade()
     {
         // 강화 칸에 적용 시
-        if (EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
+        if (_enhanceSlotUI != null && EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
         {
             double cost = CalculateCost(_targetStat, CurrentLevel);
 
@@ -113,7 +124,7 @@ public class StatUpgrader : MonoBehaviour
             }
         }
         // 성장 탭에 적용 시
-        else if (EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
+        else if (_growthSlotUI != null && EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
         {
             if (CurrencyManager.Instance.GetAmount(CurrencyType.StatPoint) > 0)
             {
