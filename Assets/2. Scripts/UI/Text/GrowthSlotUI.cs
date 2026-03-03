@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /*
 [승문]
@@ -12,7 +13,7 @@ GrowthSlotUI
 public class GrowthSlotUI : MonoBehaviour
 {
     [Header("Key")]
-    [SerializeField] private EnumUI.SlotKey key;
+    public EnumUI.SlotKey key;
 
     [Header("Icon (Prefab Local)")]
     [SerializeField] private Image iconImage;
@@ -27,6 +28,9 @@ public class GrowthSlotUI : MonoBehaviour
     [SerializeField] private string maxLvPrefix = "Max Lv.";
     [SerializeField] private string lvPrefix = "Lv.";
     [SerializeField] private string arrow = " -> ";
+
+    [HideInInspector]
+    public List<int> maxLevels = new List<int> { 1000, 1000, 1000, 200, 1000, 200, 200 };
 
     private void Awake()
     {
@@ -72,7 +76,7 @@ public class GrowthSlotUI : MonoBehaviour
         levelText.text = lvPrefix + level.ToString("000");
     }
 
-    public void SetBottomValueChange(long before, long after)
+    public void SetBottomValueChange(double before, double after)
     {
         if (bottomInfoText == null) return;
 
