@@ -13,7 +13,9 @@ public class UI_UserInfo : MonoBehaviour
         LevelManager.Instance.OnLevelUp += Refresh;
 
         Refresh(DataManager.CurrentSaveData.level);
-        _nicknameText.text = Backend.UserNickName;
+
+        if (_nicknameText != null)
+            _nicknameText.text = Backend.UserNickName;
     }
 
     private void OnDisable()
