@@ -56,7 +56,7 @@ namespace SlayerLegend.Skill.UI.Grid
             //SkillController 자동 찾기
             if (skillController == null)
             {
-                skillController = FindObjectOfType<SkillController>();
+                skillController = FindFirstObjectByType<SkillController>();
             }
         }
 

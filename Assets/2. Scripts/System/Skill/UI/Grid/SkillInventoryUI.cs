@@ -114,7 +114,7 @@ namespace SlayerLegend.Skill.UI.Grid
         {
             if (earlyGridDataLoader == null)
             {
-                earlyGridDataLoader = FindObjectOfType<EarlyGridDataLoader>();
+                earlyGridDataLoader = FindFirstObjectByType<EarlyGridDataLoader>();
             }
 
             if (earlyGridDataLoader != null)

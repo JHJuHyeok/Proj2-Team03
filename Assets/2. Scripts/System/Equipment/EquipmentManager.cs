@@ -4,503 +4,609 @@ using UnityEngine;
 
 namespace SlayerLegend.Equipment
 {
-    // 장비 관리자
-    // 모든 장비 상태를 관리하는 단일 소스 (Single Source of Truth)
-    public class EquipmentManager : MonoBehaviour
+    /// <summary>
+    /// 장비 관리자 (개선된 버전)
+    /// - GameData.equipInfo를 Source of Truth로 사용
+    /// - StatManager와 연동하여 스탯 적용
+    /// - 강화, 융합, 등급별 조회 기능 제공
+    /// </summary>
+    public class EquipmentManager : Singleton<EquipmentManager>
     {
-        [Header("장착 대상")]
-        [SerializeField] private IEquippable equipTarget;
+        #region 상수
+        private const int FUSION_MATERIAL_COUNT = 5; // 융합에 필요한 재료 개수
+        #endregion
 
-        // 장비 슬롯들 (슬롯 타입별로 관리)
-        private Dictionary<EquipType, EquipmentSlot> equipmentSlots;
+        #region 장착 상태 (런타임)
+        // 현재 장착 중인 장비 ID (타입별)
+        private Dictionary<EquipType, string> equippedIds = new Dictionary<EquipType, string>
+        {
+            { EquipType.Weapon, null },
+            { EquipType.Accessorie, null }
+        };
+        #endregion
 
-        // 인벤토리 (소유한 장비 목록)
-        // 같은 장비를 여러 개 보유 가능
-        private readonly Dictionary<EquipType, List<InventoryItem>> inventory = new Dictionary<EquipType, List<InventoryItem>>();
-
-        // 현재 적용된 보유 효과 추적 (장비 ID -> 적용됨)
-        // 같은 장비를 여러 개 보유해도 중첩 방지
-        private readonly HashSet<string> appliedHoldEffects = new HashSet<string>();
-
-        // 인벤토리 변경 이벤트
+        #region 이벤트
+        /// <summary>인벤토리 변경 시 발생 (장비 타입)</summary>
         public event Action<EquipType> OnInventoryChanged;
 
-        // 장비 변경 이벤트
-        public event Action<EquipData, EquipType, int> OnEquipmentChanged;
-        public event Action<EquipData, EquipType> OnEquipmentEquipped;
-        public event Action<EquipData, EquipType> OnEquipmentUnequipped;
+        /// <summary>장비 장착 시 발생 (장비 ID, 타입, 레벨)</summary>
+        public event Action<string, EquipType, int> OnEquipmentEquipped;
 
-        // 장착 대상
-        public IEquippable EquipTarget
+        /// <summary>장비 해제 시 발생 (장비 ID, 타입)</summary>
+        public event Action<string, EquipType> OnEquipmentUnequipped;
+
+        /// <summary>장비 강화 시 발생 (장비 ID, 새 레벨)</summary>
+        public event Action<string, int> OnEquipmentEnhanced;
+
+        /// <summary>장비 융합 완료 시 발생 (재료 ID, 결과 ID)</summary>
+        public event Action<string, string> OnFusionComplete;
+        #endregion
+
+        #region 프로퍼티
+        /// <summary>현재 세이브 데이터의 장비 정보에 접근</summary>
+        private Dictionary<string, Possesion> EquipInfo
         {
-            get => equipTarget;
-            set
+            get
             {
-                equipTarget = value;
-                // 장착 대상 설정 시 보유 효과 적용
-                if (equipTarget != null)
+                // 조민희 수정 - null 체크 후 빈 딕셔너리 반환 (에러 로그 제거)
+                if (DataManager.CurrentSaveData == null)
                 {
-                    RefreshHoldEffects();
+                    // CurrentSaveData가 null이면 빈 딕셔너리 반환
+                    return new Dictionary<string, Possesion>();
+                }
+                return DataManager.CurrentSaveData.equipInfo;
+            }
+        }
+        #endregion
+
+        #region 초기화
+        protected override void Awake()
+        {
+            base.Awake();
+            Debug.Log("[EquipmentManager] 초기화 완료 (Singleton<EquipmentManager>)");
+        }
+        #endregion
+
+        #region 조회 메서드
+
+        /// <summary>장비 보유 개수 조회</summary>
+        public int GetCount(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return 0;
+            if (!EquipInfo.ContainsKey(equipId)) return 0;
+            return EquipInfo[equipId].count;
+        }
+
+        /// <summary>장비 레벨 조회</summary>
+        public int GetLevel(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return 1;
+            if (!EquipInfo.ContainsKey(equipId)) return 1;
+            return EquipInfo[equipId].level;
+        }
+
+        /// <summary>등급별 보유량 조회</summary>
+        public Dictionary<EquipGrade, int> GetCountByGrade(EquipType type)
+        {
+            var result = new Dictionary<EquipGrade, int>();
+
+            foreach (var kvp in EquipInfo)
+            {
+                string equipId = kvp.Key;
+                EquipData data = GetEquipData(equipId);
+
+                if (data != null && GetEquipType(data) == type)
+                {
+                    EquipGrade grade = data.GetGrade();
+                    if (!result.ContainsKey(grade))
+                        result[grade] = 0;
+                    result[grade] += kvp.Value.count;
                 }
             }
+
+            return result;
         }
 
-        private void Awake()
+        /// <summary>장비 데이터 조회 (무기/악세서리 통합)</summary>
+        public EquipData GetEquipData(string equipId)
         {
-            InitializeSlots();
+            if (string.IsNullOrEmpty(equipId)) return null;
+
+            // 무기에서 먼저 찾기
+            EquipData weapon = DataManager.weapons.Get(equipId);
+            if (weapon != null) return weapon;
+
+            // 악세서리에서 찾기
+            return DataManager.accessories.Get(equipId);
         }
 
-        // 슬롯 초기화
-        private void InitializeSlots()
-        {
-            equipmentSlots = new Dictionary<EquipType, EquipmentSlot>
-            {
-                { EquipType.Weapon, new EquipmentSlot(EquipType.Weapon) },
-                { EquipType.Accessorie, new EquipmentSlot(EquipType.Accessorie) }
-            };
-
-            // 인벤토리 초기화
-            inventory[EquipType.Weapon] = new List<InventoryItem>();
-            inventory[EquipType.Accessorie] = new List<InventoryItem>();
-        }
-
-        // 장비 장착
-        public bool EquipItem(EquipData equipment, int level = 1)
-        {
-            if (equipment == null)
-            {
-                Debug.LogWarning("[EquipmentManager] 장비 데이터가 null입니다.");
-                return false;
-            }
-
-            // Lazy initialization (중요: Awake() 이전에 호출될 수 있음)
-            if (equipmentSlots == null)
-            {
-                InitializeSlots();
-            }
-
-            EquipType slotType = DetermineSlotType(equipment);
-
-            if (!equipmentSlots.ContainsKey(slotType))
-            {
-                Debug.LogError($"[EquipmentManager] 지원하지 않는 슬롯 타입: {slotType}");
-                return false;
-            }
-
-            EquipmentSlot slot = equipmentSlots[slotType];
-
-            // 기존 장비 해제
-            if (!slot.IsEmpty)
-            {
-                UnequipItem(slotType);
-            }
-
-            // 새 장비 장착
-            EquipData previousItem = slot.Equip(equipment, level);
-
-            // 효과 적용
-            ApplyEffects(equipment, level, equip: true);
-
-            // 보유 효과 재계산 (장착 중인 장비의 보유 효과는 제외)
-            RefreshHoldEffects();
-
-            // 이벤트 발생
-            OnEquipmentEquipped?.Invoke(equipment, slotType);
-            OnEquipmentChanged?.Invoke(equipment, slotType, level);
-
-            string equipName = equipment.GetName();
-            Debug.Log($"[EquipmentManager] [{slotType}] {equipName} 장착 완료 (Lv.{level})");
-
-            return true;
-        }
-
-        // 장비 해제
-        public EquipData UnequipItem(EquipType slotType)
-        {
-            if (!equipmentSlots.ContainsKey(slotType))
-            {
-                Debug.LogError($"[EquipmentManager] 지원하지 않는 슬롯 타입: {slotType}");
-                return null;
-            }
-
-            EquipmentSlot slot = equipmentSlots[slotType];
-
-            if (slot.IsEmpty)
-            {
-                Debug.LogWarning($"[EquipmentManager] {slotType} 슬롯이 비어있습니다.");
-                return null;
-            }
-
-            EquipData equipment = slot.Unequip();
-
-            // 효과 해제
-            ApplyEffects(equipment, slot.Level, equip: false);
-
-            // 보유 효과 재계산 (장착 해제된 장비의 보유 효과 적용)
-            RefreshHoldEffects();
-
-            // 이벤트 발생
-            OnEquipmentUnequipped?.Invoke(equipment, slotType);
-            OnEquipmentChanged?.Invoke(null, slotType, 1);
-
-            string equipName = equipment.GetName();
-            Debug.Log($"[EquipmentManager] [{slotType}] {equipName} 해제 완료");
-
-            return equipment;
-        }
-
-        // 특정 장비 해제 (ID 기반 비교)
-        public bool UnequipItem(EquipData equipment)
-        {
-            if (equipment == null) return false;
-
-            string targetId = equipment.GetId();
-            if (string.IsNullOrEmpty(targetId)) return false;
-
-            EquipType slotType = DetermineSlotType(equipment);
-
-            if (!equipmentSlots.ContainsKey(slotType))
-            {
-                return false;
-            }
-
-            EquipmentSlot slot = equipmentSlots[slotType];
-
-            // ID 기반 비교로 변경
-            if (slot.EquippedItem != null && slot.EquippedItem.GetId() == targetId)
-            {
-                UnequipItem(slotType);
-                return true;
-            }
-
-            return false;
-        }
-
-        // 모든 장비 해제
-        public void UnequipAll()
-        {
-            foreach (EquipType slotType in equipmentSlots.Keys)
-            {
-                UnequipItem(slotType);
-            }
-        }
-
-        // 슬롯의 장비 조회
-        public EquipData GetEquipment(EquipType slotType)
-        {
-            if (!equipmentSlots.ContainsKey(slotType))
-            {
-                return null;
-            }
-
-            return equipmentSlots[slotType].EquippedItem;
-        }
-
-        // 슬롯 조회
-        public EquipmentSlot GetSlot(EquipType slotType)
-        {
-            return equipmentSlots.ContainsKey(slotType) ? equipmentSlots[slotType] : null;
-        }
-
-        // 모든 슬롯 조회 (읽기 전용)
-        public IReadOnlyDictionary<EquipType, EquipmentSlot> GetAllSlots()
-        {
-            return equipmentSlots;
-        }
-
-        // 장비 슬롯 타입 결정
-        // ID 접두사를 기준으로 판단 (weapon_* = Weapon, 나머지 = Accessorie)
-        private EquipType DetermineSlotType(EquipData equipment)
+        /// <summary>장비 타입 결정</summary>
+        public EquipType GetEquipType(EquipData equipment)
         {
             if (equipment == null) return EquipType.Accessorie;
 
-            // ID를 기준으로 판단 (JSON 데이터의 id 필드)
             string id = equipment.GetId();
+            if (string.IsNullOrEmpty(id)) return EquipType.Accessorie;
 
-            if (!string.IsNullOrEmpty(id) && id.StartsWith("weapon_", System.StringComparison.OrdinalIgnoreCase))
+            // ID 접두사로 판단 (WP_ = Weapon, AC_ = Accessory)
+            if (id.StartsWith("WP_", StringComparison.OrdinalIgnoreCase) ||
+                id.StartsWith("weapon_", StringComparison.OrdinalIgnoreCase))
             {
                 return EquipType.Weapon;
             }
 
-            // 기본값은 악세서리
             return EquipType.Accessorie;
         }
 
-        // 장비 효과 적용/해제
-        private void ApplyEffects(EquipData equipment, int level, bool equip)
+        /// <summary>장착 중인 장비 ID 조회</summary>
+        public string GetEquippedId(EquipType type)
         {
-            if (equipment == null || equipTarget == null) return;
+            return equippedIds.ContainsKey(type) ? equippedIds[type] : null;
+        }
 
-            // 메인 효과
-            ItemEffect mainEffect = equipment.GetEquipEffect();
-            if (mainEffect != null)
-            {
-                equipTarget.ApplyEquipmentEffect(mainEffect, level, equip);
-            }
+        /// <summary>장착 중인 장비 데이터 조회</summary>
+        public EquipData GetEquippedData(EquipType type)
+        {
+            string equippedId = GetEquippedId(type);
+            if (string.IsNullOrEmpty(equippedId)) return null;
+            return GetEquipData(equippedId);
+        }
 
-            // 추가 효과
-            System.Collections.Generic.List<ItemEffect> holdEffects = equipment.GetHoldEffects();
-            if (holdEffects != null)
+        /// <summary>특정 등급의 다음 등급 조회</summary>
+        public EquipGrade GetNextGrade(EquipGrade currentGrade)
+        {
+            if (currentGrade >= EquipGrade.Myth) return EquipGrade.Myth;
+            return currentGrade + 1;
+        }
+
+        /// <summary>다음 등급의 장비 데이터 찾기</summary>
+        public EquipData FindNextGradeData(EquipData current)
+        {
+            if (current == null) return null;
+            if (current.GetGrade() >= EquipGrade.Myth) return null;
+
+            EquipGrade nextGrade = GetNextGrade(current.GetGrade());
+            EquipType type = GetEquipType(current);
+
+            var db = type == EquipType.Weapon ? DataManager.weapons : DataManager.accessories;
+
+            foreach (var data in db.GetAll())
             {
-                foreach (var effect in holdEffects)
+                if (data.GetGrade() == nextGrade)
                 {
-                    equipTarget.ApplyEquipmentEffect(effect, level, equip);
-                }
-            }
-        }
-
-        // 장비 레벨 설정
-        public bool SetEquipmentLevel(EquipType slotType, int level)
-        {
-            if (!equipmentSlots.ContainsKey(slotType))
-            {
-                return false;
-            }
-
-            EquipmentSlot slot = equipmentSlots[slotType];
-
-            if (slot.IsEmpty)
-            {
-                Debug.LogWarning($"[EquipmentManager] {slotType} 슬롯이 비어있습니다.");
-                return false;
-            }
-
-            int oldLevel = slot.Level;
-            slot.SetLevel(level);
-
-            // 효과 재적용 (해제 후 장착)
-            EquipData equipment = slot.EquippedItem;
-            if (equipment != null && equipTarget != null)
-            {
-                // 기존 효과 해제
-                ApplyEffects(equipment, oldLevel, equip: false);
-                // 새 레벨로 적용
-                ApplyEffects(equipment, level, equip: true);
-
-                Debug.Log($"[EquipmentManager] {slotType} 슬롯 레벨 변경: {oldLevel} → {level}");
-            }
-
-            return true;
-        }
-
-        #region 보유 효과 관리
-        // 보유 효과 재계산
-        // 인벤토리의 모든 장비 보유 효과를 적용 (중첩 없음)
-        private void RefreshHoldEffects()
-        {
-            if (equipTarget == null) return;
-
-            // 기존 보유 효과 모두 해제
-            RemoveAllHoldEffects();
-
-            // 인벤토리의 각 장비에 대해 보유 효과 적용
-            foreach (var kvp in inventory)
-            {
-                EquipType slotType = kvp.Key;
-                List<InventoryItem> items = kvp.Value;
-
-                // 해당 슬롯에 장착 중인 장비 확인
-                EquipData equippedItem = GetEquipment(slotType);
-
-                foreach (var invItem in items)
-                {
-                    EquipData equipData = invItem.equipment;
-                    string equipId = equipData.GetId();
-
-                    // 장착 중인 장비는 보유 효과 적용 제외
-                    if (equippedItem == equipData) continue;
-
-                    // 이미 적용된 장비 ID는 스킵 (중첩 방지)
-                    if (appliedHoldEffects.Contains(equipId)) continue;
-
-                    // 보유 효과 적용
-                    ApplyHoldEffects(equipData, invItem.level);
-                    appliedHoldEffects.Add(equipId);
-                }
-            }
-        }
-
-        // 특정 장비의 보유 효과 적용
-        private void ApplyHoldEffects(EquipData equipment, int level)
-        {
-            if (equipment == null || equipTarget == null) return;
-
-            System.Collections.Generic.List<ItemEffect> holdEffects = equipment.GetHoldEffects();
-            if (holdEffects == null) return;
-
-            foreach (var effect in holdEffects)
-            {
-                // 소스를 "owned_" + 장비 ID로 구분 (장착 효과와 중복 방지)
-                string effectSource = $"owned_{equipment.GetId()}_{effect.GetType()}";
-                equipTarget.ApplyEquipmentEffect(effect, level, equip: true);
-            }
-        }
-
-        // 모든 보유 효과 해제
-        private void RemoveAllHoldEffects()
-        {
-            if (equipTarget == null) return;
-
-            foreach (var kvp in inventory)
-            {
-                foreach (var invItem in kvp.Value)
-                {
-                    EquipData equipData = invItem.equipment;
-                    System.Collections.Generic.List<ItemEffect> holdEffects = equipData.GetHoldEffects();
-                    if (holdEffects == null) continue;
-
-                    foreach (var effect in holdEffects)
-                    {
-                        equipTarget.ApplyEquipmentEffect(effect, invItem.level, equip: false);
-                    }
+                    return data;
                 }
             }
 
-            appliedHoldEffects.Clear();
+            return null;
         }
         #endregion
 
-        #region 인벤토리 관리
-        // 장비를 인벤토리에 추가
-        // 같은 장비를 여러 개 보유 가능
-        public void AddToInventory(EquipData equipment, int level = 1)
+        #region 장비 획득/제거
+
+        /// <summary>장비 획득</summary>
+        public void AddEquipment(string equipId, int count = 1, int level = 1)
         {
-            if (equipment == null)
+            if (string.IsNullOrEmpty(equipId))
             {
-                Debug.LogWarning("[EquipmentManager] 인벤토리에 추가할 장비가 null입니다.");
+                Debug.LogWarning("[EquipmentManager] 장비 ID가 null 또는 비어있습니다.");
                 return;
             }
 
-            // Lazy initialization
-            if (inventory == null || inventory.Count == 0)
+            if (!EquipInfo.ContainsKey(equipId))
             {
-                InitializeSlots();
+                EquipInfo[equipId] = new Possesion { count = 0, level = level };
             }
 
-            EquipType slotType = DetermineSlotType(equipment);
+            EquipInfo[equipId].count += count;
+            EquipInfo[equipId].level = Math.Max(EquipInfo[equipId].level, level);
 
-            if (!inventory.ContainsKey(slotType))
+            EquipType type = GetEquipTypeFromId(equipId);
+            EquipData data = GetEquipData(equipId);
+            string name = data != null ? data.GetName() : equipId;
+
+            Debug.Log($"[EquipmentManager] 장비 획득: {name} x{count} (총 {EquipInfo[equipId].count}개)");
+
+            // 보유 효과 적용 (장착 중이 아닌 경우만)
+            if (equippedIds[type] != equipId)
             {
-                inventory[slotType] = new List<InventoryItem>();
+                ApplyHoldEffects(equipId, EquipInfo[equipId].level, apply: true);
             }
 
-            // 장비의 자체 레벨 사용 (EquipData.level 필드)
-            inventory[slotType].Add(new InventoryItem(equipment, equipment.level));
-
-            string equipName = equipment.GetName();
-            Debug.Log($"[EquipmentManager] 인벤토리에 추가: {equipName} (Lv.{equipment.level}) - 현재 보유량: {GetEquipmentCount(equipment)}");
-
-            // 보유 효과 재계산
-            RefreshHoldEffects();
-
-            OnInventoryChanged?.Invoke(slotType);
+            OnInventoryChanged?.Invoke(type);
         }
 
-        // 인벤토리에서 장비 제거 (ID 기반 비교)
-        public bool RemoveFromInventory(EquipData equipment)
+        /// <summary>장비 제거</summary>
+        public bool RemoveEquipment(string equipId, int count = 1)
         {
-            if (equipment == null) return false;
+            if (string.IsNullOrEmpty(equipId)) return false;
+            if (!EquipInfo.ContainsKey(equipId)) return false;
 
-            string targetId = equipment.GetId();
-            if (string.IsNullOrEmpty(targetId)) return false;
+            EquipType type = GetEquipTypeFromId(equipId);
 
-            EquipType slotType = DetermineSlotType(equipment);
-
-            if (!inventory.ContainsKey(slotType))
+            // 장착 중이면 해제
+            if (equippedIds[type] == equipId)
             {
+                Unequip(type);
+            }
+
+            EquipInfo[equipId].count -= count;
+
+            if (EquipInfo[equipId].count <= 0)
+            {
+                // 보유 효과 제거
+                ApplyHoldEffects(equipId, EquipInfo[equipId].level, apply: false);
+                EquipInfo.Remove(equipId);
+            }
+
+            EquipData data = GetEquipData(equipId);
+            string name = data != null ? data.GetName() : equipId;
+            Debug.Log($"[EquipmentManager] 장비 제거: {name} x{count}");
+
+            OnInventoryChanged?.Invoke(type);
+            return true;
+        }
+        #endregion
+
+        #region 장착/해제
+
+        /// <summary>장비 장착</summary>
+        public bool Equip(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId))
+            {
+                Debug.LogWarning("[EquipmentManager] 장착할 장비 ID가 null입니다.");
                 return false;
             }
 
-            // ID 기반으로 첫 번째 해당 장비 찾아서 제거
-            for (int i = 0; i < inventory[slotType].Count; i++)
+            if (!EquipInfo.ContainsKey(equipId) || EquipInfo[equipId].count <= 0)
             {
-                if (inventory[slotType][i].equipment != null &&
-                    inventory[slotType][i].equipment.GetId() == targetId)
+                Debug.LogWarning($"[EquipmentManager] 보유하지 않은 장비입니다: {equipId}");
+                return false;
+            }
+
+            EquipData data = GetEquipData(equipId);
+            if (data == null)
+            {
+                Debug.LogWarning($"[EquipmentManager] 장비 데이터를 찾을 수 없습니다: {equipId}");
+                return false;
+            }
+
+            EquipType type = GetEquipType(data);
+
+            // 이미 장착 중인 장비면 무시
+            if (equippedIds[type] == equipId)
+            {
+                Debug.Log($"[EquipmentManager] 이미 장착 중인 장비입니다: {data.GetName()}");
+                return true;
+            }
+
+            // 기존 장비 해제
+            if (!string.IsNullOrEmpty(equippedIds[type]))
+            {
+                Unequip(type);
+            }
+
+            // 장착 효과 적용
+            int level = EquipInfo[equipId].level;
+            ApplyEquipEffects(equipId, level, apply: true);
+
+            // 보유 효과 제거 (장착 중인 장비는 보유 효과 제외)
+            ApplyHoldEffects(equipId, level, apply: false);
+
+            // 장착 상태 업데이트
+            equippedIds[type] = equipId;
+
+            Debug.Log($"[EquipmentManager] [{type}] {data.GetName()} 장착 완료 (Lv.{level})");
+
+            OnEquipmentEquipped?.Invoke(equipId, type, level);
+            return true;
+        }
+
+        /// <summary>장비 해제</summary>
+        public bool Unequip(EquipType type)
+        {
+            string equippedId = equippedIds[type];
+            if (string.IsNullOrEmpty(equippedId))
+            {
+                Debug.Log($"[EquipmentManager] {type} 슬롯이 이미 비어있습니다.");
+                return true;
+            }
+
+            EquipData data = GetEquipData(equippedId);
+            int level = GetLevel(equippedId);
+
+            // 장착 효과 해제
+            ApplyEquipEffects(equippedId, level, apply: false);
+
+            // 보유 효과 다시 적용
+            if (EquipInfo.ContainsKey(equippedId))
+            {
+                ApplyHoldEffects(equippedId, level, apply: true);
+            }
+
+            string name = data != null ? data.GetName() : equippedId;
+            Debug.Log($"[EquipmentManager] [{type}] {name} 해제 완료");
+
+            equippedIds[type] = null;
+
+            OnEquipmentUnequipped?.Invoke(equippedId, type);
+            return true;
+        }
+        #endregion
+
+        #region 강화
+
+        /// <summary>장비 강화</summary>
+        public bool Enhance(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return false;
+            if (!EquipInfo.ContainsKey(equipId)) return false;
+
+            EquipType type = GetEquipTypeFromId(equipId);
+            int oldLevel = EquipInfo[equipId].level;
+
+            // TODO: 강화 비용 체크 (CurrencyManager 연동)
+            // if (!CurrencyManager.Instance.TrySpend(CurrencyType.Gold, GetEnhanceCost(oldLevel)))
+            //     return false;
+
+            EquipInfo[equipId].level++;
+
+            EquipData data = GetEquipData(equipId);
+            string name = data != null ? data.GetName() : equipId;
+            Debug.Log($"[EquipmentManager] {name} 강화: Lv.{oldLevel} → Lv.{EquipInfo[equipId].level}");
+
+            // 장착 중이면 스탯 재적용
+            if (equippedIds[type] == equipId)
+            {
+                ApplyEquipEffects(equipId, oldLevel, apply: false);
+                ApplyEquipEffects(equipId, EquipInfo[equipId].level, apply: true);
+            }
+            else
+            {
+                // 보유 효과 재적용
+                ApplyHoldEffects(equipId, oldLevel, apply: false);
+                ApplyHoldEffects(equipId, EquipInfo[equipId].level, apply: true);
+            }
+
+            OnEquipmentEnhanced?.Invoke(equipId, EquipInfo[equipId].level);
+            return true;
+        }
+
+        /// <summary>강화 비용 계산</summary>
+        public long GetEnhanceCost(int currentLevel)
+        {
+            // 기본 비용 + 레벨별 증가
+            return 1000L * currentLevel * currentLevel;
+        }
+        #endregion
+
+        #region 융합
+
+        /// <summary>융합 가능 여부 확인</summary>
+        public bool CanFuse(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return false;
+            if (!EquipInfo.ContainsKey(equipId)) return false;
+            if (EquipInfo[equipId].count < FUSION_MATERIAL_COUNT) return false;
+
+            EquipData data = GetEquipData(equipId);
+            if (data == null) return false;
+            if (data.GetGrade() >= EquipGrade.Myth) return false;
+
+            EquipData nextData = FindNextGradeData(data);
+            return nextData != null;
+        }
+
+        /// <summary>융합 불가 사유 메시지</summary>
+        public string GetCannotFuseReason(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return "장비 ID가 없습니다.";
+            if (!EquipInfo.ContainsKey(equipId)) return "보유하지 않은 장비입니다.";
+
+            int count = EquipInfo[equipId].count;
+            if (count < FUSION_MATERIAL_COUNT)
+                return $"재료 부족 ({count}/{FUSION_MATERIAL_COUNT})";
+
+            EquipData data = GetEquipData(equipId);
+            if (data == null) return "장비 데이터를 찾을 수 없습니다.";
+
+            if (data.GetGrade() >= EquipGrade.Myth)
+                return "최고 등급은 융합할 수 없습니다.";
+
+            EquipData nextData = FindNextGradeData(data);
+            if (nextData == null)
+                return "다음 등급 장비가 없습니다.";
+
+            return "알 수 없는 오류";
+        }
+
+        /// <summary>장비 융합 (5개 → 상위 등급 1개)</summary>
+        public bool Fuse(string equipId, out string resultId)
+        {
+            resultId = null;
+
+            if (!CanFuse(equipId))
+            {
+                Debug.LogWarning($"[EquipmentManager] 융합 불가: {GetCannotFuseReason(equipId)}");
+                return false;
+            }
+
+            EquipData currentData = GetEquipData(equipId);
+            EquipData nextData = FindNextGradeData(currentData);
+
+            if (nextData == null)
+            {
+                Debug.LogError("[EquipmentManager] 다음 등급 장비를 찾을 수 없습니다.");
+                return false;
+            }
+
+            // 재료 제거
+            EquipInfo[equipId].count -= FUSION_MATERIAL_COUNT;
+            if (EquipInfo[equipId].count <= 0)
+            {
+                // 장착 중이면 해제
+                EquipType type = GetEquipTypeFromId(equipId);
+                if (equippedIds[type] == equipId)
                 {
-                    string equipName = equipment.GetName();
-                    inventory[slotType].RemoveAt(i);
-                    Debug.Log($"[EquipmentManager] 인벤토리에서 제거: {equipName} - 현재 보유량: {GetEquipmentCount(equipment)}");
-
-                    // 보유 효과 재계산
-                    RefreshHoldEffects();
-
-                    OnInventoryChanged?.Invoke(slotType);
-                    return true;
+                    Unequip(type);
                 }
+                EquipInfo.Remove(equipId);
             }
 
-            return false;
+            // 결과 장비 추가
+            resultId = nextData.GetId();
+            if (!EquipInfo.ContainsKey(resultId))
+            {
+                EquipInfo[resultId] = new Possesion { count = 0, level = 1 };
+            }
+            EquipInfo[resultId].count += 1;
+
+            Debug.Log($"[EquipmentManager] 융합 성공: {currentData.GetName()} x{FUSION_MATERIAL_COUNT} → {nextData.GetName()} x1");
+
+            EquipType equipType = GetEquipType(currentData);
+            OnInventoryChanged?.Invoke(equipType);
+            OnFusionComplete?.Invoke(equipId, resultId);
+
+            return true;
+        }
+        #endregion
+
+        #region StatManager 연동
+
+        /// <summary>장착 효과 적용/해제</summary>
+        private void ApplyEquipEffects(string equipId, int level, bool apply)
+        {
+            EquipData data = GetEquipData(equipId);
+            if (data == null) return;
+
+            var stats = CalculateStatValues(data, level);
+            string sourceKey = $"{SourceKey.Equipment}_{equipId}";
+
+            StatManager.Instance.UpdatePlayerStat(sourceKey, apply ? stats : null);
         }
 
-        // 특정 장비의 보유 개수 조회 (ID 기반 비교)
-        public int GetEquipmentCount(EquipData equipment)
+        /// <summary>보유 효과 적용/해제</summary>
+        private void ApplyHoldEffects(string equipId, int level, bool apply)
         {
-            if (equipment == null) return 0;
+            EquipData data = GetEquipData(equipId);
+            if (data == null) return;
 
-            // ID 기반 비교로 변경 (참조 비교 버그 수정)
-            string targetId = equipment.GetId();
-            if (string.IsNullOrEmpty(targetId)) return 0;
+            var holdEffects = data.GetHoldEffects();
+            if (holdEffects == null || holdEffects.Count == 0) return;
 
-            EquipType slotType = DetermineSlotType(equipment);
+            var stats = ConvertEffectsToStatValues(holdEffects, level);
+            string sourceKey = $"{SourceKey.Collect}_{equipId}";
 
-            if (!inventory.ContainsKey(slotType))
+            StatManager.Instance.UpdatePlayerStat(sourceKey, apply ? stats : null);
+        }
+
+        /// <summary>EquipData를 StatValue 리스트로 변환</summary>
+        private List<StatValue> CalculateStatValues(EquipData data, int level)
+        {
+            var stats = new List<StatValue>();
+
+            // 장착 효과
+            ItemEffect equipEffect = data.GetEquipEffect();
+            if (equipEffect != null)
             {
-                return 0;
-            }
+                float value = equipEffect.initValue + (equipEffect.levelUpValue * (level - 1));
+                StatType statType = ConvertEffectTypeToStatType(equipEffect.type);
 
-            int count = 0;
-            foreach (var item in inventory[slotType])
-            {
-                // ID로 비교 (참조 무시)
-                if (item.equipment != null && item.equipment.GetId() == targetId)
+                stats.Add(new StatValue
                 {
-                    count++;
-                }
+                    type = statType,
+                    baseValue = 0,
+                    multiplier = value / 100f // 퍼센트 → 배율 변환
+                });
             }
 
-            return count;
+            return stats;
         }
 
-        // 특정 슬롯 타입의 전체 인벤토리 조회 (읽기 전용)
-        public IReadOnlyList<InventoryItem> GetInventory(EquipType slotType)
+        /// <summary>ItemEffect 리스트를 StatValue 리스트로 변환</summary>
+        private List<StatValue> ConvertEffectsToStatValues(List<ItemEffect> effects, int level)
         {
-            if (!inventory.ContainsKey(slotType))
+            var stats = new List<StatValue>();
+
+            foreach (var effect in effects)
             {
-                return System.Array.Empty<InventoryItem>();
+                float value = effect.initValue + (effect.levelUpValue * (level - 1));
+                StatType statType = ConvertEffectTypeToStatType(effect.type);
+
+                stats.Add(new StatValue
+                {
+                    type = statType,
+                    baseValue = 0,
+                    multiplier = value / 100f
+                });
             }
 
-            return inventory[slotType];
+            return stats;
         }
 
-        // 인벤토리 비우기
-        public void ClearInventory(EquipType slotType)
+        /// <summary>EffectType을 StatType으로 변환</summary>
+        private StatType ConvertEffectTypeToStatType(EffectType effectType)
         {
-            if (!inventory.ContainsKey(slotType))
+            return effectType switch
             {
-                return;
+                EffectType.AttackBoost => StatType.STR,           // 공격력
+                EffectType.CriticalDamage => StatType.CRI_DMG,     // 크리티컬 데미지
+                EffectType.GoldGain => StatType.ADD_GOLD,          // 추가 골드
+                EffectType.HealthBoost => StatType.HP,             // 체력
+                EffectType.ManaBoost => StatType.MANA,             // 마나
+                EffectType.ExpGain => StatType.ADD_EXP,            // 추가 경험치
+                _ => StatType.STR
+            };
+        }
+        #endregion
+
+        #region 유틸리티
+
+        /// <summary>ID로 장비 타입 판단</summary>
+        private EquipType GetEquipTypeFromId(string equipId)
+        {
+            if (string.IsNullOrEmpty(equipId)) return EquipType.Accessorie;
+
+            if (equipId.StartsWith("WP_", StringComparison.OrdinalIgnoreCase) ||
+                equipId.StartsWith("weapon_", StringComparison.OrdinalIgnoreCase))
+            {
+                return EquipType.Weapon;
             }
 
-            inventory[slotType].Clear();
-            Debug.Log($"[EquipmentManager] {slotType} 인벤토리 비우기 완료");
-            OnInventoryChanged?.Invoke(slotType);
+            return EquipType.Accessorie;
+        }
+        #endregion
+
+        #region 디버그
+        [ContextMenu("디버그: 등급별 보유량 출력")]
+        public void DebugPrintGradeCount()
+        {
+            var weaponCount = GetCountByGrade(EquipType.Weapon);
+            var accessoryCount = GetCountByGrade(EquipType.Accessorie);
+
+            Debug.Log("=== 무기 등급별 보유량 ===");
+            foreach (var kvp in weaponCount)
+            {
+                Debug.Log($"  {kvp.Key}: {kvp.Value}개");
+            }
+
+            Debug.Log("=== 악세서리 등급별 보유량 ===");
+            foreach (var kvp in accessoryCount)
+            {
+                Debug.Log($"  {kvp.Key}: {kvp.Value}개");
+            }
         }
 
-        // 전체 인벤토리 비우기
-        public void ClearAllInventory()
+        [ContextMenu("디버그: 전체 인벤토리 출력")]
+        public void DebugPrintInventory()
         {
-            foreach (EquipType slotType in inventory.Keys)
+            Debug.Log("=== 전체 장비 인벤토리 ===");
+            foreach (var kvp in EquipInfo)
             {
-                inventory[slotType].Clear();
-            }
-            Debug.Log("[EquipmentManager] 전체 인벤토리 비우기 완료");
-
-            // 보유 효과 모두 해제
-            RemoveAllHoldEffects();
-
-            // 이벤트는 각 슬롯 타입별로 한 번씩 발생
-            foreach (EquipType slotType in inventory.Keys)
-            {
-                OnInventoryChanged?.Invoke(slotType);
+                EquipData data = GetEquipData(kvp.Key);
+                string name = data != null ? data.GetName() : kvp.Key;
+                Debug.Log($"  {name} ({kvp.Key}): {kvp.Value.count}개, Lv.{kvp.Value.level}");
             }
         }
         #endregion

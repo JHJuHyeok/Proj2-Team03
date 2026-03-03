@@ -43,7 +43,7 @@ namespace SlayerLegend.Equipment
             if (equipmentManager == null) return false;
 
             // 재료 개수 확인
-            int count = equipmentManager.GetEquipmentCount(equipment);
+            int count = equipmentManager.GetCount(equipment.GetId());
             if (count < fusionMaterialCount) return false;
 
             // 등급 확인 (Myth는 합성 불가)
@@ -65,17 +65,14 @@ namespace SlayerLegend.Equipment
                 return false;
             }
 
-            // 재료 5개 제거
-            for (int i = 0; i < fusionMaterialCount; i++)
-            {
-                equipmentManager.RemoveFromInventory(equipment);
-            }
+            // 재료 5개 제거 (한 번에 처리)
+            equipmentManager.RemoveEquipment(equipment.GetId(), fusionMaterialCount);
 
             // 결과 장비 획득 (레벨 1)
             result = EquipmentDatabase.GetNextGradeEquipment(equipment);
 
             // 결과 장비 추가
-            equipmentManager.AddToInventory(result, level: 1);
+            equipmentManager.AddEquipment(result.GetId(), count: 1, level: 1);
 
             // 이벤트 발생
             OnFusionComplete?.Invoke(equipment, result);
@@ -92,7 +89,7 @@ namespace SlayerLegend.Equipment
         {
             if (equipment == null) return "장비가 없습니다";
 
-            int count = equipmentManager.GetEquipmentCount(equipment);
+            int count = equipmentManager.GetCount(equipment.GetId());
             if (count < fusionMaterialCount)
                 return $"재료 부족 ({count}/{fusionMaterialCount})";
 

@@ -50,6 +50,10 @@ namespace SlayerLegend.Resource
                 $"Skills/Icons/{spriteName}",
                 $"Slayer Legend/Image/icon/{spriteName}",
                 $"Sprites/{spriteName}",
+                // 조민희 수정 - 장비 아이콘 로드 경로 추가
+                $"Slayer Legend/Bookmark UI/Equip UI/Weapon/{spriteName}",      // 무기 아이콘
+                $"Slayer Legend/Bookmark UI/Equip UI/Accessory/{spriteName}",   // 악세서리 아이콘
+                // 조민희 수정 끝
                 spriteName
             };
 
@@ -63,6 +67,24 @@ namespace SlayerLegend.Resource
                     return sprite;
                 }
             }
+
+            // 조민희 추가 - AssetBundleLoader에서 스프라이트 로드 시도
+            var bundleSprite = AssetBundleLoader.Instance.LoadSpriteFromBundle(spriteName, "skin");
+            if (bundleSprite != null && bundleSprite.texture != null)
+            {
+                _spriteCache[spriteName] = bundleSprite;
+                Debug.Log($"[ResourceManager] AssetBundleLoader에서 스프라이트 로드 성공: {spriteName}, texture={bundleSprite.texture.name}");
+                return bundleSprite;
+            }
+            else if (bundleSprite != null && bundleSprite.texture == null)
+            {
+                Debug.LogWarning($"[ResourceManager] 스프라이트 로드됨 but 텍스처 null: {spriteName}");
+            }
+            else if (bundleSprite == null)
+            {
+                Debug.LogWarning($"[ResourceManager] AssetBundleLoader에서 스프라이트 찾기 실패: {spriteName}");
+            }
+            // 조민희 추가 끝
 
             Debug.LogWarning($"[ResourceManager] Sprite not found: {spriteName}");
             return null;

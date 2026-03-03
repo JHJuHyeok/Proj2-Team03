@@ -36,7 +36,13 @@ public class EffectAutoDestroy : MonoBehaviour
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
         float clipLength = stateInfo.length;
 
-        if (clipLength > 0)
+        // useAnimationLength가 true면 애니메이션 길이를 자동으로 사용
+        if (useAnimationLength && clipLength > 0)
+        {
+            targetDuration = clipLength;
+        }
+
+        if (clipLength > 0 && targetDuration > 0)
         {
             // 속도 = 원래 길이 / 목표 시간
             // 예: 원래 2초 → 목표 1초 = 2배속
