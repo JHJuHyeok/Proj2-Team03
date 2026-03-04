@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using SlayerLegend.Skill.Data;
 using SlayerLegend.Resource;
+using SlayerLegend.Skill;  // SkillTabPanelUI 참조용 (조민희 추가)
 
 namespace SlayerLegend.Skill.UI.Grid
 {
@@ -205,13 +206,33 @@ namespace SlayerLegend.Skill.UI.Grid
             slot.Initialize(skill, null);  // draggableItem은 나중에 생성됨
             slot.OnSlotClicked += HandleSlotClicked;
 
+            // 스킬 보유 여부 설정 (조민희 추가)
+            bool isOwned = CheckSkillOwnership(skill.id);
+            slot.SetOwnedState(isOwned);
+
             slots.Add(slot);
             slotsBySkillId[skill.id] = slot;
+        }
+
+        /// <summary>
+        /// 스킬 보유 여부 확인 (조민희 추가)
+        /// </summary>
+        private bool CheckSkillOwnership(string skillId)
+        {
+            if (DataManager.CurrentSaveData == null) return false;
+            if (DataManager.CurrentSaveData.skillInfo == null) return false;
+            return DataManager.CurrentSaveData.skillInfo.ContainsKey(skillId);
         }
 
         // 슬롯 클릭 핸들러
         private void HandleSlotClicked(InventorySlotUI slot)
         {
+            // 미보유 스킬이면 차단 (조민희 추가)
+            if (!slot.IsOwned)
+            {
+                return;
+            }
+
             // 이전 선택 해제
             if (selectedSlot != null)
             {
@@ -413,5 +434,126 @@ namespace SlayerLegend.Skill.UI.Grid
                 selectedSlot = null;
             }
         }
+
+        #region 디버그/테스트 (조민희 추가)
+
+        /// <summary>
+        /// 모든 슬롯의 보유 상태 갱신
+        /// </summary>
+        public void RefreshSlotOwnedStates()
+        {
+            foreach (var slot in slots)
+            {
+                if (slot != null && !string.IsNullOrEmpty(slot.SkillId))
+                {
+                    bool isOwned = CheckSkillOwnership(slot.SkillId);
+                    slot.SetOwnedState(isOwned);
+                }
+            }
+        }
+
+        [ContextMenu("테스트: 스킬 보유 데이터 추가 (랜덤)")]
+        public void DebugAddTestSkillData()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[SkillInventoryUI] CurrentSaveData가 null");
+                return;
+            }
+
+            if (DataManager.CurrentSaveData.skillInfo == null)
+            {
+                DataManager.CurrentSaveData.skillInfo = new Dictionary<string, Possesion>();
+            }
+
+            // 랜덤하게 일부 스킬만 보유 (Fire 계열 + 일부 랜덤)
+            string[] alwaysOwned = { "Fire_01", "Fire_02", "Fire_03", "Water_01", "Wind_01", "Earth_01" };
+            var allSkills = DataManager.skills.GetAll();
+
+            foreach (var skill in allSkills)
+            {
+                bool shouldOwn = false;
+                int count = 0;
+
+                // 항상 보유할 스킬들
+                foreach (string id in alwaysOwned)
+                {
+                    if (skill.id == id)
+                    {
+                        shouldOwn = true;
+                        count = UnityEngine.Random.Range(1, 15);
+                        break;
+                    }
+                }
+
+                // 30% 확률로 추가 보유
+                if (!shouldOwn && UnityEngine.Random.value < 0.3f)
+                {
+                    shouldOwn = true;
+                    count = UnityEngine.Random.Range(1, 8);
+                }
+
+                if (shouldOwn)
+                {
+                    DataManager.CurrentSaveData.skillInfo[skill.id] = new Possesion { count = count };
+                }
+            }
+
+            Debug.Log("[SkillInventoryUI] 테스트 스킬 데이터 추가 완료");
+            RefreshAllSkillUIs();
+        }
+
+        [ContextMenu("테스트: 스킬 보유 데이터 전체 삭제")]
+        public void DebugClearSkillData()
+        {
+            if (DataManager.CurrentSaveData != null)
+            {
+                DataManager.CurrentSaveData.skillInfo.Clear();
+                Debug.Log("[SkillInventoryUI] 스킬 보유 데이터 전체 삭제");
+                RefreshAllSkillUIs();
+            }
+        }
+
+        [ContextMenu("테스트: 모든 스킬 보유 추가")]
+        public void DebugOwnAllSkills()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[SkillInventoryUI] CurrentSaveData가 null");
+                return;
+            }
+
+            if (DataManager.CurrentSaveData.skillInfo == null)
+            {
+                DataManager.CurrentSaveData.skillInfo = new Dictionary<string, Possesion>();
+            }
+
+            var allSkills = DataManager.skills.GetAll();
+            foreach (var skill in allSkills)
+            {
+                DataManager.CurrentSaveData.skillInfo[skill.id] = new Possesion { count = UnityEngine.Random.Range(1, 20) };
+            }
+
+            Debug.Log("[SkillInventoryUI] 모든 스킬 보유 추가 완료");
+            RefreshAllSkillUIs();
+        }
+
+        /// <summary>
+        /// 모든 스킬 관련 UI 갱신 (조민희 추가)
+        /// </summary>
+        private void RefreshAllSkillUIs()
+        {
+            // 자신 갱신
+            RefreshSlotOwnedStates();
+
+            // SkillTabPanelUI도 갱신
+            var tabPanelUI = FindFirstObjectByType<SkillTabPanelUI>();
+            if (tabPanelUI != null)
+            {
+                tabPanelUI.RefreshSkillList();
+            }
+        }
+
+        #endregion
     }
 }

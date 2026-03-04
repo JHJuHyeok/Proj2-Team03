@@ -70,24 +70,19 @@ namespace SlayerLegend.Equipment
                 return;
             }
 
-            // 등급별 보유량 조회
-            var gradeCounts = EquipmentManager.Instance.GetCountByGrade(EquipType.Weapon);
-
             // 각 등급별로 Equipment Bar의 번들에 데이터 설정
-            FillEquipmentBar(commonEquipmentBar, EquipGrade.Common, gradeCounts);
-            FillEquipmentBar(uncommonEquipmentBar, EquipGrade.Uncommon, gradeCounts);
-            FillEquipmentBar(rareEquipmentBar, EquipGrade.Rare, gradeCounts);
-            FillEquipmentBar(heroEquipmentBar, EquipGrade.Hero, gradeCounts);
-            FillEquipmentBar(legendEquipmentBar, EquipGrade.Legend, gradeCounts);
-            FillEquipmentBar(mythEquipmentBar, EquipGrade.Myth, gradeCounts);
-
-            Debug.Log("[WeaponTabPanelUI] 무기 목록 새로고침 완료");
+            FillEquipmentBar(commonEquipmentBar, EquipGrade.Common);
+            FillEquipmentBar(uncommonEquipmentBar, EquipGrade.Uncommon);
+            FillEquipmentBar(rareEquipmentBar, EquipGrade.Rare);
+            FillEquipmentBar(heroEquipmentBar, EquipGrade.Hero);
+            FillEquipmentBar(legendEquipmentBar, EquipGrade.Legend);
+            FillEquipmentBar(mythEquipmentBar, EquipGrade.Myth);
         }
 
         /// <summary>
         /// 특정 등급의 Equipment Bar에 있는 번들들에 데이터 채우기
         /// </summary>
-        private void FillEquipmentBar(Transform equipmentBar, EquipGrade grade, Dictionary<EquipGrade, int> gradeCounts)
+        private void FillEquipmentBar(Transform equipmentBar, EquipGrade grade)
         {
             if (equipmentBar == null)
             {
@@ -110,11 +105,6 @@ namespace SlayerLegend.Equipment
             // 해당 등급의 장비 목록 가져오기
             List<EquipData> weaponsOfGrade = GetWeaponsByGrade(grade);
 
-            // 보유 개수 가져오기
-            gradeCounts.TryGetValue(grade, out int ownedCount);
-
-            Debug.Log($"[WeaponTabPanelUI] {grade}: 번들 {bundles.Length}개, 해당 등급 무기 {weaponsOfGrade.Count}개, 보유 {ownedCount}개");
-
             // 각 번들에 데이터 설정
             for (int i = 0; i < bundles.Length; i++)
             {
@@ -123,12 +113,14 @@ namespace SlayerLegend.Equipment
                 if (i < weaponsOfGrade.Count)
                 {
                     EquipData weaponData = weaponsOfGrade[i];
-                    int level = EquipmentManager.Instance.GetLevel(weaponData.GetId());
+                    string equipId = weaponData.GetId();
 
-                    bundle.SetEquipData(weaponData, ownedCount, level);
+                    // 개별 무기별 보유량과 레벨 조회
+                    int count = EquipmentManager.Instance.GetCount(equipId);
+                    int level = EquipmentManager.Instance.GetLevel(equipId);
+
+                    bundle.SetEquipData(weaponData, count, level);
                     bundle.gameObject.SetActive(true);
-
-                    Debug.Log($"[WeaponTabPanelUI] 번들 {i} 설정: {weaponData.GetId()}, spriteName={weaponData.spriteName}");
                 }
                 else
                 {

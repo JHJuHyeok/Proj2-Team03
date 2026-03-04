@@ -22,6 +22,9 @@ namespace SlayerLegend.Skill
         // 속성 순서 (Bar 내 Bundle 순서)
         private static readonly string[] ElementOrder = { "Fire", "Water", "Wind", "Earth" };
 
+        // 이벤트 구독 추적용 (중복 구독 방지) - 조민희 추가
+        private HashSet<SkillBundleUI> subscribedBundles = new HashSet<SkillBundleUI>();
+
         #region Unity 라이프사이클
 
         private void OnEnable()
@@ -32,6 +35,19 @@ namespace SlayerLegend.Skill
             }
         }
 
+        private void OnDestroy()
+        {
+            // 이벤트 구독 해제 (조민희 추가)
+            foreach (var bundle in subscribedBundles)
+            {
+                if (bundle != null)
+                {
+                    bundle.OnBundleClicked -= OnBundleClicked;
+                }
+            }
+            subscribedBundles.Clear();
+        }
+
         #endregion
 
         #region 데이터 대기 코루틴
@@ -40,7 +56,7 @@ namespace SlayerLegend.Skill
         {
             // DataManager 초기화 대기 (최대 100프레임)
             int waitCount = 0;
-            while (DataManager.skills.GetAll() == null && waitCount < 100)
+            while ((DataManager.skills.GetAll() == null || DataManager.CurrentSaveData == null) && waitCount < 100)
             {
                 yield return null;
                 waitCount++;
@@ -49,6 +65,11 @@ namespace SlayerLegend.Skill
             if (DataManager.skills.GetAll() == null)
             {
                 Debug.LogWarning("[SkillTabPanelUI] DataManager.skills가 null - 빈 상태로 표시");
+            }
+
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogWarning("[SkillTabPanelUI] CurrentSaveData가 null - 기본 레벨 1 사용");
             }
 
             RefreshSkillList();
@@ -117,14 +138,19 @@ namespace SlayerLegend.Skill
 
                     if (skillData != null)
                     {
-                        // TODO: 실제 레벨 데이터 연동 필요 (임시로 1 레벨, 최대 4단계 사용)
-                        int level = 1;
-                        int maxStep = 4;  // 스킬 등급 단계 (1~4)
+                        // 스킬 보유량 조회 (없으면 0)
+                        int ownedCount = GetSkillCount(skillId);
+                        int requiredCount = 4;  // 레벨업에 필요한 개수
 
-                        bundle.SetSkillData(skillData, level, maxStep);
+                        bundle.SetSkillData(skillData, ownedCount, requiredCount);
                         bundle.gameObject.SetActive(true);
 
-                        Debug.Log($"[SkillTabPanelUI] Bar {skillNumber} Bundle {i} 설정: {skillId}, spriteName={skillData.spriteName}");
+                        // 클릭 이벤트 구독 (중복 방지) - 조민희 추가
+                        if (!subscribedBundles.Contains(bundle))
+                        {
+                            bundle.OnBundleClicked += OnBundleClicked;
+                            subscribedBundles.Add(bundle);
+                        }
                     }
                     else
                     {
@@ -159,6 +185,49 @@ namespace SlayerLegend.Skill
             return null;
         }
 
+        /// <summary>
+        /// 스킬 보유량 조회 (저장 데이터에서)
+        /// </summary>
+        /// <param name="skillId">스킬 ID</param>
+        /// <returns>보유 개수 (기본값 0)</returns>
+        private int GetSkillCount(string skillId)
+        {
+            if (DataManager.CurrentSaveData == null) return 0;
+            if (DataManager.CurrentSaveData.skillInfo == null) return 0;
+
+            if (DataManager.CurrentSaveData.skillInfo.TryGetValue(skillId, out var possession))
+            {
+                return possession.count;
+            }
+
+            return 0; // 보유하지 않은 스킬은 0개
+        }
+
+        /// <summary>
+        /// 스킬 번들 클릭 시 팝업 열기 (조민희 추가)
+        /// </summary>
+        private void OnBundleClicked(SkillBundleUI bundle)
+        {
+            if (bundle == null) return;
+
+            string skillId = bundle.SkillId;
+            if (string.IsNullOrEmpty(skillId))
+            {
+                Debug.LogWarning("[SkillTabPanelUI] 클릭한 번들의 스킬 ID가 비어있음");
+                return;
+            }
+
+            // 팝업 매니저를 통해 스킬 상세 팝업 열기
+            if (PopupManager.Instance != null)
+            {
+                PopupManager.Instance.Open(PopupId.SkillDetail, skillId);
+            }
+            else
+            {
+                Debug.LogWarning("[SkillTabPanelUI] PopupManager.Instance가 null");
+            }
+        }
+
         #endregion
 
         #region 디버그
@@ -190,6 +259,108 @@ namespace SlayerLegend.Skill
                 {
                     Debug.Log($"  Bar {i + 1}: null");
                 }
+            }
+        }
+
+        [ContextMenu("테스트: 스킬 보유 데이터 추가 (랜덤)")]
+        public void DebugAddTestSkillData()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[SkillTabPanelUI] CurrentSaveData가 null");
+                return;
+            }
+
+            if (DataManager.CurrentSaveData.skillInfo == null)
+            {
+                DataManager.CurrentSaveData.skillInfo = new System.Collections.Generic.Dictionary<string, Possesion>();
+            }
+
+            // 랜덤하게 일부 스킬만 보유 (Fire 계열 + 일부 랜덤)
+            string[] alwaysOwned = { "Fire_01", "Fire_02", "Fire_03", "Water_01", "Wind_01", "Earth_01" };
+            var allSkills = DataManager.skills.GetAll();
+
+            foreach (var skill in allSkills)
+            {
+                bool shouldOwn = false;
+                int count = 0;
+
+                // 항상 보유할 스킬들
+                foreach (string id in alwaysOwned)
+                {
+                    if (skill.id == id)
+                    {
+                        shouldOwn = true;
+                        count = UnityEngine.Random.Range(1, 15);
+                        break;
+                    }
+                }
+
+                // 30% 확률로 추가 보유
+                if (!shouldOwn && UnityEngine.Random.value < 0.3f)
+                {
+                    shouldOwn = true;
+                    count = UnityEngine.Random.Range(1, 8);
+                }
+
+                if (shouldOwn)
+                {
+                    DataManager.CurrentSaveData.skillInfo[skill.id] = new Possesion { count = count };
+                }
+            }
+
+            Debug.Log("[SkillTabPanelUI] 테스트 스킬 데이터 추가 완료");
+            RefreshAllSkillUIs();
+        }
+
+        [ContextMenu("테스트: 스킬 보유 데이터 전체 삭제")]
+        public void DebugClearSkillData()
+        {
+            if (DataManager.CurrentSaveData != null)
+            {
+                DataManager.CurrentSaveData.skillInfo.Clear();
+                Debug.Log("[SkillTabPanelUI] 스킬 보유 데이터 전체 삭제");
+                RefreshAllSkillUIs();
+            }
+        }
+
+        [ContextMenu("테스트: 모든 스킬 보유 추가")]
+        public void DebugOwnAllSkills()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[SkillTabPanelUI] CurrentSaveData가 null");
+                return;
+            }
+
+            if (DataManager.CurrentSaveData.skillInfo == null)
+            {
+                DataManager.CurrentSaveData.skillInfo = new System.Collections.Generic.Dictionary<string, Possesion>();
+            }
+
+            var allSkills = DataManager.skills.GetAll();
+            foreach (var skill in allSkills)
+            {
+                DataManager.CurrentSaveData.skillInfo[skill.id] = new Possesion { count = UnityEngine.Random.Range(1, 20) };
+            }
+
+            Debug.Log("[SkillTabPanelUI] 모든 스킬 보유 추가 완료");
+            RefreshAllSkillUIs();
+        }
+
+        /// <summary>
+        /// 모든 스킬 관련 UI 갱신 (조민희 추가)
+        /// </summary>
+        private void RefreshAllSkillUIs()
+        {
+            // 자신 갱신
+            RefreshSkillList();
+
+            // SkillInventoryUI도 갱신
+            var inventoryUI = FindFirstObjectByType<UI.Grid.SkillInventoryUI>();
+            if (inventoryUI != null)
+            {
+                inventoryUI.RefreshSlotOwnedStates();
             }
         }
 

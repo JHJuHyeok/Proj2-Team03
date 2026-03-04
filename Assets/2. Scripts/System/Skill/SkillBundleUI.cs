@@ -17,16 +17,55 @@ namespace SlayerLegend.Skill
         [SerializeField] private TMP_Text skillNameText;    // Skill Name Text
         [SerializeField] private Slider skillSlider;        // Skill Slider
         [SerializeField] private TMP_Text sliderText;       // Slider 내부 Text (예: "2/4")
+        [SerializeField] private Button skillButton;        // 클릭용 버튼 (조민희 추가)
 
         private SkillData currentSkillData;
+
+        /// <summary>
+        /// 스킬 번들 클릭 이벤트 (조민희 추가)
+        /// </summary>
+        public event System.Action<SkillBundleUI> OnBundleClicked;
+
+        private void Awake()
+        {
+            // 버튼 클릭 이벤트 연결 (조민희 추가)
+            if (skillButton != null)
+            {
+                skillButton.onClick.AddListener(HandleBundleClicked);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // 이벤트 해제 (조민희 추가)
+            if (skillButton != null)
+            {
+                skillButton.onClick.RemoveListener(HandleBundleClicked);
+            }
+        }
+
+        /// <summary>
+        /// 번들 클릭 핸들러 (조민희 추가)
+        /// </summary>
+        private void HandleBundleClicked()
+        {
+            if (currentSkillData == null)
+            {
+                Debug.LogWarning("[SkillBundleUI] 클릭했지만 스킬 데이터가 없음");
+                return;
+            }
+
+            // 이벤트 발생
+            OnBundleClicked?.Invoke(this);
+        }
 
         /// <summary>
         /// 스킬 데이터 설정 및 UI 갱신
         /// </summary>
         /// <param name="data">스킬 데이터</param>
-        /// <param name="currentLevel">현재 레벨</param>
-        /// <param name="maxLevel">최대 레벨</param>
-        public void SetSkillData(SkillData data, int currentLevel = 1, int maxLevel = 200)
+        /// <param name="ownedCount">현재 보유량</param>
+        /// <param name="requiredCount">레벨업에 필요한 개수</param>
+        public void SetSkillData(SkillData data, int ownedCount = 0, int requiredCount = 4)
         {
             currentSkillData = data;
 
@@ -45,17 +84,25 @@ namespace SlayerLegend.Skill
                 skillNameText.text = data.name;
             }
 
-            // 슬라이더 설정
+            // 슬라이더 설정 (보유량/필요량 비율)
             if (skillSlider != null)
             {
                 skillSlider.maxValue = 1f;
-                skillSlider.value = (float)currentLevel / maxLevel;
+                skillSlider.value = (float)ownedCount / requiredCount;
             }
 
-            // 슬라이더 텍스트 설정 (레벨 표시)
+            // 슬라이더 텍스트 설정 (보유량/필요량 표시)
             if (sliderText != null)
             {
-                sliderText.text = $"{currentLevel}/{maxLevel}";
+                sliderText.text = $"{ownedCount}/{requiredCount}";
+            }
+
+            // 보유하지 않은 스킬은 아이콘을 반투명하게 처리
+            if (skillIcon != null)
+            {
+                Color color = skillIcon.color;
+                color.a = ownedCount > 0 ? 1f : 0.3f;  // 보유: 100%, 미보유: 30%
+                skillIcon.color = color;
             }
         }
 
@@ -108,5 +155,10 @@ namespace SlayerLegend.Skill
         {
             return currentSkillData;
         }
+
+        /// <summary>
+        /// 현재 스킬 ID 반환 (조민희 추가)
+        /// </summary>
+        public string SkillId => currentSkillData?.id ?? "";
     }
 }

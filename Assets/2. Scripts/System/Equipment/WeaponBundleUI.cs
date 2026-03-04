@@ -38,9 +38,6 @@ namespace SlayerLegend.Equipment
         /// <param name="level">강화 레벨</param>
         public void SetEquipData(EquipData data, int count, int level = 1)
         {
-            // 조민희 추가 - 디버그 로그
-            Debug.Log($"[WeaponBundleUI] SetEquipData 호출: data={(data != null ? data.GetId() : "null")}, count={count}, level={level}");
-
             currentEquipData = data;
 
             if (data == null)
@@ -48,9 +45,6 @@ namespace SlayerLegend.Equipment
                 SetEmptyState();
                 return;
             }
-
-            // 조민희 추가 - spriteName 로그
-            Debug.Log($"[WeaponBundleUI] spriteName={data.spriteName}, GetName={data.GetName()}");
 
             // 아이콘 로드
             SetEquipIcon(data.spriteName);
@@ -79,9 +73,6 @@ namespace SlayerLegend.Equipment
             {
                 enhanceSlider.value = data.gradeStep / 4f;
             }
-
-            // 조민희 추가 - 최종 상태 확인
-            Debug.Log($"[WeaponBundleUI] 설정 완료 - equipmentIcon.sprite={(equipmentIcon != null && equipmentIcon.sprite != null ? equipmentIcon.sprite.name : "null")}");
         }
 
         /// <summary>
@@ -89,9 +80,6 @@ namespace SlayerLegend.Equipment
         /// </summary>
         private void SetEquipIcon(string spriteName)
         {
-            // 조민희 추가 - 디버그 로그
-            Debug.Log($"[WeaponBundleUI] SetEquipIcon 호출: spriteName={spriteName}, equipmentIcon={(equipmentIcon != null ? "있음" : "없음")}");
-
             if (equipmentIcon == null)
             {
                 Debug.LogError("[WeaponBundleUI] equipmentIcon이 null입니다! 인스펙터에서 연결해주세요.");
@@ -105,11 +93,6 @@ namespace SlayerLegend.Equipment
                 {
                     equipmentIcon.sprite = sprite;
                     equipmentIcon.enabled = true;
-
-                    Debug.Log($"[WeaponBundleUI] 스프라이트 설정 완료: {spriteName}, texture={(sprite.texture != null ? sprite.texture.name : "NULL")}");
-
-                    // SetNativeSize() 제거 - 스프라이트의 pivot이 (0.25, 0.25)이라 위치가 어긋남
-                    // RectTransform이 이미 적절한 크기로 설정되어 있음
                 }
                 else
                 {
