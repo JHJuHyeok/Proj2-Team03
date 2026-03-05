@@ -114,6 +114,7 @@ namespace SlayerLegend.Skill
                 skill.SetActive(false);
                 activeSkills.Remove(skill);
                 Debug.Log($"{skill.Data.name} 스킬 장착 해제");
+                Destroy(skill.gameObject);  // [조민희] 프리셋 전환 시 중복 생성 방지용 Destroy 추가
                 return true;
             }
             return false;
@@ -128,6 +129,7 @@ namespace SlayerLegend.Skill
                 skill.Deactivate();
                 passiveSkills.Remove(skill);
                 Debug.Log($"{skill.Data.name} 패시브 장착 해제");
+                Destroy(skill.gameObject);  // [조민희] 프리셋 전환 시 중복 생성 방지용 Destroy 추가
                 return true;
             }
             return false;

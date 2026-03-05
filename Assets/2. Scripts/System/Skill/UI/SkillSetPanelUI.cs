@@ -74,9 +74,15 @@ namespace SlayerLegend.UI
             }
 
             // SkillPresetManager 이벤트 구독 (프리셋 변경 시 UI 갱신) - 조민희 추가
+            // Start() 시점에 Instance가 없으면 코루틴에서 대기 후 구독
             if (SkillPresetManager.Instance != null)
             {
                 SkillPresetManager.Instance.OnPresetChanged += HandlePresetChanged;
+                Debug.Log("[SkillSetPanelUI] SkillPresetManager 이벤트 구독 완료");
+            }
+            else
+            {
+                StartCoroutine(WaitForPresetManagerAndSubscribe());
             }
 
             // 초기화 지연 (GameSkillInitializer가 스킬을 로드할 시간 확보)
@@ -175,10 +181,31 @@ namespace SlayerLegend.UI
         {
             Debug.Log($"[SkillSetPanelUI] 프리셋 변경 감지: {newPresetIndex + 1}");
 
-            // 큐 초기화 후 다시 로드
-            placedSkillQueue.Clear();
-            skillMap.Clear();
-            LoadPlacedSkillsToQueue();
+            // 강제로 다시 로드 (중복 방지 체크 무시)
+            LoadPlacedSkillsToQueue(forceReload: true);
+        }
+
+        /// <summary>
+        /// SkillPresetManager.Instance가 생성될 때까지 대기 후 이벤트 구독 (조민희 추가)
+        /// </summary>
+        private System.Collections.IEnumerator WaitForPresetManagerAndSubscribe()
+        {
+            float waitTime = 0f;
+            while (SkillPresetManager.Instance == null && waitTime < 5f)
+            {
+                yield return new WaitForSeconds(0.1f);
+                waitTime += 0.1f;
+            }
+
+            if (SkillPresetManager.Instance != null)
+            {
+                SkillPresetManager.Instance.OnPresetChanged += HandlePresetChanged;
+                Debug.Log("[SkillSetPanelUI] SkillPresetManager 이벤트 구독 완료 (지연)");
+            }
+            else
+            {
+                Debug.LogWarning("[SkillSetPanelUI] SkillPresetManager를 찾을 수 없어 프리셋 변경 이벤트를 구독하지 않음");
+            }
         }
 
         /// <summary>
@@ -274,12 +301,17 @@ namespace SlayerLegend.UI
         /// <summary>
         /// 그리드에 배치된 스킬들을 큐에 로드 (Active/Passive 모두)
         /// </summary>
-        private void LoadPlacedSkillsToQueue()
+        /// <param name="forceReload">강제로 다시 로드 (프리셋 변경 시 true)</param>
+        private void LoadPlacedSkillsToQueue(bool forceReload = false)
         {
-            if (skillController == null) return;
+            if (skillController == null)
+            {
+                Debug.LogWarning("[SkillSetPanelUI] LoadPlacedSkillsToQueue: skillController가 null");
+                return;
+            }
 
-            //이미 로드된 상태면 중복 방지
-            if (placedSkillQueue.Count > 0)
+            // forceReload가 아니면 중복 방지
+            if (!forceReload && placedSkillQueue.Count > 0)
             {
                 Debug.Log("[SkillSetPanelUI] 이미 스킬이 로드됨, 중복 로드 방지");
                 return;
@@ -288,6 +320,9 @@ namespace SlayerLegend.UI
             placedSkillQueue.Clear();
             skillMap.Clear();
 
+            int activeCount = 0;
+            int passiveCount = 0;
+
             // SkillController의 ActiveSkills에서 배치된 스킬들 가져오기
             foreach (var skill in skillController.ActiveSkills)
             {
@@ -295,6 +330,7 @@ namespace SlayerLegend.UI
                 {
                     placedSkillQueue.Add(skill.Data.id);
                     skillMap[skill.Data.id] = skill;
+                    activeCount++;
                 }
             }
 
@@ -305,8 +341,11 @@ namespace SlayerLegend.UI
                 {
                     placedSkillQueue.Add(skill.Data.id);
                     skillMap[skill.Data.id] = skill;
+                    passiveCount++;
                 }
             }
+
+            Debug.Log($"[SkillSetPanelUI] 스킬 로드 완료: Active {activeCount}개, Passive {passiveCount}개");
 
             // 버튼 갱신
             RefreshButtonsFromQueue();
