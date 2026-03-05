@@ -36,6 +36,7 @@ public class EnhanceSlotUI : MonoBehaviour
     [Header("Format")]
     [SerializeField] private string lvPrefix = "Lv.";
     [SerializeField] private string arrow = " -> ";
+    [SerializeField] private string numFormat = "N0";
 
     private void Awake()
     {
@@ -78,7 +79,7 @@ public class EnhanceSlotUI : MonoBehaviour
     public void SetValueChange(double before, double after)
     {
         if (changeText == null) return;
-        changeText.text = before.ToString("N0") + arrow + after.ToString("N0");
+        changeText.text = before.ToString(numFormat) + arrow + after.ToString(numFormat);
     }
 
     public void SetCostGold(long cost)

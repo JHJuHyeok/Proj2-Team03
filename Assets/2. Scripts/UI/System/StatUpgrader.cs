@@ -17,7 +17,8 @@ public class StatUpgrader : MonoBehaviour
     [SerializeField] private int _upgradeIndex;
 
     [Header("UI 연결")]
-    [SerializeField] private EnhanceSlotUI _slotUI;         // 각 슬롯 정보
+    [SerializeField] private EnhanceSlotUI _enhanceSlotUI;          // 강화 슬롯 UI
+    [SerializeField] private GrowthSlotUI _growthSlotUI;            // 성장 슬롯 UI
 
     #region 업그레이드 별 재화 상승치
     private static float basicRate = 1.02f;
@@ -54,19 +55,30 @@ public class StatUpgrader : MonoBehaviour
     {
         get
         {
-            var array = GetTargetLevels(_slotUI.key);
+            List<int> array = null;
+            if (_enhanceSlotUI != null)
+                array = GetTargetLevels(_enhanceSlotUI.key);
+            else if (_growthSlotUI != null)
+                array = GetTargetLevels(_growthSlotUI.key);
             return array != null ? array[_upgradeIndex] : 0;
         }
         set
         {
-            var array = GetTargetLevels(_slotUI.key);
+            List<int> array = null;
+            if (_enhanceSlotUI != null)
+                array = GetTargetLevels(_enhanceSlotUI.key);
+            else if (_growthSlotUI != null)
+                array = GetTargetLevels(_growthSlotUI.key);
             if (array != null) array[_upgradeIndex] = value;
         }
     }
 
     private void OnEnable()
     {
-        RefreshUI();
+        if (transform.parent.TryGetComponent<EnhanceSlotUI>(out _enhanceSlotUI))
+            RefreshUI();
+        else if (transform.parent.TryGetComponent<GrowthSlotUI>(out _growthSlotUI))
+            RefreshUI();
     }
 
     private EnumUI.SlotKey[] UpgradeEnums =
@@ -94,7 +106,7 @@ public class StatUpgrader : MonoBehaviour
     public void TryUpgrade()
     {
         // 강화 칸에 적용 시
-        if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
+        if (_enhanceSlotUI != null && EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
         {
             double cost = CalculateCost(_targetStat, CurrentLevel);
 
@@ -112,7 +124,7 @@ public class StatUpgrader : MonoBehaviour
             }
         }
         // 성장 탭에 적용 시
-        else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
+        else if (_growthSlotUI != null && EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
         {
             if (CurrencyManager.Instance.GetAmount(CurrencyType.StatPoint) > 0)
             {
@@ -158,42 +170,51 @@ public class StatUpgrader : MonoBehaviour
 
     private void RefreshUI()
     {
-        if (_slotUI != null)
+        if (_enhanceSlotUI != null)
         {
-            _slotUI.SetLevel(CurrentLevel);
-            _slotUI.SetCostGold(CalculateCost(_targetStat, CurrentLevel));
-            _slotUI.SetValueChange(GetStatValue(CurrentLevel), GetStatValue(CurrentLevel + 1));
+            _enhanceSlotUI.SetLevel(CurrentLevel);
+            _enhanceSlotUI.SetCostGold(CalculateCost(_targetStat, CurrentLevel));
+            _enhanceSlotUI.SetValueChange(GetStatValue(CurrentLevel), GetStatValue(CurrentLevel + 1));
+        }
+        else if (_growthSlotUI != null)
+        {
+            _growthSlotUI.SetMaxLv(_growthSlotUI.maxLevels[_upgradeIndex]);
+            _growthSlotUI.SetLevel(CurrentLevel);
+            _growthSlotUI.SetBottomValueChange(GetStatValue(CurrentLevel), GetStatValue(CurrentLevel + 1));
         }
     }
 
     private double GetStatValue(int level)
     {
-        if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
+        if (_enhanceSlotUI != null && EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
         {
             switch (_targetStat)
             {
-                case StatType.STR: return level * 3;
-                case StatType.HP: return level * 30;
-                case StatType.VIT_HP: return level * 3;
-                case StatType.CRI_DMG: return level * 1;
-                case StatType.CRI_Per: return level * 0.1f;
-                default: return level * 1;
+                case StatType.STR:      return level * 3;
+                case StatType.HP:       return level * 30;
+                case StatType.VIT_HP:   return level * 3;
+                case StatType.CRI_DMG:  return level * 1;
+                case StatType.CRI_Per:  return level * 0.1f;
+                default:                return level * 1;
+                
             }
         }
-        else
+        else if (_growthSlotUI != null && EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
         {
             switch (_targetStat)
             {
-                case StatType.STR: return level * 5;
-                case StatType.HP: return level * 30;
-                case StatType.VIT_HP: return level * 5;
-                case StatType.CRI_DMG: return level * 3;
+                case StatType.STR:      return level * 5;
+                case StatType.HP:       return level * 30;
+                case StatType.VIT_HP:   return level * 5;
+                case StatType.CRI_DMG:  return level * 3;
                 case StatType.ADD_GOLD: return level * 0.5;
-                case StatType.ACC: return level * 3;
-                case StatType.DODGE: return level * 1;
-                default: return level * 1;
+                case StatType.ACC:      return level * 3;
+                case StatType.DODGE:    return level * 1;
+                default:                return level * 1;
             }
         }
+
+        return level * 1.0f;
     }
 
     /// <summary>
@@ -219,9 +240,9 @@ public class StatUpgrader : MonoBehaviour
                 }
             };
 
-            if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
+            if (_enhanceSlotUI != null && EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Upgrade, stats);
-            else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
+            else if (_growthSlotUI != null && EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Growth, stats);
         }
         else
@@ -237,9 +258,9 @@ public class StatUpgrader : MonoBehaviour
                 }
             };
 
-            if (EnumUI.IsAny(_slotUI.key, UpgradeEnums))
+            if (_enhanceSlotUI != null && EnumUI.IsAny(_enhanceSlotUI.key, UpgradeEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Upgrade, stats);
-            else if (EnumUI.IsAny(_slotUI.key, GrowthEnums))
+            else if (_growthSlotUI != null && EnumUI.IsAny(_growthSlotUI.key, GrowthEnums))
                 StatManager.Instance.UpdatePlayerStat(SourceKey.Growth, stats);
         }
     }
