@@ -4,10 +4,10 @@ using UnityEngine;
 /*
 [승문]
 PopupManager
-- PopupRoot 아래에 미리 배치된(비활성) 팝업들을 등록해서 SetActive로 관리
+- PopupRoot 아래에 "미리 배치된(비활성)" 팝업들을 등록해서 SetActive로 관리
 - 스택 관리: 뒤 팝업 비활성화 / 닫으면 이전 팝업 복귀
-- 같은 팝업 중복 Open 방지
-- ESC(또는 Android Back)로 CloseTop
+- 같은 팝업 중복 오픈 방지
+- ESC(또는 Android Back)로 Top 닫기
 */
 public class PopupManager : MonoBehaviour
 {
@@ -16,12 +16,11 @@ public class PopupManager : MonoBehaviour
     [Header("Root")]
     [SerializeField] private Transform popupRoot;
 
-    [Header("Options")]
-    [SerializeField] private bool closeOnEsc = true;
-    [SerializeField] private bool preventDuplicateOpen = true;
+    [Header("ESC Close")]
+    [SerializeField] private bool closeByEsc = true;
 
-    private readonly Dictionary<PopupId, UIPopup> prefabTable = new Dictionary<PopupId, UIPopup>();
-    private readonly Stack<UIPopup> stack = new Stack<UIPopup>();
+    private readonly Dictionary<PopupId, UIPopup> table = new();
+    private readonly Stack<UIPopup> stack = new();
 
     private void Awake()
     {
@@ -34,30 +33,30 @@ public class PopupManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        BuildPrefabTable();
+        RebuildTableFromRoot();
         HideAll();
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
-            Instance = null;
+        if (Instance == this) Instance = null;
     }
 
     private void Update()
     {
-        if (!closeOnEsc) return;
+        if (!closeByEsc) return;
+        if (stack.Count <= 0) return;
 
-        // PC: ESC, Android: Back 버튼도 KeyCode.Escape로 들어옴
+        // PC ESC / Android Back
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseTop();
         }
     }
 
-    private void BuildPrefabTable()
+    private void RebuildTableFromRoot()
     {
-        prefabTable.Clear();
+        table.Clear();
 
         if (popupRoot == null)
         {
@@ -65,27 +64,25 @@ public class PopupManager : MonoBehaviour
             return;
         }
 
+        // 비활성 포함 전체 수집
         UIPopup[] pops = popupRoot.GetComponentsInChildren<UIPopup>(true);
 
-        for (int i = 0; i < pops.Length; i++)
+        foreach (var p in pops)
         {
-            UIPopup p = pops[i];
             if (p == null) continue;
-
-            PopupId id = p.PopupId;
-            if (id == PopupId.None)
+            if (p.PopupId == PopupId.None)
             {
-                Debug.LogWarning("[PopupManager] PopupId is None. Check object: " + p.name);
+                Debug.LogWarning("[PopupManager] PopupId is None: " + p.name);
                 continue;
             }
 
-            if (prefabTable.ContainsKey(id))
+            if (table.ContainsKey(p.PopupId))
             {
-                Debug.LogWarning("[PopupManager] Duplicate PopupId: " + id + " / object: " + p.name);
+                Debug.LogWarning("[PopupManager] Duplicate PopupId: " + p.PopupId + " / " + p.name);
                 continue;
             }
 
-            prefabTable.Add(id, p);
+            table.Add(p.PopupId, p);
         }
     }
 
@@ -93,92 +90,68 @@ public class PopupManager : MonoBehaviour
     {
         if (popupRoot != null)
         {
-            UIPopup[] pops = popupRoot.GetComponentsInChildren<UIPopup>(true);
+            var pops = popupRoot.GetComponentsInChildren<UIPopup>(true);
             foreach (var p in pops)
             {
                 if (p != null) p.gameObject.SetActive(false);
             }
         }
-
         stack.Clear();
     }
 
-    // 팝업 열기: 현재 top 숨기고, Root에 있는 해당 팝업을 활성화해서 스택에 push
     public UIPopup Open(PopupId id, object param = null)
     {
-        if (id == PopupId.None)
+        if (id == PopupId.None) return null;
+        if (popupRoot == null) return null;
+
+        if (!table.TryGetValue(id, out var popup) || popup == null)
         {
-            Debug.LogWarning("[PopupManager] Open failed. id is None");
+            RebuildTableFromRoot();
+            table.TryGetValue(id, out popup);
+        }
+
+        if (popup == null)
+        {
+            Debug.LogWarning("[PopupManager] Open failed. not found under popupRoot: " + id);
             return null;
         }
 
-        if (popupRoot == null)
+        if (stack.Count > 0 && stack.Peek() == popup)
         {
-            Debug.LogWarning("[PopupManager] Open failed. popupRoot is null");
-            return null;
+            popup.gameObject.SetActive(true);
+            popup.OnOpen(param);
+            return popup;
         }
 
-        if (!prefabTable.TryGetValue(id, out UIPopup instance) || instance == null)
+        if (stack.Contains(popup))
         {
-            BuildPrefabTable();
-            prefabTable.TryGetValue(id, out instance);
+            while (stack.Count > 0 && stack.Peek() != popup)
+                CloseTop();
+
+            popup.gameObject.SetActive(true);
+            popup.OnOpen(param);
+            return popup;
         }
 
-        if (instance == null)
-        {
-            Debug.LogWarning("[PopupManager] Open failed. popup not found under popupRoot: " + id);
-            return null;
-        }
-
-        // 중복 방지 1) 지금 top이 같은 팝업이면: 스택에 다시 안 쌓고 "갱신만"
-        if (preventDuplicateOpen && stack.Count > 0 && stack.Peek() == instance)
-        {
-            instance.gameObject.SetActive(true);
-            instance.OnOpen(param); // 내용 갱신이 필요 없으면 이 줄 빼도 됨
-            return instance;
-        }
-
-        // 중복 방지 2) 스택 어딘가에 이미 있으면: 그 위에 있는 팝업들만 닫아서 "그 팝업을 top으로"
-        if (preventDuplicateOpen && stack.Contains(instance))
-        {
-            BringToTop(instance, param);
-            return instance;
-        }
-
-        // 현재 top 팝업 비활성화
         if (stack.Count > 0)
         {
-            UIPopup top = stack.Peek();
+            var top = stack.Peek();
             if (top != null) top.gameObject.SetActive(false);
         }
 
-        instance.gameObject.SetActive(true);
-        instance.OnOpen(param);
+        popup.gameObject.SetActive(true);
+        popup.OnOpen(param);
+        stack.Push(popup);
 
-        stack.Push(instance);
-        return instance;
+        return popup;
     }
 
-    // target이 스택 중간에 있을 때, target 위에 있는 팝업만 닫고 target을 top으로 올림
-    private void BringToTop(UIPopup target, object param)
-    {
-        while (stack.Count > 0 && stack.Peek() != target)
-        {
-            CloseTop();
-        }
-
-        if (stack.Count > 0 && stack.Peek() == target)
-        {
-            target.gameObject.SetActive(true);
-            target.OnOpen(param);
-        }
-    }
-
+    //Top팝업 닫기
     public void CloseTop()
     {
         if (stack.Count <= 0) return;
 
-        UIPopup top = stack.Pop();
+        var top = stack.Pop();
         if (top != null)
         {
             top.OnClose();
@@ -187,43 +160,28 @@ public class PopupManager : MonoBehaviour
 
         if (stack.Count > 0)
         {
-            UIPopup prev = stack.Peek();
+            var prev = stack.Peek();
             if (prev != null) prev.gameObject.SetActive(true);
         }
     }
 
+    //열린팝업이 하나라도 있는지 확인
+    public bool IsOpenAny()
+    {
+        return stack.Count > 0;
+    }
+
+    //요청한팝업이 Top일때만 닫기
     public void CloseIfTop(UIPopup popup)
     {
         if (popup == null) return;
         if (stack.Count <= 0) return;
 
-        UIPopup top = stack.Peek();
-        if (top != popup) return;
+        if (stack.Peek() != popup)
+        {
+            return;
+        }
 
         CloseTop();
     }
-
-    public void CloseAll()
-    {
-        while (stack.Count > 0)
-        {
-            UIPopup p = stack.Pop();
-            if (p == null) continue;
-
-            p.OnClose();
-            p.gameObject.SetActive(false);
-        }
-    }
-
-    public bool IsOpenAny() => stack.Count > 0;
-    public int OpenCount => stack.Count;
-
-#if UNITY_EDITOR
-    [ContextMenu("DEBUG/Rebuild Popup Table From Root")]
-    private void Editor_RebuildPrefabTable()
-    {
-        BuildPrefabTable();
-        Debug.Log("[PopupManager] Table rebuilt from popupRoot. Count=" + prefabTable.Count);
-    }
-#endif
 }

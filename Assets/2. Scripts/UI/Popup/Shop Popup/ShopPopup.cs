@@ -12,13 +12,15 @@ ShopPopup
 public class ShopPopup : UIPopup
 {
     [Header("UI 참조")]
-    [SerializeField] private TMP_Text titleText;   // 상점 카테고리 텍스트
-    [SerializeField] private Image iconImage;     // 카테고리 아이콘
+    [SerializeField] private Image iconImage;//카테고리 아이콘
 
     [Header("카테고리 아이콘 스프라이트")]
-    [SerializeField] private Sprite weaponSprite;
-    [SerializeField] private Sprite accessorySprite;
-    [SerializeField] private Sprite skillSprite;
+    [SerializeField] private Sprite weaponSprite;//무기 아이콘
+    [SerializeField] private Sprite accessorySprite;//악세 아이콘
+    [SerializeField] private Sprite skillSprite;//스킬 아이콘
+
+    [Header("Content")]
+    [SerializeField] private ShopPopupContentController controller;//상점 내부 컨텐츠
 
     /// <summary>
     /// 팝업 열릴 때 호출
@@ -32,9 +34,16 @@ public class ShopPopup : UIPopup
         ShopTab tab = ShopTab.Weapon;
 
         if (param is ShopTab t)
+        {
             tab = t;
+        }
 
         Apply(tab);
+
+        if (controller != null)
+        {
+            controller.SetTab(tab);
+        }
     }
 
     /// <summary>
@@ -42,20 +51,22 @@ public class ShopPopup : UIPopup
     /// </summary>
     private void Apply(ShopTab tab)
     {
+        if (iconImage == null)
+        {
+            return;
+        }
+
         switch (tab)
         {
             case ShopTab.Weapon:
-                titleText.text = "무기 상점";
                 iconImage.sprite = weaponSprite;
                 break;
 
             case ShopTab.Accessory:
-                titleText.text = "악세서리 상점";
                 iconImage.sprite = accessorySprite;
                 break;
 
             case ShopTab.Skill:
-                titleText.text = "스킬 상점";
                 iconImage.sprite = skillSprite;
                 break;
         }
