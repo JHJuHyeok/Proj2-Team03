@@ -73,6 +73,12 @@ namespace SlayerLegend.UI
                 earlyGridDataLoader.OnEarlyGridDataLoaded += HandleEarlyGridDataLoaded;
             }
 
+            // SkillPresetManager 이벤트 구독 (프리셋 변경 시 UI 갱신) - 조민희 추가
+            if (SkillPresetManager.Instance != null)
+            {
+                SkillPresetManager.Instance.OnPresetChanged += HandlePresetChanged;
+            }
+
             // 초기화 지연 (GameSkillInitializer가 스킬을 로드할 시간 확보)
             StartCoroutine(DelayedRefresh());
         }
@@ -91,6 +97,12 @@ namespace SlayerLegend.UI
             if (earlyGridDataLoader != null)
             {
                 earlyGridDataLoader.OnEarlyGridDataLoaded -= HandleEarlyGridDataLoaded;
+            }
+
+            // SkillPresetManager 구독 해제 (조민희 추가)
+            if (SkillPresetManager.Instance != null)
+            {
+                SkillPresetManager.Instance.OnPresetChanged -= HandlePresetChanged;
             }
         }
 
@@ -153,6 +165,19 @@ namespace SlayerLegend.UI
         private void HandleEarlyGridDataLoaded(List<string> skillIds)
         {
             // 배치된 스킬들을 큐에 로드
+            LoadPlacedSkillsToQueue();
+        }
+
+        /// <summary>
+        /// 프리셋 변경 이벤트 핸들러 (조민희 추가)
+        /// </summary>
+        private void HandlePresetChanged(int newPresetIndex)
+        {
+            Debug.Log($"[SkillSetPanelUI] 프리셋 변경 감지: {newPresetIndex + 1}");
+
+            // 큐 초기화 후 다시 로드
+            placedSkillQueue.Clear();
+            skillMap.Clear();
             LoadPlacedSkillsToQueue();
         }
 

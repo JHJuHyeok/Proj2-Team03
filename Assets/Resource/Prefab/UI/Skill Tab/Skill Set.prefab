@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8727687813508930102}
   - component: {fileID: 2949793733030836823}
   - component: {fileID: 1127971225979327794}
+  - component: {fileID: 538147362452346857}
   m_Layer: 5
   m_Name: Skill Set
   m_TagString: Untagged
@@ -121,6 +122,24 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &538147362452346857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 625113533541227843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94ced5f1b36497b4e8de57c564df77bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presetIndex: 0
+  button: {fileID: 1127971225979327794}
+  labelText: {fileID: 103439287881998730}
+  selectedIndicator: {fileID: 5173276088728443613}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &5173276088728443613
 GameObject:
   m_ObjectHideFlags: 0

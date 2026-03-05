@@ -657,6 +657,101 @@ namespace SlayerLegend.Skill.UI.Grid
             return PlayerPrefs.HasKey(saveKey);
         }
 
+        /// <summary>
+        /// 프리셋 데이터로부터 그리드 로드 (조민희 추가 - SkillPresetManager 연동용)
+        /// </summary>
+        public void LoadFromPresetData(List<PlacedSkillData> skills)
+        {
+            if (gridManager == null || skills == null) return;
+
+            // 1. 기존 스킬들을 SkillController에서 해제 (조민희 수정 - 중요!)
+            DeregisterAllSkillsFromController();
+
+            // 2. 그리드 클리어
+            gridManager.ClearGrid();
+
+            // 3. 기존 아이템 정리
+            var itemsToRemove = new List<string>(itemsById.Keys);
+            foreach (var id in itemsToRemove)
+            {
+                var item = itemsById[id];
+                if (item != null)
+                {
+                    item.OnItemPlaced -= HandleItemPlaced;
+                    item.OnItemRemoved -= HandleItemRemoved;
+                    Destroy(item.gameObject);
+                }
+            }
+            inventoryItems.Clear();
+            itemsById.Clear();
+
+            if (skills.Count == 0)
+            {
+                Debug.Log("[SkillGridController] 프리셋이 비어있음");
+                return;
+            }
+
+            // 4. 그리드 셀 상태 적용
+            var tempSaveData = new SkillGridSaveData();
+            foreach (var skill in skills)
+            {
+                tempSaveData.AddPlacedSkill(skill);
+            }
+            gridManager.LoadSaveData(tempSaveData);
+
+            // 5. 각 스킬에 대해 DraggableItem 복원 및 등록
+            int restoredCount = 0;
+            foreach (var placedSkill in skills)
+            {
+                var item = RestoreDraggableItemFromSave(placedSkill);
+                if (item != null)
+                {
+                    restoredCount++;
+                    RegisterSkillToController(placedSkill.skillId);
+                }
+            }
+
+            Debug.Log($"[SkillGridController] 프리셋 로드 완료: {restoredCount}개 스킬");
+
+            // 이벤트 호출
+            OnGridDataLoaded?.Invoke();
+        }
+
+        /// <summary>
+        /// 모든 스킬을 SkillController에서 해제 (조민희 추가)
+        /// 수정: Active/Passive 모두 해제하도록 변경
+        /// </summary>
+        private void DeregisterAllSkillsFromController()
+        {
+            if (skillController == null) return;
+
+            int removedCount = 0;
+
+            // inventoryItems에서 그리드에 배치된 모든 스킬 해제
+            foreach (var item in inventoryItems)
+            {
+                if (item != null && item.IsOnGrid && !string.IsNullOrEmpty(item.SkillId))
+                {
+                    // 기존 메서드 사용 (Active/Passive 자동 구분)
+                    DeregisterSkillFromController(item.SkillId);
+                    removedCount++;
+                }
+            }
+
+            Debug.Log($"[SkillGridController] SkillController에서 {removedCount}개 스킬 해제 (Active/Passive 포함)");
+        }
+
+        /// <summary>
+        /// 현재 그리드의 배치된 스킬 목록 반환 (조민희 추가 - SkillPresetManager 연동용)
+        /// </summary>
+        public List<PlacedSkillData> GetPlacedSkillDataList()
+        {
+            if (gridManager == null) return new List<PlacedSkillData>();
+
+            var saveData = gridManager.GetSaveData();
+            return saveData?.placedSkills ?? new List<PlacedSkillData>();
+        }
+
         #endregion
 
         // skillId 패턴 기반 아이콘 로드 (자동 마이그레이션) - 조민희

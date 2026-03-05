@@ -477,6 +477,11 @@ namespace SlayerLegend.Skill.UI.Grid
         // 저장 데이터 반환
         public SkillGridSaveData GetSaveData()
         {
+            // saveData가 null이면 새로 생성 (조민희 수정)
+            if (saveData == null)
+            {
+                saveData = new SkillGridSaveData(gridWidth, gridHeight);
+            }
             return saveData.Clone();
         }
 
