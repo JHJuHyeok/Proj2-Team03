@@ -10,6 +10,7 @@ namespace SlayerLegend.Equipment
     /// 장비 번들 UI 컴포넌트
     /// 작성자: 조민희
     /// Weapon Bundle 프리팹에 연결하여 장비 정보 표시
+    /// [조민희] 클릭 시 EquipPopup 열기 기능 추가
     /// </summary>
     public class WeaponBundleUI : MonoBehaviour
     {
@@ -19,6 +20,7 @@ namespace SlayerLegend.Equipment
         [SerializeField] private TMP_Text countText;       // Count Text
         [SerializeField] private TMP_Text levelText;       // Level Text
         [SerializeField] private Slider enhanceSlider;     // Equipment Slider
+        [SerializeField] private Button clickButton;       // [조민희] 클릭용 버튼
 
         [Header("등급 색상")]
         [SerializeField] private Color commonColor = Color.white;
@@ -29,6 +31,39 @@ namespace SlayerLegend.Equipment
         [SerializeField] private Color mythColor = new Color(1f, 0.8f, 0f);     // 금색
 
         private EquipData currentEquipData;
+
+        private void Awake()
+        {
+            // [조민희] 버튼 이벤트 연결
+            if (clickButton != null)
+            {
+                clickButton.onClick.AddListener(OnClick);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // [조민희] 버튼 이벤트 해제
+            if (clickButton != null)
+            {
+                clickButton.onClick.RemoveListener(OnClick);
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 장비 슬롯 클릭 시 EquipPopup 열기
+        /// </summary>
+        private void OnClick()
+        {
+            if (currentEquipData == null) return;
+
+            // PopupManager를 통해 EquipPopup 열기
+            if (PopupManager.Instance != null)
+            {
+                var param = new EquipPopupParam(EquipTab.Weapon, currentEquipData.GetId());
+                PopupManager.Instance.Open(PopupId.Equip, param);
+            }
+        }
 
         /// <summary>
         /// 장비 데이터 설정 및 UI 갱신

@@ -4002,12 +4002,15 @@ MonoBehaviour:
   tab:
   - {fileID: 436728123}
   - {fileID: 1459314528}
+  extraTab: []
   tabBtnImage:
   - {fileID: 695108000}
   - {fileID: 751908296}
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!114 &267651491 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2358233889231407591, guid: d3a7cc6570233c343a0259c0a9cacbc7, type: 3}
@@ -6264,12 +6267,15 @@ MonoBehaviour:
   tab:
   - {fileID: 9005075725097952237}
   - {fileID: 2925539325395327817}
+  extraTab: []
   tabBtnImage:
   - {fileID: 1504070227}
   - {fileID: 1646599359}
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!1001 &456660516
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7669,6 +7675,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2201077428217518704, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2201077428217518704, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4988891499786037991, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -7692,6 +7706,14 @@ PrefabInstance:
     - target: {fileID: 8566057954525253627, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_Name
       value: Top Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643162283661550367, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643162283661550367, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8940789403966955588, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_Pivot.x
@@ -15169,7 +15191,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3112315843018368007, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
   m_PrefabInstance: {fileID: 407373074}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420315758}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe5b3785b305f48d68ad7fc74e38f766, type: 3}
@@ -29865,6 +29887,7 @@ MonoBehaviour:
   - {fileID: 228539325070237099}
   - {fileID: 509009722}
   - {fileID: 2043404051}
+  extraTab: []
   tabBtnImage:
   - {fileID: 931045515607440390}
   - {fileID: 7641977392422618450}
@@ -29872,6 +29895,8 @@ MonoBehaviour:
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 8165082619979113084}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!1001 &5925306802372885471
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30710,6 +30735,14 @@ PrefabInstance:
     - target: {fileID: 6138389999128184642, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
       propertyPath: m_Name
       value: EquipPopup
+      objectReference: {fileID: 0}
+    - target: {fileID: 6138389999128184642, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7693121360816709356, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -107,6 +107,25 @@ namespace SlayerLegend.Equipment
             return result;
         }
 
+        /// <summary>타입별 인벤토리 조회</summary>
+        public IReadOnlyList<InventoryItem> GetInventory(EquipType type)
+        {
+            var result = new List<InventoryItem>();
+
+            foreach (var kvp in EquipInfo)
+            {
+                string equipId = kvp.Key;
+                EquipData data = GetEquipData(equipId);
+
+                if (data != null && GetEquipType(data) == type)
+                {
+                    result.Add(new InventoryItem(data, kvp.Value.level));
+                }
+            }
+
+            return result.AsReadOnly();
+        }
+
         /// <summary>장비 데이터 조회 (무기/악세서리 통합)</summary>
         public EquipData GetEquipData(string equipId)
         {
@@ -159,22 +178,28 @@ namespace SlayerLegend.Equipment
             return currentGrade + 1;
         }
 
-        /// <summary>다음 등급의 장비 데이터 찾기</summary>
+        /// <summary>다음 순서의 장비 데이터 찾기 (ID 기반) </summary>
         public EquipData FindNextGradeData(EquipData current)
         {
             if (current == null) return null;
-            if (current.GetGrade() >= EquipGrade.Myth) return null;
 
-            EquipGrade nextGrade = GetNextGrade(current.GetGrade());
-            EquipType type = GetEquipType(current);
+            string currentId = current.GetId();
+            if (string.IsNullOrEmpty(currentId)) return null;
 
-            var db = type == EquipType.Weapon ? DataManager.weapons : DataManager.accessories;
-
-            foreach (var data in db.GetAll())
+            // [조민희] ID에서 숫자 추출 후 +1 (예: WP_004 → WP_005)
+            string prefix = currentId.Substring(0, 3); // "WP_" 또는 "AC_"
+            if (int.TryParse(currentId.Substring(3), out int num))
             {
-                if (data.GetGrade() == nextGrade)
+                string nextId = $"{prefix}{num + 1:D3}"; // WP_004 → WP_005
+                EquipType type = GetEquipType(current);
+                var db = type == EquipType.Weapon ? DataManager.weapons : DataManager.accessories;
+
+                foreach (var data in db.GetAll())
                 {
-                    return data;
+                    if (data.GetId() == nextId)
+                    {
+                        return data;
+                    }
                 }
             }
 
@@ -346,9 +371,14 @@ namespace SlayerLegend.Equipment
             EquipType type = GetEquipTypeFromId(equipId);
             int oldLevel = EquipInfo[equipId].level;
 
-            // TODO: 강화 비용 체크 (CurrencyManager 연동)
-            // if (!CurrencyManager.Instance.TrySpend(CurrencyType.Gold, GetEnhanceCost(oldLevel)))
-            //     return false;
+            // [조민희] 강화 비용 체크 및 차감 (CurrencyManager 연동)
+            long cost = GetEnhanceCost(oldLevel);
+            if (!CurrencyManager.Instance.HasEnoughCurrency(CurrencyType.Cube, cost))
+            {
+                Debug.LogWarning($"[EquipmentManager] 강화 실패: 큐브 부족 (필요: {cost}, 보유: {CurrencyManager.Instance.GetAmount(CurrencyType.Cube)})");
+                return false;
+            }
+            CurrencyManager.Instance.ConsumeCurrency(CurrencyType.Cube, cost);
 
             EquipInfo[equipId].level++;
 
@@ -607,6 +637,101 @@ namespace SlayerLegend.Equipment
                 EquipData data = GetEquipData(kvp.Key);
                 string name = data != null ? data.GetName() : kvp.Key;
                 Debug.Log($"  {name} ({kvp.Key}): {kvp.Value.count}개, Lv.{kvp.Value.level}");
+            }
+        }
+        #endregion
+
+        #region 테스트용 장비 추가 (조민희 추가)
+
+        [ContextMenu("테스트: 랜덤 장비 추가 (무작위 수량)")]
+        public void DebugAddRandomEquipment()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[EquipmentManager] CurrentSaveData가 null입니다.");
+                return;
+            }
+
+            var allWeapons = DataManager.weapons.GetAll();
+            var allAccessories = DataManager.accessories.GetAll();
+
+            int addedCount = 0;
+
+            // 무기: 50% 확률로 추가, 수량 1~10개
+            foreach (var weapon in allWeapons)
+            {
+                if (UnityEngine.Random.value < 0.5f)
+                {
+                    string equipId = weapon.GetId();
+                    int count = UnityEngine.Random.Range(1, 11);
+                    int level = UnityEngine.Random.Range(1, 6);
+
+                    AddEquipment(equipId, count, level);
+                    addedCount++;
+                }
+            }
+
+            // 악세서리: 30% 확률로 추가, 수량 1~5개
+            foreach (var accessory in allAccessories)
+            {
+                if (UnityEngine.Random.value < 0.3f)
+                {
+                    string equipId = accessory.GetId();
+                    int count = UnityEngine.Random.Range(1, 6);
+                    int level = UnityEngine.Random.Range(1, 4);
+
+                    AddEquipment(equipId, count, level);
+                    addedCount++;
+                }
+            }
+
+            Debug.Log($"[EquipmentManager] 랜덤 장비 추가 완료: {addedCount}종류");
+        }
+
+        [ContextMenu("테스트: 모든 장비 10개씩 추가")]
+        public void DebugAddAllEquipment()
+        {
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogError("[EquipmentManager] CurrentSaveData가 null입니다.");
+                return;
+            }
+
+            var allWeapons = DataManager.weapons.GetAll();
+            var allAccessories = DataManager.accessories.GetAll();
+
+            int addedCount = 0;
+
+            // 모든 무기 10개씩 추가
+            foreach (var weapon in allWeapons)
+            {
+                string equipId = weapon.GetId();
+                AddEquipment(equipId, 10, 1);
+                addedCount++;
+            }
+
+            // 모든 악세서리 10개씩 추가
+            foreach (var accessory in allAccessories)
+            {
+                string equipId = accessory.GetId();
+                AddEquipment(equipId, 10, 1);
+                addedCount++;
+            }
+
+            Debug.Log($"[EquipmentManager] 모든 장비 10개씩 추가 완료: {addedCount}종류");
+        }
+
+        [ContextMenu("테스트: 장비 데이터 전체 삭제")]
+        public void DebugClearAllEquipment()
+        {
+            if (DataManager.CurrentSaveData != null && DataManager.CurrentSaveData.equipInfo != null)
+            {
+                DataManager.CurrentSaveData.equipInfo.Clear();
+                Debug.Log("[EquipmentManager] 장비 데이터 전체 삭제 완료");
+
+                // 이벤트 발생
+                OnInventoryChanged?.Invoke(EquipType.Weapon);
+                OnInventoryChanged?.Invoke(EquipType.Accessorie);
             }
         }
         #endregion

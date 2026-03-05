@@ -69,7 +69,9 @@ public class StatController
             }
         }
 
-        foreach (var type in _finalStats.Keys)
+        // [조민희] 컬렉션 열거 중 수정 에러 방지를 위해 키 복사
+        var types = new List<StatType>(_finalStats.Keys);
+        foreach (var type in types)
         {
             double sumBase = 0;
             double sumMultiplier = 1.0f;

@@ -13,6 +13,7 @@ namespace SlayerLegend.Equipment
         private static readonly FieldInfo _nameField;
         private static readonly FieldInfo _spriteNameField;
         private static readonly FieldInfo _gradeField;
+        private static readonly FieldInfo _gradeStepField; // [조민희] gradeStep 필드 추가
         private static readonly FieldInfo _equipEffectField;
         private static readonly FieldInfo _holdEffectsField;
 
@@ -25,6 +26,7 @@ namespace SlayerLegend.Equipment
             _nameField = _equipDataType.GetField("name", flags);
             _spriteNameField = _equipDataType.GetField("spriteName", flags);
             _gradeField = _equipDataType.GetField("grade", flags);
+            _gradeStepField = _equipDataType.GetField("gradeStep", flags); // [조민희] gradeStep 필드
             _equipEffectField = _equipDataType.GetField("equipEffect", flags);
             _holdEffectsField = _equipDataType.GetField("holdEffects", flags);
         }
@@ -56,6 +58,14 @@ namespace SlayerLegend.Equipment
             if (data == null || _gradeField == null) return EquipGrade.Common;
             var value = _gradeField.GetValue(data);
             return value is EquipGrade ? (EquipGrade)value : EquipGrade.Common;
+        }
+
+        // [조민희] 장비 등급 단계 가져오기
+        public static int GetGradeStep(this EquipData data)
+        {
+            if (data == null || _gradeStepField == null) return 1;
+            var value = _gradeStepField.GetValue(data);
+            return value is int ? (int)value : 1;
         }
 
         // 메인 효과 가져오기

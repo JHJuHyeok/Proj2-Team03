@@ -203,7 +203,7 @@ public class EquipPopupJsonBinder : MonoBehaviour
         }
     }
 
-    //스프라이트 로드(Resources)
+    // [조민희] 스프라이트 로드 (AssetBundleLoader 사용)
     private Sprite ResolveSprite(string spriteName)
     {
         if (string.IsNullOrEmpty(spriteName)) return null;
@@ -213,10 +213,10 @@ public class EquipPopupJsonBinder : MonoBehaviour
             return cached;
         }
 
-        string path = iconBasePath + "/" + spriteName;
-        Sprite loaded = Resources.Load<Sprite>(path);
+        // AssetBundleLoader를 통해 스프라이트 로드
+        Sprite loaded = SlayerLegend.Resource.ResourceManager.Instance.LoadSprite(spriteName);
 
-        if (cacheSprites)
+        if (cacheSprites && loaded != null)
         {
             spriteCache[spriteName] = loaded;
         }

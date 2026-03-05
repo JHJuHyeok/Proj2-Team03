@@ -8,6 +8,7 @@ EquipPopup
 - PopupManager에서 PopupId.Equip로 호출
 - param으로 EquipTab을 받아 아이콘과 컨텐츠를 변경
 - param으로 "열릴 때 기본 탭"을 지정 : param이 int면: 0=강화, 1=융합
+- [조민희] EquipPopupParam으로 장비 ID도 전달받아 초기 선택 가능
 */
 public class EquipPopup : UIPopup
 {
@@ -26,8 +27,15 @@ public class EquipPopup : UIPopup
         base.OnOpen(param);
 
         EquipTab tab = EquipTab.Weapon;
+        string initialEquipId = null; // [조민희] 초기 선택할 장비 ID
 
-        if (param is EquipTab t)
+        // [조민희] EquipPopupParam 처리 (우선순위)
+        if (param is EquipPopupParam popupParam)
+        {
+            tab = popupParam.Tab;
+            initialEquipId = popupParam.EquipId;
+        }
+        else if (param is EquipTab t)
         {
             tab = t;
         }
@@ -37,6 +45,11 @@ public class EquipPopup : UIPopup
         if (controller != null)
         {
             controller.SetEquipTab(tab);
+            // [조민희] 초기 선택 장비 ID가 있으면 설정
+            if (!string.IsNullOrEmpty(initialEquipId))
+            {
+                controller.SetInitialSelection(initialEquipId);
+            }
         }
     }
 

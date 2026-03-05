@@ -31,6 +31,30 @@ namespace SlayerLegend.Equipment
             {
                 StartCoroutine(RefreshWhenDataReady());
             }
+
+            // EquipmentManager 이벤트 구독
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnInventoryChanged += OnInventoryChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            // EquipmentManager 이벤트 구독 해제
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnInventoryChanged -= OnInventoryChanged;
+            }
+        }
+
+        private void OnInventoryChanged(EquipType type)
+        {
+            // 무기 타입이 변경되었을 때만 새로고침
+            if (type == EquipType.Weapon)
+            {
+                RefreshWeaponList();
+            }
         }
 
         #endregion
