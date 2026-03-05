@@ -73,6 +73,10 @@ public class LevelManager : Singleton<LevelManager>
             // 요구 경험치 재계산
             _requiredExp = GetRequiredExp(_saveData.level);
         }
+        else
+        {
+            Debug.Log("경험치가 부족해 레벨업이 불가능합니다.");
+        }
 
         // 레벨업 가능 여부 체크
         if (!CheckLevelUp())
