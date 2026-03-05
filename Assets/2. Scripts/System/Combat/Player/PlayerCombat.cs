@@ -12,6 +12,10 @@ public class PlayerCombat : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private bool autoAttackEnabled = true;
 
+    // 애니메이션
+    private Animator _animator;
+    private int _attackIndex = 0;
+
     // 현재 상태
     private MonsterBase _currentTarget;
     private float _lastAttackTime = -999f;
@@ -22,11 +26,37 @@ public class PlayerCombat : MonoBehaviour
         if (playerStats == null)
             playerStats = GetComponent<PlayerCombatStats>();
 
+        _animator = GetComponentInChildren<Animator>();
+
         if (playerStats == null)
         {
             Debug.LogError("[PlayerCombat] Missing required components!");
             enabled = false;
         }
+
+        if (_animator == null)
+            Debug.LogWarning("[PlayerCombat] Animator not found. Attack animations will not play.");
+    }
+
+    private void OnEnable()
+    {
+        // 스테이지 변경 시 타겟 초기화 이벤트 구독
+        if (CombatManager.Instance != null && CombatManager.Instance.StageManager != null)
+            CombatManager.Instance.StageManager.OnStageChanged += OnStageChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (CombatManager.Instance != null && CombatManager.Instance.StageManager != null)
+            CombatManager.Instance.StageManager.OnStageChanged -= OnStageChanged;
+    }
+
+    /// <summary>
+    /// 스테이지 변경 시 호출 - 기존 타겟 초기화
+    /// </summary>
+    private void OnStageChanged(int stageIndex)
+    {
+        ClearTarget();
     }
 
     private void Update()
@@ -133,8 +163,15 @@ public class PlayerCombat : MonoBehaviour
     /// </summary>
     protected virtual void OnAttackExecuted(bool wasCritical)
     {
-        // 파생 클래스에서 VFX, 애니메이션 등을 추가하기 위해 재정의
-        // 예: 근접 베기 이팩트 실행, 데미지 숫자 스폰 등
+        // 공격 애니메이션 재생 (Attack1 ↔ Attack2 번갈아 재생)
+        if (_animator != null)
+        {
+            _animator.SetInteger("AttackIndex", _attackIndex);
+            _animator.SetTrigger("Attack");
+
+            // 0 → 1 → 0 → 1 번갈아가기
+            _attackIndex = (_attackIndex + 1) % 2;
+        }
     }
 
     /// <summary>

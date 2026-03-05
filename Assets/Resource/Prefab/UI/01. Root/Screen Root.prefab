@@ -4617,12 +4617,15 @@ MonoBehaviour:
   tab:
   - {fileID: 5380923218586849109}
   - {fileID: 8103036887203245782}
+  extraTab: []
   tabBtnImage:
   - {fileID: 317503110705782628}
   - {fileID: 7296327761118659512}
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!1 &3828676477640316487
 GameObject:
   m_ObjectHideFlags: 0
@@ -6929,7 +6932,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2712779278326489815}
   m_Direction: 3
   m_Value: 1
-  m_Size: 0.21775395
+  m_Size: 0.21753004
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7249,6 +7252,7 @@ MonoBehaviour:
   - {fileID: 7550439734805629988}
   - {fileID: 8907198264496619624}
   - {fileID: 1609545165754090674}
+  extraTab: []
   tabBtnImage:
   - {fileID: 5437254471286528182}
   - {fileID: 8100671436152649206}
@@ -7256,6 +7260,8 @@ MonoBehaviour:
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 7975791958282056329}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!1 &5362760627423506248
 GameObject:
   m_ObjectHideFlags: 0
@@ -11248,12 +11254,15 @@ MonoBehaviour:
   tab:
   - {fileID: 5362760627423506248}
   - {fileID: 5771462520081516295}
+  extraTab: []
   tabBtnImage:
   - {fileID: 193332409901673619}
   - {fileID: 1380299133316718347}
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  defaultIndex: 0
+  keepLastIndexOnEnable: 0
 --- !u!1 &9105692083458096905
 GameObject:
   m_ObjectHideFlags: 0
@@ -24182,6 +24191,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5005436186285355784}
     m_Modifications:
+    - target: {fileID: 1259285341540967944, guid: 79b0b6ebef07049e49223a5cb6761d93, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259285341540967944, guid: 79b0b6ebef07049e49223a5cb6761d93, type: 3}
+      propertyPath: m_SortingLayer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5790526737620963275, guid: 79b0b6ebef07049e49223a5cb6761d93, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -29681,45 +29698,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5005436186285355784}
     m_Modifications:
-    - target: {fileID: 1213535748372501520, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+    - target: {fileID: 2201077428217518704, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2201077428217518704, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1213535748372501520, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1213535748372501520, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1213535748372501520, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4988891499786037991, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6947842625210080918, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6947842625210080918, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6947842625210080918, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6947842625210080918, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
-      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8566057954525253627, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_Name
       value: Top Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643162283661550367, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8643162283661550367, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8940789403966955588, guid: 51bf13b8c61fa4b9ab4dcd0be6a75f10, type: 3}
       propertyPath: m_Pivot.x
