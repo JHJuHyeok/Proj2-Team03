@@ -99,15 +99,15 @@ namespace Combat.Drop
 
         private void OnCollected()
         {
-            // TODO: 실제 보상 적용 로직 (나중에 구현)
-            // if (dropType == DropType.Gold)
-            // {
-            //     GameManager.Instance.AddGold(_amount);
-            // }
-            // else if (dropType == DropType.Exp)
-            // {
-            //     GameManager.Instance.AddExp(_amount);
-            // }
+            // 보상 적용
+            if (dropType == DropType.Gold)
+            {
+                CurrencyManager.Instance.AddCurrency(CurrencyType.Gold, _amount);
+            }
+            else if (dropType == DropType.Exp)
+            {
+                LevelManager.Instance.AddExp(_amount);
+            }
 
             // 상태 초기화
             _isInitialized = false;

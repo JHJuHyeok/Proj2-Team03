@@ -8,6 +8,7 @@ public class BossMonster : MonsterBase
     private float _lastAttackTime = -999f;
     private float _attackRange = 4f; // 공격 범위
     private double _attackPower;
+    private bool _isAttacking = false;
 
     public override bool IsBoss => true;
     public override bool IsRewardBox => false;
@@ -73,6 +74,10 @@ public class BossMonster : MonsterBase
 
     private void ExecuteAttack()
     {
+        // 공격 애니메이션 실행
+        _isAttacking = true;
+        SetAnimState(ANIM_STATE_ATTACK);
+
         // 타겟의 PlayerCombatStats 컴포넌트 찾기
         var playerStats = _target.GetComponent<PlayerCombatStats>();
         if (playerStats != null)
@@ -85,6 +90,33 @@ public class BossMonster : MonsterBase
             Debug.LogWarning($"[{_data.name}] 공격 불가: 플레이어에게 PlayerCombatStats 컴포넌트 없음");
         }
 
-        // 선택사항: 여기서 공격 애니메이션/이펙트 재생
+    }
+
+    /// <summary>
+    /// 공격 애니메이션 종료 시 Animation Event에서 호출
+    /// </summary>
+    public void OnAttackAnimationEnd()
+    {
+        _isAttacking = false;
+        SetAnimState(ANIM_STATE_IDLE);
+    }
+
+    public override void TakeDamage(double damage)
+    {
+        if (_isDead) return;
+
+        // 데미지는 적용하되, 공격 중이면 Hit 애니메이션 생략
+        if (_isAttacking)
+        {
+            _currentHp -= damage;
+            _currentHp = System.Math.Max(0, _currentHp);
+
+            if (_currentHp <= 0)
+                Die();
+
+            return;
+        }
+
+        base.TakeDamage(damage);
     }
 }
