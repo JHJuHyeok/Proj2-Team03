@@ -41,7 +41,7 @@ namespace SlayerLegend.UI
             // SkillGridController 찾기 (자동)
             if (skillGridController == null)
             {
-                skillGridController = FindObjectOfType<SkillGridController>();
+                skillGridController = FindFirstObjectByType<SkillGridController>();
                 if (skillGridController != null)
                 {
                     Debug.Log("[SkillSetPanelUI] SkillGridController 자동 연결됨");
@@ -51,7 +51,7 @@ namespace SlayerLegend.UI
             //EarlyGridDataLoader 찾기 (게임 시작 시 그리드 데이터 로드용)
             if (earlyGridDataLoader == null)
             {
-                earlyGridDataLoader = FindObjectOfType<EarlyGridDataLoader>();
+                earlyGridDataLoader = FindFirstObjectByType<EarlyGridDataLoader>();
             }
 
             // 이벤트 구독

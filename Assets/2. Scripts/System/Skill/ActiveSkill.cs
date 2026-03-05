@@ -548,7 +548,7 @@ namespace SlayerLegend.Skill
         #region ISkillDisplayable 구현
 
         public string SkillId => skillData?.id ?? "";
-        public SkillData Data => skillData;
+        public new SkillData Data => skillData;
         bool ISkillDisplayable.IsActive => isActive;
 
         public string GetDisplayText()

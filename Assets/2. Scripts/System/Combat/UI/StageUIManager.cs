@@ -43,7 +43,7 @@ public class StageUIManager : MonoBehaviour
             SetGaugeWidth(progressGauge, 0f);
         }
 
-        areaUIManager = FindObjectOfType<AreaUIManager>();
+        areaUIManager = FindFirstObjectByType<AreaUIManager>();
         // 버튼 클릭 이벤트를 코드로 연결
         areaPopupButton.onClick.AddListener(() => areaUIManager.OpenPopup());
         bossButton.onClick.AddListener(() => CombatManager.Instance.StartBossBattle());

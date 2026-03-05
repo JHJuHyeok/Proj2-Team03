@@ -32,6 +32,7 @@ namespace SlayerLegend.Skill.UI.Grid
         private SkillDraggableItem draggableItem;
         private bool isSelected = false;
         private bool isPlaced = false;  //그리드 배치 상태
+        private bool isOwned = true;    //스킬 보유 상태 (조민희 추가)
         private Color originalColor;    //원래 색상 저장
 
         public event System.Action<InventorySlotUI> OnSlotClicked;
@@ -39,6 +40,7 @@ namespace SlayerLegend.Skill.UI.Grid
         public SkillData SkillData => skillData;
         public SkillDraggableItem DraggableItem => draggableItem;
         public bool IsSelected => isSelected;
+        public bool IsOwned => isOwned;  //스킬 보유 여부 노출 (조민희 추가)
         public string SkillId => skillData?.id ?? "";  //스킬 ID 노출
 
         private void Awake()
@@ -171,6 +173,23 @@ namespace SlayerLegend.Skill.UI.Grid
         /// 현재 배치 상태 반환 (조민희 추가)
         /// </summary>
         public bool IsPlaced => isPlaced;
+
+        /// <summary>
+        /// 스킬 보유 상태 설정 (조민희 추가)
+        /// </summary>
+        /// <param name="owned">보유 여부</param>
+        public void SetOwnedState(bool owned)
+        {
+            isOwned = owned;
+
+            // 미보유 스킬은 아이콘을 반투명하게
+            if (iconImage != null)
+            {
+                Color color = iconImage.color;
+                color.a = owned ? 1f : 0.3f;  // 보유: 100%, 미보유: 30%
+                iconImage.color = color;
+            }
+        }
 
         // 슬롯 클릭 핸들러
         private void HandleSlotClicked()

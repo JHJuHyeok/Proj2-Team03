@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3715882725389469490}
   - component: {fileID: 3054968382709808329}
+  - component: {fileID: 442188110749013619}
   m_Layer: 5
   m_Name: Weapon Tab Panel
   m_TagString: Untagged
@@ -68,6 +69,21 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &442188110749013619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8285844159254966020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70635ffad199b7644802f293c18764c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bundlePrefab: {fileID: 5410305853894650804, guid: 5abeb306b2b4b6b46ada2a65886200a5, type: 3}
+  contentRoot: {fileID: 0}
+  autoRefreshOnEnable: 1
 --- !u!1001 &1786061150532756893
 PrefabInstance:
   m_ObjectHideFlags: 0

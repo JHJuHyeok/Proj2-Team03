@@ -52,7 +52,8 @@ namespace SlayerLegend.Skill.Testing
             }
 
             // DummyCharacter를 장착 대상으로 설정
-            equipmentManager.EquipTarget = dummyCharacter;
+            // 주의: EquipTarget은 새 EquipmentManager 아키텍처에서 제거됨
+            // StatManager가 자동으로 플레이어 스탯을 관리함
 
             // 테스트 장비 데이터 생성 및 캐싱
             cachedWeapons = TestEquipmentData.CreateTestWeapons();
@@ -63,19 +64,13 @@ namespace SlayerLegend.Skill.Testing
             // 각 무기를 3개씩 추가
             for (int i = 0; i < cachedWeapons.Length; i++)
             {
-                for (int j = 0; j < 3; j++)
-                {
-                    equipmentManager.AddToInventory(cachedWeapons[i]);
-                }
+                equipmentManager.AddEquipment(cachedWeapons[i].GetId(), count: 3, level: 1);
             }
 
             // 각 악세서리를 3개씩 추가
             for (int i = 0; i < cachedAccessories.Length; i++)
             {
-                for (int j = 0; j < 3; j++)
-                {
-                    equipmentManager.AddToInventory(cachedAccessories[i]);
-                }
+                equipmentManager.AddEquipment(cachedAccessories[i].GetId(), count: 3, level: 1);
             }
 
             // FusionManager 생성 및 초기화
@@ -404,7 +399,7 @@ namespace SlayerLegend.Skill.Testing
             // 무기 해제
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                equipmentManager?.UnequipItem(EquipType.Weapon);
+                equipmentManager?.Unequip(EquipType.Weapon);
             }
             // 장비 테스트 메뉴 복귀
             else if (Input.GetKeyDown(KeyCode.Alpha9))
@@ -444,7 +439,7 @@ namespace SlayerLegend.Skill.Testing
             // 악세서리 해제
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                equipmentManager?.UnequipItem(EquipType.Accessorie);
+                equipmentManager?.Unequip(EquipType.Accessorie);
             }
             // 장비 테스트 메뉴 복귀
             else if (Input.GetKeyDown(KeyCode.Alpha9))
@@ -527,15 +522,19 @@ namespace SlayerLegend.Skill.Testing
             if (equipmentManager != null)
             {
                 GUILayout.Space(5);
-                var slots = equipmentManager.GetAllSlots();
-                foreach (var kvp in slots)
-                {
-                    EquipData equip = kvp.Value.EquippedItem;
-                    string equipInfo = equip != null
-                        ? $"[{equip.GetGradeString()}] {equip.GetName()} (Lv.{kvp.Value.Level})"
-                        : "(비어있음)";
-                    GUILayout.Label($"{kvp.Key}: {equipInfo}");
-                }
+                // 새 아키텍처: GetEquippedData 사용
+                EquipData weapon = equipmentManager.GetEquippedData(EquipType.Weapon);
+                EquipData accessory = equipmentManager.GetEquippedData(EquipType.Accessorie);
+
+                string weaponInfo = weapon != null
+                    ? $"[{weapon.GetGradeString()}] {weapon.GetName()} (Lv.{equipmentManager.GetLevel(weapon.GetId())})"
+                    : "(비어있음)";
+                GUILayout.Label($"Weapon: {weaponInfo}");
+
+                string accessoryInfo = accessory != null
+                    ? $"[{accessory.GetGradeString()}] {accessory.GetName()} (Lv.{equipmentManager.GetLevel(accessory.GetId())})"
+                    : "(비어있음)";
+                GUILayout.Label($"Accessorie: {accessoryInfo}");
             }
         }
 
@@ -544,7 +543,7 @@ namespace SlayerLegend.Skill.Testing
         {
             if (items == null || equipmentManager == null || index < 0 || index >= items.Length)
                 return 0;
-            return equipmentManager.GetEquipmentCount(items[index]);
+            return equipmentManager.GetCount(items[index].GetId());
         }
         #endregion
 
@@ -553,10 +552,11 @@ namespace SlayerLegend.Skill.Testing
         {
             if (cachedWeapons != null && index >= 0 && index < cachedWeapons.Length)
             {
+                string equipId = cachedWeapons[index].GetId();
                 // 먼저 인벤토리에 추가 (테스트용)
-                equipmentManager?.AddToInventory(cachedWeapons[index]);
+                equipmentManager?.AddEquipment(equipId, count: 1, level: 1);
                 // 그 다음 장착
-                equipmentManager?.EquipItem(cachedWeapons[index]);
+                equipmentManager?.Equip(equipId);
             }
         }
 
@@ -564,10 +564,11 @@ namespace SlayerLegend.Skill.Testing
         {
             if (cachedAccessories != null && index >= 0 && index < cachedAccessories.Length)
             {
+                string equipId = cachedAccessories[index].GetId();
                 // 먼저 인벤토리에 추가 (테스트용)
-                equipmentManager?.AddToInventory(cachedAccessories[index]);
+                equipmentManager?.AddEquipment(equipId, count: 1, level: 1);
                 // 그 다음 장착
-                equipmentManager?.EquipItem(cachedAccessories[index]);
+                equipmentManager?.Equip(equipId);
             }
         }
         #endregion
@@ -680,13 +681,13 @@ namespace SlayerLegend.Skill.Testing
             // 모든 무기 1개씩 추가
             foreach (var weapon in cachedWeapons)
             {
-                equipmentManager.AddToInventory(weapon);
+                equipmentManager.AddEquipment(weapon.GetId(), count: 1, level: 1);
             }
 
             // 모든 악세서리 1개씩 추가
             foreach (var accessory in cachedAccessories)
             {
-                equipmentManager.AddToInventory(accessory);
+                equipmentManager.AddEquipment(accessory.GetId(), count: 1, level: 1);
             }
 
             Debug.Log("[SimpleSkillTest] 모든 장비 +1씩 추가됨");

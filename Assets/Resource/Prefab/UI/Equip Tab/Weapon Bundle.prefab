@@ -236,7 +236,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc4dafb422ddae64aa6d46237ab1d352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupId: 2
+  popupId: 3
+  useEquipParam: 1
+  equipTab: 0
+  useSkillParam: 0
+  skillAttribute: 0
+  useShopParam: 0
+  shopTab: 0
 --- !u!1 &1481390414833807943
 GameObject:
   m_ObjectHideFlags: 0
@@ -746,6 +752,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6189349244724123674}
+  - component: {fileID: 5410305853894650804}
   m_Layer: 5
   m_Name: Weapon Bundle
   m_TagString: Untagged
@@ -774,6 +781,29 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &5410305853894650804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4996641755786561737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a53f5348a24858343886aa49c07b0ce6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentIcon: {fileID: 3281938214143800906}
+  equipmentName: {fileID: 0}
+  countText: {fileID: 2332639983283898473}
+  levelText: {fileID: 618004691451968471}
+  enhanceSlider: {fileID: 8885724774551044257}
+  commonColor: {r: 1, g: 1, b: 1, a: 1}
+  uncommonColor: {r: 0, g: 1, b: 0, a: 1}
+  rareColor: {r: 0, g: 0, b: 1, a: 1}
+  heroColor: {r: 0.6, g: 0.2, b: 0.8, a: 1}
+  legendColor: {r: 1, g: 0.5, b: 0, a: 1}
+  mythColor: {r: 1, g: 0.8, b: 0, a: 1}
 --- !u!1 &5826781995492975341
 GameObject:
   m_ObjectHideFlags: 0
