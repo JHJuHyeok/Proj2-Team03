@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1592172978855986210}
   - component: {fileID: 2464624485133401444}
+  - component: {fileID: 5860478213128492437}
   m_Layer: 5
   m_Name: Skill Bar
   m_TagString: Untagged
@@ -66,6 +67,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &5860478213128492437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2346210407874483160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6374411339cbdf445b6057cb313c6141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bundleRoot: {fileID: 1592172978855986210}
 --- !u!1001 &2174427515171782191
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -411,18 +425,6 @@ PrefabInstance:
     - target: {fileID: 5937183587286471643, guid: 61179cd6572d1154a8f174dadff0eaba, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5937183587286471643, guid: 61179cd6572d1154a8f174dadff0eaba, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5937183587286471643, guid: 61179cd6572d1154a8f174dadff0eaba, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5937183587286471643, guid: 61179cd6572d1154a8f174dadff0eaba, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5937183587286471643, guid: 61179cd6572d1154a8f174dadff0eaba, type: 3}
       propertyPath: m_LocalPosition.x
