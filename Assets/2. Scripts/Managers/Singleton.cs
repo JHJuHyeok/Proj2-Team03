@@ -5,11 +5,14 @@ using UnityEngine;
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T instance;
+    private static bool _isQuitting = false;
 
     public static T Instance
     {
         get
         {
+            if (_isQuitting) return null;
+
             if (instance == null)
             {
                 // 해당 컴포넌트를 가지고 있는 게임 오브젝트를 찾아서 반환한다.
@@ -26,6 +29,11 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
             return instance;
         }
+    }
+
+    protected virtual void OnApplicationQuit()
+    {
+        _isQuitting = true;
     }
 
     protected virtual void Awake()

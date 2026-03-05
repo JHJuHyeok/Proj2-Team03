@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7013515369909262225}
   - component: {fileID: 274823523113811161}
   - component: {fileID: 1052261905175637885}
+  - component: {fileID: 5003357760856967282}
   m_Layer: 5
   m_Name: Summon Button
   m_TagString: Untagged
@@ -123,6 +124,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5003357760856967282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1287576696128160115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7589de667d8659438d0d13913b13a2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  summonCount: 1
+  providerBehaviour: {fileID: 0}
 --- !u!1 &3282640857010065771
 GameObject:
   m_ObjectHideFlags: 0
@@ -188,7 +203,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "33\uD68C \uC18C\uD658"
+  m_text: "11\uD68C \uC18C\uD658"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 06ded8ed542fefe41b0e5b8f413de0b1, type: 2}
   m_sharedMaterial: {fileID: -6167918227507553548, guid: 06ded8ed542fefe41b0e5b8f413de0b1, type: 2}
@@ -325,7 +340,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0567b8f734440b94d9bbe9ec06871ea2, type: 2}
+  m_Sprite: {fileID: -543755318, guid: 07a0a9070471d164f918989e3fac3c34, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -400,7 +415,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1500
+  m_text: 500
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

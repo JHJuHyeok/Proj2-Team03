@@ -16,6 +16,8 @@ public class GameData : ISavable
     public Dictionary<string, List<int>> buddyInfo = new();     // 동료 현황
     public Dictionary<string, applyOption> buddyOption = new(); // 각 동료 승급 옵션
     public List<int> gachaLevel = new();                        // 뽑기 레벨
+    public string currentStageId;                               // 현재 스테이지
+    public string lastStageId;                                  // 마지막 클리어 스테이지
 
     public long lastSaveTime { get; set; }           // 마지막 저장 시간
 
@@ -30,7 +32,9 @@ public class GameData : ISavable
             growthLevels = new List<int> { 0, 0, 0, 0, 0, 0, 0 },
             advanceGrade = "",
             gachaLevel = new List<int> { 0, 0, 0 },
-            lastSaveTime = DateTime.UtcNow.Ticks
+            lastSaveTime = DateTime.UtcNow.Ticks,
+            currentStageId = "STG_01_01",
+            lastStageId = "STG_01_01"
         };
     }
 }

@@ -133,7 +133,6 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
     /// <summary> 피격 애니메이션 (프레임 12) </summary>
     public void Animation_Hit_SpriteSetting_Number(int frameIndex)
     {
-        Debug.Log("Hit");
         SetSpriteByAbsoluteIndex(HIT_START + frameIndex);
     }
 

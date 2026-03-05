@@ -5,7 +5,8 @@ using TMPro;
 public class UI_ExpBar : MonoBehaviour
 {
     [SerializeField] private Slider _expSlider;
-    [SerializeField] private TMP_Text _expText;
+    [SerializeField] private TMP_Text _expValueText;
+    [SerializeField] private TMP_Text _expPercentText;
 
     private void OnEnable()
     {
@@ -23,7 +24,9 @@ public class UI_ExpBar : MonoBehaviour
     private void UpdateBar(double current, double max, float ratio)
     {
         _expSlider.value = ratio;
-        if (_expText != null)
-            _expText.text = $"{current:F0}/{max:F0}";
+        if (_expValueText != null)
+            _expValueText.text = $"{current:F0}/{max:F0}";
+        if (_expPercentText != null)
+            _expPercentText.text = ratio.ToString("P2");
     }
 }

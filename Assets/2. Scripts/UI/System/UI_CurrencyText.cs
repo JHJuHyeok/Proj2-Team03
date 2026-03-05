@@ -9,7 +9,7 @@ public class UI_CurrencyText : MonoBehaviour
 {
     [SerializeField] private CurrencyType _targetType;
     [SerializeField] private TMP_Text _amountText;
-    [SerializeField] private string _format = "{0:#,##0}";     // 숫자 포맷 설정
+    [SerializeField] private string _format = "{0:0,00#}";     // 숫자 포맷 설정
 
     private void OnEnable()
     {
