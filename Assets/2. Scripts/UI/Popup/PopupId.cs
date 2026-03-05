@@ -13,6 +13,7 @@ public enum PopupId
     Mailbox = 6,     //메일함
     Quest = 7,       //퀘스트
     Scroll = 8,      //버프스크롤
+    SkillDetail =9,
 }
 // 장비타입
 public enum EquipTab
