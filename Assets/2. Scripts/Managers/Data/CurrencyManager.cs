@@ -68,9 +68,8 @@ public class CurrencyManager : Singleton<CurrencyManager>
         if (!HasEnoughCurrency(type, amount)) return;
 
         UpdateValue(type, -amount);
-        InfoHandler.UpdateUserData();       // <--- 제거할 코드
 
-        OnCurrencyChanged?.Invoke(type, amount);
+        OnCurrencyChanged?.Invoke(type, _currencies[type]);
     }
 
     /// <summary>
