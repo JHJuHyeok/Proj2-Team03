@@ -195,7 +195,7 @@ public class EquipPopupContentController : MonoBehaviour
                 spriteName = equipData.spriteName;
             }
 
-            cell.Bind(equipId, spriteName, ResolveSprite, OnClickItem);
+            //cell.Bind(equipId, spriteName, ResolveSprite, OnClickItem);
             cell.SetSelected(string.IsNullOrEmpty(selectedEquipId) == false && selectedEquipId == equipId);
         }
     }
@@ -229,8 +229,8 @@ public class EquipPopupContentController : MonoBehaviour
                 continue;
             }
 
-            bool selected = cellPool[i].GetEquipId() == selectedEquipId;
-            cellPool[i].SetSelected(selected);
+            //bool selected = cellPool[i].GetEquipId() == selectedEquipId;
+            //cellPool[i].SetSelected(selected);
         }
 
         ApplySelection(selectedEquipId);

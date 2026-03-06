@@ -610,9 +610,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6138389999128184642, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5464597404558296064}
-    - targetCorrespondingSourceObject: {fileID: 6138389999128184642, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 192545841904244710}
   m_SourcePrefab: {fileID: 100100000, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
 --- !u!114 &363727289474263770 stripped
@@ -669,26 +666,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6138389999128184642, guid: 2bb5dfbaac2183c43bb22f719b31165f, type: 3}
   m_PrefabInstance: {fileID: 596094563277407193}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5464597404558296064
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6731247528482276507}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa73a72c42585e142b0fda2c5eaf51bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  equipmentManager: {fileID: 0}
-  listRoot: {fileID: 0}
-  cellPrefab: {fileID: 0}
-  detailIcon: {fileID: 0}
-  detailName: {fileID: 0}
-  ownedText: {fileID: 0}
-  equipButton: {fileID: 0}
-  spritePath: Icons
 --- !u!114 &192545841904244710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,8 +679,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   autoLoadOnAwake: 1
-  weaponJsonPath: Json/Equip/WeaponList
-  accessorieJsonPath: Json/Equip/AccessorieList
+  weaponJsonKey: Json/Equip/WeaponList
+  accessorieJsonKey: Json/Equip/AccessorieList
   iconBasePath: Icons
   cacheSprites: 1
   iconImage: {fileID: 6867905323256795879}

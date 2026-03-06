@@ -11,7 +11,7 @@ EquipPopupContentController
 -장비 선택 / 장착 / 융합 / 강화 / 보유개수 표시
 작성자: [승문] + 조민희 (융합/강화 기능 추가)
 */
-public class EquipPopupContentController : MonoBehaviour
+public class EquipPopupController : MonoBehaviour
 {
     [Header("매니저")]
     [SerializeField] private EquipmentManager equipmentManager;//장비 매니저
