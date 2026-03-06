@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5128087049731039083}
   - component: {fileID: 4323879109031049890}
   - component: {fileID: 1963482794718241209}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 2150768568660426777}
   - component: {fileID: 877535127302053891}
   - component: {fileID: 5858213233291025309}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: InventoryContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,6 +170,7 @@ MonoBehaviour:
   gridController: {fileID: 1169552095022665515}
   slotContainer: {fileID: 5128087049731039083}
   slotPrefab: {fileID: 8843014398623604877, guid: 5de9ad959712f9b44858038b294a23c9, type: 3}
+  earlyGridDataLoader: {fileID: 0}
   showActiveToggle: {fileID: 0}
   showPassiveToggle: {fileID: 0}
   gradeFilterDropdown: {fileID: 0}
@@ -187,7 +188,7 @@ GameObject:
   - component: {fileID: 5988246286356114742}
   - component: {fileID: 5962696277805680229}
   - component: {fileID: 4722385169144392208}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ScrollView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -294,7 +295,7 @@ GameObject:
   - component: {fileID: 5225966796431740271}
   - component: {fileID: 4976087007597294546}
   - component: {fileID: 2436793863394668027}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Viewport
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -383,7 +384,7 @@ GameObject:
   - component: {fileID: 5298808239092081082}
   - component: {fileID: 5100511121421919157}
   - component: {fileID: 6769428239889588203}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GridContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -458,7 +459,7 @@ GameObject:
   m_Component:
   - component: {fileID: 953019081357179141}
   - component: {fileID: 2408750105160896459}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GridArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -502,6 +503,9 @@ MonoBehaviour:
   gridOffset: {x: 0, y: 0}
   cellPrefab: {fileID: 758809192395874316, guid: 8eef80ca42f068b419dd9ecf37c9cdae, type: 3}
   cellContainer: {fileID: 953019081357179141}
+  autoCellSize: 1
+  cellSpacing: 2
+  padding: 10
 --- !u!1 &6196131223352342195
 GameObject:
   m_ObjectHideFlags: 0
@@ -513,7 +517,7 @@ GameObject:
   - component: {fileID: 238687564583619754}
   - component: {fileID: 8514943996607324907}
   - component: {fileID: 1460342338577435040}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Header
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -650,7 +654,8 @@ GameObject:
   - component: {fileID: 5267211685194743966}
   - component: {fileID: 1169552095022665515}
   - component: {fileID: 2062059724864101977}
-  m_Layer: 0
+  - component: {fileID: 8429288178106303833}
+  m_Layer: 5
   m_Name: SkillGridSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -693,6 +698,7 @@ MonoBehaviour:
   gridManager: {fileID: 2408750105160896459}
   inventoryContainer: {fileID: 5128087049731039083}
   draggableItemPrefab: {fileID: 3842138021845985267, guid: f2643bd48a2edad4a85dd20111db250a, type: 3}
+  skillController: {fileID: 0}
   saveKey: SkillGridData
 --- !u!114 &2062059724864101977
 MonoBehaviour:
@@ -710,3 +716,16 @@ MonoBehaviour:
   inventoryUI: {fileID: 5858213233291025309}
   loadOnStart: 1
   loadSavedGridData: 1
+  autoInitializeDataManager: 1
+--- !u!210 &8429288178106303833
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7467943128822893185}
+  m_Enabled: 1
+  m_SortingLayerID: -498307287
+  m_SortingLayer: 3
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
