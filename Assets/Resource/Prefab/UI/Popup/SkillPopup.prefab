@@ -572,7 +572,6 @@ GameObject:
   - component: {fileID: 124645079998500653}
   - component: {fileID: 5667699058027102219}
   - component: {fileID: 6973833324417959334}
-  - component: {fileID: 594909930749217132}
   m_Layer: 5
   m_Name: SkillPopup Tab
   m_TagString: Untagged
@@ -641,31 +640,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &594909930749217132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1872509854182814952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e10c5f148b3c1e4a810fa25c2a21328, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  autoLoadOnAwake: 1
-  skillJsonKey: Json/Skill/SkillList
-  iconBasePath: Icons
-  cacheSprites: 1
-  iconImage: {fileID: 4181108531037996298}
-  gradeAndNameText: {fileID: 0}
-  descText: {fileID: 0}
-  mpValueText: {fileID: 17001196604042279}
-  delayLabelText: {fileID: 0}
-  delayValueText: {fileID: 0}
-  attackCountValueText: {fileID: 0}
-  useCoolTimeAsDelay: 1
-  defaultSkillId: Fire_01
 --- !u!1 &2038482956469585538
 GameObject:
   m_ObjectHideFlags: 0
@@ -1749,12 +1723,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupId: 2
-  elementIcon: {fileID: 1408818154273892380}
-  fireSprite: {fileID: 21300000, guid: 276c5db409d3a5d48a9ff26f2f222d70, type: 2}
-  waterSprite: {fileID: 21300000, guid: 6019c1610ef272a469e17799ee57139a, type: 3}
-  windSprite: {fileID: 21300000, guid: 5c865dc9bd195c945bdc787912eb5a94, type: 3}
-  earthSprite: {fileID: 21300000, guid: 1fe45541287cade40b3f023b8ccd7f5b, type: 3}
-  controller: {fileID: 2100991822851125892}
+  popupElementIconImage: {fileID: 1408818154273892380}
+  popupFireSprite: {fileID: 21300000, guid: 7807419c77cd8fb4497a5cd92b53871b, type: 3}
+  popupWaterSprite: {fileID: 21300000, guid: 6019c1610ef272a469e17799ee57139a, type: 3}
+  popupWindSprite: {fileID: 21300000, guid: 5c865dc9bd195c945bdc787912eb5a94, type: 3}
+  popupEarthSprite: {fileID: 21300000, guid: 1fe45541287cade40b3f023b8ccd7f5b, type: 3}
+  popupController: {fileID: 2100991822851125892}
 --- !u!114 &2100991822851125892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1767,16 +1741,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7ce69c2b22c0e14fb69554c5b7a8872, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillController: {fileID: 0}
-  autoSlider: {fileID: 7455590967725830499}
-  autoOnThreshold: 0.5
-  listRoot: {fileID: 0}
-  cellPrefab: {fileID: 3287786523737901693}
-  poolWarmCount: 24
-  jsonBinder: {fileID: 594909930749217132}
-  upgradeButton: {fileID: 8499292650031024289}
-  iconBasePath: Icons
-  cacheSprites: 1
+  systemSkillController: {fileID: 0}
+  popupRoot: {fileID: 4669390265290071183}
+  popupDetailIcon: {fileID: 4181108531037996298}
+  popupGradeAndNameText: {fileID: 8683280814315747877}
+  popupExplainText: {fileID: 429249399199965429}
+  popupEffectText: {fileID: 3754898192599885688}
+  popupDelayLabelText: {fileID: 3895386361341624921}
+  popupDelayValueText: {fileID: 4077749953918382146}
+  popupMpValueText: {fileID: 17001196604042279}
+  popupUpgradeCostText: {fileID: 2731337275258471605}
+  popupAutoSlider: {fileID: 7455590967725830499}
+  popupUpgradeButton: {fileID: 8499292650031024289}
+  spriteResourcesBasePath: Icons
 --- !u!1 &5182421571059955959
 GameObject:
   m_ObjectHideFlags: 0
@@ -3081,17 +3058,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &3287786523737901693 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7039955770383344148, guid: 3fbd71ed275161f4f9f0e6dad650560e, type: 3}
-  m_PrefabInstance: {fileID: 5481551542364399721}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3fa6076d4bbb6742a955e933c05819f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &4181108531037996298 stripped

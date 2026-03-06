@@ -1,295 +1,202 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
+﻿using UnityEngine;
 using SlayerLegend.Equipment;
 
 /*
-EquipPopupContentController
--EquipPopup 내부 UI 컨트롤러
--EquipmentManager의 EquipInfo는 private라 직접 못읽음
--대신 DataManager DB를 훑고 EquipmentManager.GetCount(equipId)>0 인 것만 리스트로 구성
--선택시 상세(아이콘/이름/보유수) 갱신
--장착은 EquipmentManager.Equip(equipId) 호출
+[승문]
+EquipPopupController
+-장비 팝업 상세 전용 컨트롤러
+-메인메뉴에서 전달받은 equipId 하나만 관리
+-상단 장비 정보, 강화 탭, 융합 탭에 같은 equipId를 전달
+-팝업 안에는 장비 리스트가 없으므로 ScrollView/Cell 관련 코드는 전부 제거
+-탭 전환은 TabManager가 처리하므로 여기서는 패널 on/off를 하지 않음
 */
-public class EquipPopupContentController : MonoBehaviour
+public class EquipPopupController : MonoBehaviour
 {
-    [Header("Popup에서 연결")]
-    [SerializeField] private EquipmentManager equipmentManager;//씬에 있는 장비매니저
-    [SerializeField] private Transform listRoot;//팝업 ScrollContent
-    [SerializeField] private EquipItemCell cellPrefab;//팝업 셀 프리팹
+    [Header("System Reference(씬/매니저 오브젝트)")]
+    [SerializeField] private EquipmentManager systemEquipmentManager; // 최신 EquipmentManager
 
-    [Header("Popup 상세UI에서 연결")]
-    [SerializeField] private Image detailIcon;//상세 아이콘
-    [SerializeField] private TMP_Text detailName;//상세 이름
-    [SerializeField] private TMP_Text ownedText;//보유개수 텍스트
-    [SerializeField] private Button equipButton;//장착버튼
+    [Header("Popup Detail(팝업 프리팹 내부)")]
+    [SerializeField] private EquipPopup popupRoot;                               // 카테고리 아이콘 변경용
+    [SerializeField] private EquipPopupJsonBinder popupJsonBinder;               // 상단 장비 정보 바인더
+    [SerializeField] private EquipEnhancePanelController popupEnhanceController; // 강화 탭 상세
+    [SerializeField] private EquipMergePanelController popupMergeController;     // 융합 탭 상세
 
     [Header("Resource")]
-    [SerializeField] private string spritePath = "Icons";//Resources/Icons
+    [SerializeField] private string spritePath = "Icons"; // Resources/Icons 기준
 
-    private readonly List<EquipItemCell> cellPool = new List<EquipItemCell>(64);
-    private readonly List<string> ownedIds = new List<string>(256);
-
-    private EquipType currentType;
-    private string selectedEquipId;
+    private string currentEquipId; // 현재 팝업에서 보고 있는 장비 ID
+    private EquipTab currentTab;   // 현재 장비 타입(무기/악세)
 
     private void Awake()
     {
-        //참조 자동캐싱
-        if (equipmentManager == null)
+        // 최신 장비 매니저 자동 연결
+        if (systemEquipmentManager == null)
         {
-            equipmentManager = FindFirstObjectByType<EquipmentManager>();
+            systemEquipmentManager = EquipmentManager.Instance;
         }
 
-        //버튼 이벤트
-        if (equipButton != null)
+        // 장비 관련 이벤트 연결
+        if (systemEquipmentManager != null)
         {
-            equipButton.onClick.AddListener(OnClickEquip);
+            systemEquipmentManager.OnInventoryChanged += OnInventoryChanged;
+            systemEquipmentManager.OnEquipmentEnhanced += OnEquipmentEnhanced;
+            systemEquipmentManager.OnEquipmentEquipped += OnEquipmentEquipped;
+            systemEquipmentManager.OnFusionComplete += OnFusionComplete;
         }
-
-        //인벤토리 변경 이벤트
-        if (equipmentManager != null)
-        {
-            equipmentManager.OnInventoryChanged += OnInventoryChanged;
-        }
-
-        //초기상태
-        selectedEquipId = null;
-        ApplySelection(null);
     }
 
     private void OnDestroy()
     {
-        //이벤트 해제
-        if (equipmentManager != null)
+        // 이벤트 해제
+        if (systemEquipmentManager != null)
         {
-            equipmentManager.OnInventoryChanged -= OnInventoryChanged;
+            systemEquipmentManager.OnInventoryChanged -= OnInventoryChanged;
+            systemEquipmentManager.OnEquipmentEnhanced -= OnEquipmentEnhanced;
+            systemEquipmentManager.OnEquipmentEquipped -= OnEquipmentEquipped;
+            systemEquipmentManager.OnFusionComplete -= OnFusionComplete;
         }
     }
 
-    //팝업에서 탭 전달
-    public void SetEquipTab(EquipTab tab)
+    /// <summary>
+    /// 메인메뉴에서 클릭한 equipId를 팝업 전체에 반영
+    /// </summary>
+    public void SetEquipId(string equipId)
     {
-        //탭->EquipType 매핑
-        if (tab == EquipTab.Weapon)
+        currentEquipId = equipId;
+
+        if (systemEquipmentManager == null)
         {
-            currentType = EquipType.Weapon;
-        }
-        else
-        {
-            currentType = EquipType.Accessorie;
+            Debug.LogError("[EquipPopupController] systemEquipmentManager missing.");
+            return;
         }
 
-        selectedEquipId = null;
+        if (string.IsNullOrEmpty(currentEquipId))
+        {
+            Debug.LogWarning("[EquipPopupController] currentEquipId is empty.");
+            return;
+        }
 
-        RebuildList();
-        ApplySelection(null);
+        EquipData equip = systemEquipmentManager.GetEquipData(currentEquipId);
+        if (equip == null)
+        {
+            Debug.LogWarning("[EquipPopupController] EquipData not found: " + currentEquipId);
+            return;
+        }
+
+        // 장비 타입 결정
+        EquipType type = systemEquipmentManager.GetEquipType(equip);
+        currentTab = type == EquipType.Weapon ? EquipTab.Weapon : EquipTab.Accessory;
+
+        // 상단 카테고리 아이콘 반영
+        if (popupRoot != null)
+        {
+            popupRoot.SetCategoryIcon(type);
+        }
+
+        // 상단 장비 정보 반영
+        if (popupJsonBinder != null)
+        {
+            popupJsonBinder.SetEquipId(currentEquipId);
+            popupJsonBinder.SetOwnedCount(systemEquipmentManager.GetCount(currentEquipId), 5);
+        }
+
+        // 강화 탭 반영
+        if (popupEnhanceController != null)
+        {
+            popupEnhanceController.BindSelection(currentEquipId, currentTab, systemEquipmentManager, ResolveSprite);
+        }
+
+        // 융합 탭 반영
+        if (popupMergeController != null)
+        {
+            popupMergeController.BindSelection(currentEquipId, currentTab, systemEquipmentManager, ResolveSprite);
+        }
     }
 
-    //인벤토리 변경 시 현재 탭만 갱신
-    private void OnInventoryChanged(EquipType type)
+    /// <summary>
+    /// 인벤토리 변경 시 현재 장비 상세만 다시 반영
+    /// </summary>
+    private void OnInventoryChanged(EquipType changedType)
     {
-        if (type != currentType)
+        if (string.IsNullOrEmpty(currentEquipId))
         {
             return;
         }
 
-        RebuildList();
-        ApplySelection(selectedEquipId);
-    }
-
-    //리스트 재구성
-    private void RebuildList()
-    {
-        if (equipmentManager == null)
-        {
-            Debug.LogError("[EquipPopupContentController] equipmentManager missing.");
-            return;
-        }
-
-        ownedIds.Clear();
-
-        //DB에서 전부 훑어서 보유한 것만 수집
-        if (currentType == EquipType.Weapon)
-        {
-            if (DataManager.weapons == null)
-            {
-                Debug.LogError("[EquipPopupContentController] DataManager.weapons is null.");
-                return;
-            }
-
-            List<EquipData> all = DataManager.weapons.GetAll();
-            for (int i = 0; i < all.Count; i++)
-            {
-                EquipData data = all[i];
-                if (data == null)
-                {
-                    continue;
-                }
-
-                string id = data.GetId();
-                if (string.IsNullOrEmpty(id))
-                {
-                    continue;
-                }
-
-                int count = equipmentManager.GetCount(id);
-                if (count > 0)
-                {
-                    ownedIds.Add(id);
-                }
-            }
-        }
-        else
-        {
-            if (DataManager.accessories == null)
-            {
-                Debug.LogError("[EquipPopupContentController] DataManager.accessories is null.");
-                return;
-            }
-
-            List<EquipData> all = DataManager.accessories.GetAll();
-            for (int i = 0; i < all.Count; i++)
-            {
-                EquipData data = all[i];
-                if (data == null)
-                {
-                    continue;
-                }
-
-                string id = data.GetId();
-                if (string.IsNullOrEmpty(id))
-                {
-                    continue;
-                }
-
-                int count = equipmentManager.GetCount(id);
-                if (count > 0)
-                {
-                    ownedIds.Add(id);
-                }
-            }
-        }
-
-        EnsurePool(ownedIds.Count);
-
-        for (int i = 0; i < cellPool.Count; i++)
-        {
-            bool active = i < ownedIds.Count;
-            EquipItemCell cell = cellPool[i];
-
-            cell.gameObject.SetActive(active);
-
-            if (active == false)
-            {
-                continue;
-            }
-
-            string equipId = ownedIds[i];
-            EquipData equipData = equipmentManager.GetEquipData(equipId);
-
-            string spriteName = "";
-            if (equipData != null)
-            {
-                spriteName = equipData.spriteName;
-            }
-
-            cell.Bind(equipId, spriteName, ResolveSprite, OnClickItem);
-            cell.SetSelected(string.IsNullOrEmpty(selectedEquipId) == false && selectedEquipId == equipId);
-        }
-    }
-
-    //풀 확보
-    private void EnsurePool(int need)
-    {
-        if (cellPrefab == null || listRoot == null)
-        {
-            Debug.LogError("[EquipPopupContentController] cellPrefab/listRoot missing.");
-            return;
-        }
-
-        while (cellPool.Count < need)
-        {
-            EquipItemCell cell = Instantiate(cellPrefab, listRoot);
-            cell.gameObject.SetActive(false);
-            cellPool.Add(cell);
-        }
-    }
-
-    //셀 클릭
-    private void OnClickItem(string equipId)
-    {
-        selectedEquipId = equipId;
-
-        for (int i = 0; i < cellPool.Count; i++)
-        {
-            if (cellPool[i].gameObject.activeSelf == false)
-            {
-                continue;
-            }
-
-            bool selected = cellPool[i].GetEquipId() == selectedEquipId;
-            cellPool[i].SetSelected(selected);
-        }
-
-        ApplySelection(selectedEquipId);
-    }
-
-    //상세 갱신
-    private void ApplySelection(string equipId)
-    {
-        if (string.IsNullOrEmpty(equipId))
-        {
-            if (detailIcon != null) detailIcon.sprite = null;
-            if (detailName != null) detailName.text = "";
-            if (ownedText != null) ownedText.text = "";
-
-            if (equipButton != null) equipButton.interactable = false;
-            return;
-        }
-
-        EquipData equip = equipmentManager != null ? equipmentManager.GetEquipData(equipId) : null;
-
-        if (detailIcon != null)
-        {
-            detailIcon.sprite = equip != null ? ResolveSprite(equip.spriteName) : null;
-        }
-
-        if (detailName != null)
-        {
-            detailName.text = equip != null ? equip.GetName() : equipId;
-        }
-
-        if (ownedText != null && equipmentManager != null)
-        {
-            ownedText.text = equipmentManager.GetCount(equipId).ToString();
-        }
-
-        if (equipButton != null)
-        {
-            equipButton.interactable = true;
-        }
-    }
-
-    //장착 버튼
-    private void OnClickEquip()
-    {
-        if (equipmentManager == null)
+        EquipData current = systemEquipmentManager != null ? systemEquipmentManager.GetEquipData(currentEquipId) : null;
+        if (current == null)
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(selectedEquipId))
+        EquipType currentType = systemEquipmentManager.GetEquipType(current);
+        if (currentType != changedType)
         {
             return;
         }
 
-        bool ok = equipmentManager.Equip(selectedEquipId);
-        Debug.Log(ok ? "[EquipPopupContentController] Equip ok." : "[EquipPopupContentController] Equip fail.");
+        SetEquipId(currentEquipId);
     }
 
-    //스프라이트 로드
+    /// <summary>
+    /// 강화되면 현재 장비면 갱신
+    /// </summary>
+    private void OnEquipmentEnhanced(string equipId, int newLevel)
+    {
+        if (string.IsNullOrEmpty(currentEquipId))
+        {
+            return;
+        }
+
+        if (equipId != currentEquipId)
+        {
+            return;
+        }
+
+        SetEquipId(currentEquipId);
+    }
+
+    /// <summary>
+    /// 장착되면 현재 장비면 갱신
+    /// </summary>
+    private void OnEquipmentEquipped(string equipId, EquipType type, int level)
+    {
+        if (string.IsNullOrEmpty(currentEquipId))
+        {
+            return;
+        }
+
+        if (equipId != currentEquipId)
+        {
+            return;
+        }
+
+        SetEquipId(currentEquipId);
+    }
+
+    /// <summary>
+    /// 융합되면 재료 장비나 결과 장비가 현재와 관련 있으면 갱신
+    /// </summary>
+    private void OnFusionComplete(string materialId, string resultId)
+    {
+        if (string.IsNullOrEmpty(currentEquipId))
+        {
+            return;
+        }
+
+        if (currentEquipId != materialId && currentEquipId != resultId)
+        {
+            return;
+        }
+
+        // 재료가 사라질 수도 있으므로 결과 장비로 전환 가능
+        string targetId = systemEquipmentManager.GetCount(materialId) > 0 ? materialId : resultId;
+        SetEquipId(targetId);
+    }
+
+    /// <summary>
+    /// spriteName -> Sprite
+    /// </summary>
     private Sprite ResolveSprite(string spriteName)
     {
         if (string.IsNullOrEmpty(spriteName))
@@ -297,7 +204,6 @@ public class EquipPopupContentController : MonoBehaviour
             return null;
         }
 
-        string path = spritePath + "/" + spriteName;
-        return Resources.Load<Sprite>(path);
+        return Resources.Load<Sprite>(spritePath + "/" + spriteName);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using SlayerLegend.Skill;
@@ -6,112 +6,74 @@ using SlayerLegend.Skill;
 /*
 [승문]
 SkillPopupContentController
--스킬 팝업 내부 UI만 담당(리스트,선택,AUTO,강화)
--리스트는 풀링 재사용으로 GC 최소화
--상세 UI는 SkillPopupJsonBinder에 위임(선택된 id만 전달)
--슬라이더는 상태가 바뀔 때만 이벤트/로그 발생
+-스킬 상세 팝업 전용 컨트롤러
+-메인메뉴에서 클릭한 skillId 하나만 받아 상세 UI 갱신
+-리스트/셀/풀링 구조는 메인메뉴에 있으므로 팝업 안에서는 제거
+-AUTO 토글/강화 버튼은 현재 선택 스킬 하나에 대해서만 동작
 */
 public class SkillPopupContentController : MonoBehaviour
 {
-    [SerializeField] private SkillController skillController;//팀 로직 연결용(강화 등)
-    [SerializeField] private Slider autoSlider;//AUTO 슬라이더
-    [SerializeField, Range(0.01f, 0.99f)] private float autoOnThreshold = 0.5f;//0.5 이상이면 ON
-    [SerializeField] private Transform listRoot;//ScrollRect Content
-    [SerializeField] private SkillItemCell cellPrefab;//리스트 셀 프리팹
-    [SerializeField, Min(1)] private int poolWarmCount = 24;//초기 풀 크기
-    [SerializeField] private SkillPopupJsonBinder jsonBinder;//상세 바인더
-    [SerializeField] private Button upgradeButton;//강화 버튼
+    [Header("System Reference(씬/매니저 오브젝트)")]
+    [SerializeField] private SkillController systemSkillController; // 팀 스킬 컨트롤러(선택)
 
-    [SerializeField] private string iconBasePath = "Icons";//Resources/Icons/...
-    [SerializeField] private bool cacheSprites = true;//스프라이트 캐시 사용
+    [Header("Popup Root(팝업 프리팹 내부)")]
+    [SerializeField] private SkillPopup popupRoot; // 속성 아이콘 반영용
 
-    private readonly List<SkillItemCell> cellPool = new List<SkillItemCell>(64);
-    private readonly List<SkillData> filtered = new List<SkillData>(128);
-    private readonly Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>(128);
+    [Header("Popup UI(Detail)(팝업 프리팹 내부)")]
+    [SerializeField] private Image popupDetailIcon;            // 스킬 아이콘
+    [SerializeField] private TMP_Text popupGradeAndNameText;   // [등급] 이름
+    [SerializeField] private TMP_Text popupExplainText;        // 스킬 설명
+    [SerializeField] private TMP_Text popupEffectText;         // 효과 설명
+    [SerializeField] private TMP_Text popupDelayLabelText;     // 쿨타임/필요공격수 라벨
+    [SerializeField] private TMP_Text popupDelayValueText;     // 쿨타임/필요공격수 값
+    [SerializeField] private TMP_Text popupMpValueText;        // MP 숫자
+    [SerializeField] private TMP_Text popupUpgradeCostText;    // 강화 비용
 
-    private SkillAttribute currentAttribute;
-    private SkillData selectedSkill;
-    private bool lastAutoOn;
+    [Header("Popup UI(Actions)(팝업 프리팹 내부)")]
+    [SerializeField] private Slider popupAutoSlider;           // AUTO 슬라이더
+    [SerializeField] private Button popupUpgradeButton;        // 강화 버튼
+
+    [Header("Resource")]
+    [SerializeField] private string spriteResourcesBasePath = "Icons"; // Resources/Icons
+
+    private string currentSkillId; // 현재 선택 스킬 ID
 
     private void Awake()
     {
-        //필수참조 자동 캐싱
-        if (skillController == null)
+        // 스킬 컨트롤러 자동 캐싱
+        if (systemSkillController == null)
         {
-            skillController = FindFirstObjectByType<SkillController>();
+            systemSkillController = FindFirstObjectByType<SkillController>();
         }
 
-        //바인더 자동 탐색
-        if (jsonBinder == null)
+        // 버튼 이벤트 연결
+        if (popupUpgradeButton != null)
         {
-            jsonBinder = GetComponentInChildren<SkillPopupJsonBinder>(true);
+            popupUpgradeButton.onClick.AddListener(OnClickUpgrade);
         }
 
-        //버튼 이벤트 연결
-        if (upgradeButton != null)
+        // 슬라이더 이벤트 연결
+        if (popupAutoSlider != null)
         {
-            upgradeButton.onClick.AddListener(OnClickUpgrade);
+            popupAutoSlider.onValueChanged.AddListener(OnAutoSliderChanged);
         }
 
-        //슬라이더 이벤트 연결
-        if (autoSlider != null)
-        {
-            autoSlider.onValueChanged.AddListener(OnAutoSliderChanged);
-            lastAutoOn = autoSlider.value >= autoOnThreshold;
-        }
-
-        //풀 워밍
-        WarmPool();
-
-        //초기 비선택
-        ApplySelection(null);
-
-        Debug.Log("[SkillPopupContentController] Awake completed.");
+        // 초기 상태 비우기
+        ClearTexts();
     }
 
-    private void OnDestroy()
+    /// <summary>
+    /// 메인메뉴에서 클릭한 skillId를 상세 패널에 반영
+    /// </summary>
+    public void SetSkillId(string skillId)
     {
-        //이벤트 해제
-        if (autoSlider != null)
+        currentSkillId = skillId;
+
+        if (string.IsNullOrEmpty(currentSkillId))
         {
-            autoSlider.onValueChanged.RemoveListener(OnAutoSliderChanged);
-        }
-    }
-
-    //팝업에서 속성을 전달받아 리스트를 재구성
-    public void SetAttribute(SkillAttribute attribute)
-    {
-        currentAttribute = attribute;
-        selectedSkill = null;
-
-        RebuildFiltered();
-        RebuildList();
-        ApplySelection(null);
-
-        Debug.Log("[SkillPopupContentController] SetAttribute applied.");
-    }
-
-    //AUTO 슬라이더 변경 처리(상태 변할 때만)
-    private void OnAutoSliderChanged(float value)
-    {
-        bool on = value >= autoOnThreshold;
-
-        if (on == lastAutoOn)
-        {
+            ClearTexts();
             return;
         }
-
-        lastAutoOn = on;
-
-        Debug.Log(on ? "[SkillPopupContentController] Auto ON." : "[SkillPopupContentController] Auto OFF.");
-
-        //TODO:팀 자동 시전 시스템에 on 전달
-    }
-
-    //속성에 맞는 스킬 목록 필터링
-    private void RebuildFiltered()
-    {
-        filtered.Clear();
 
         if (DataManager.skills == null)
         {
@@ -119,157 +81,171 @@ public class SkillPopupContentController : MonoBehaviour
             return;
         }
 
-        SkillElement element = ConvertAttributeToElement(currentAttribute);
-        List<SkillData> all = DataManager.skills.GetAll();
-
-        for (int i = 0; i < all.Count; i++)
-        {
-            SkillData s = all[i];
-            if (s == null)
-            {
-                continue;
-            }
-
-            if (s.element == element)
-            {
-                filtered.Add(s);
-            }
-        }
-    }
-
-    //리스트 풀링 생성/바인딩
-    private void RebuildList()
-    {
-        EnsurePool(filtered.Count);
-
-        for (int i = 0; i < cellPool.Count; i++)
-        {
-            bool active = i < filtered.Count;
-            SkillItemCell cell = cellPool[i];
-
-            cell.gameObject.SetActive(active);
-
-            if (active == false)
-            {
-                continue;
-            }
-
-            SkillData data = filtered[i];
-            cell.Bind(data, ResolveSprite, OnClickCell);
-            cell.SetSelected(selectedSkill != null && selectedSkill.id == data.id);
-        }
-    }
-
-    //셀 클릭 처리
-    private void OnClickCell(SkillData data)
-    {
-        selectedSkill = data;
-
-        for (int i = 0; i < cellPool.Count; i++)
-        {
-            if (cellPool[i].gameObject.activeSelf == false)
-            {
-                continue;
-            }
-
-            SkillData bound = cellPool[i].GetBound();
-            bool selected = bound != null && selectedSkill != null && bound.id == selectedSkill.id;
-            cellPool[i].SetSelected(selected);
-        }
-
-        ApplySelection(selectedSkill);
-    }
-
-    //선택 변경 시 상세 갱신은 JsonBinder에 위임
-    private void ApplySelection(SkillData data)
-    {
-        if (upgradeButton != null)
-        {
-            upgradeButton.interactable = data != null;
-        }
-
-        if (jsonBinder == null)
-        {
-            Debug.LogWarning("[SkillPopupContentController] jsonBinder missing.");
-            return;
-        }
-
+        SkillData data = FindSkillById(currentSkillId);
         if (data == null)
         {
+            Debug.LogWarning("[SkillPopupContentController] SkillData not found: " + currentSkillId);
             return;
         }
 
-        jsonBinder.SetSkillId(data.id);
+        // 속성 아이콘 반영
+        if (popupRoot != null)
+        {
+            popupRoot.SetElementIcon(ConvertElementToAttribute(data.element));
+        }
+
+        // 상세 아이콘
+        if (popupDetailIcon != null)
+        {
+            popupDetailIcon.sprite = ResolveSprite(data.spriteName);
+        }
+
+        // [등급] 이름
+        if (popupGradeAndNameText != null)
+        {
+            popupGradeAndNameText.text = "[" + ConvertGradeToKorean(data.grade.ToString()) + "] " + data.name;
+        }
+
+        // 스킬 설명
+        if (popupExplainText != null)
+        {
+            popupExplainText.text = data.explain;
+        }
+
+        // 효과 설명
+        if (popupEffectText != null)
+        {
+            popupEffectText.text = data.effect;
+        }
+
+        // request 타입에 따라 라벨/값 변경
+        if (popupDelayLabelText != null)
+        {
+            popupDelayLabelText.text = IsAttackCountRequest(data) ? "필요공격수" : "쿨타임";
+        }
+
+        if (popupDelayValueText != null)
+        {
+            popupDelayValueText.text = IsAttackCountRequest(data)
+                ? Mathf.RoundToInt(data.wantedDelay).ToString()
+                : data.wantedDelay.ToString("0.##") + "s";
+        }
+
+        // MP
+        if (popupMpValueText != null)
+        {
+            popupMpValueText.text = data.needMp.ToString();
+        }
+
+        // 강화 비용(임시)
+        if (popupUpgradeCostText != null)
+        {
+            popupUpgradeCostText.text = "0";
+        }
+
+        // 버튼 활성
+        if (popupUpgradeButton != null)
+        {
+            popupUpgradeButton.interactable = true;
+        }
     }
 
-    //강화 버튼 클릭
+    /// <summary>
+    /// skillId로 SkillData 찾기
+    /// </summary>
+    private SkillData FindSkillById(string skillId)
+    {
+        if (DataManager.skills == null)
+        {
+            return null;
+        }
+
+        // GameDB.Get(id)가 있으면 그걸 쓰고, 없으면 전체 탐색
+        SkillData found = DataManager.skills.Get(skillId);
+        if (found != null)
+        {
+            return found;
+        }
+
+        var all = DataManager.skills.GetAll();
+        for (int i = 0; i < all.Count; i++)
+        {
+            if (all[i] == null)
+            {
+                continue;
+            }
+
+            if (all[i].id == skillId)
+            {
+                return all[i];
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// request가 공격횟수형인지 판단
+    /// </summary>
+    private bool IsAttackCountRequest(SkillData data)
+    {
+        if (data == null)
+        {
+            return false;
+        }
+
+        string req = data.request != null ? data.request.ToString() : "";
+        return req == "AttackCount";
+    }
+
+    /// <summary>
+    /// AUTO 슬라이더 변경
+    /// </summary>
+    private void OnAutoSliderChanged(float value)
+    {
+        bool on = value >= 0.5f;
+        Debug.Log(on ? "[SkillPopupContentController] Auto ON." : "[SkillPopupContentController] Auto OFF.");
+
+        // TODO: 팀 자동 시전 로직 연결
+    }
+
+    /// <summary>
+    /// 강화 버튼 클릭
+    /// </summary>
     private void OnClickUpgrade()
     {
-        if (selectedSkill == null)
-        {
-            Debug.LogWarning("[SkillPopupContentController] Upgrade blocked. No selection.");
-            return;
-        }
-
-        //TODO:팀 스킬 강화/레벨업 시스템 연결 지점
-        Debug.Log("[SkillPopupContentController] Upgrade clicked. Hook skill upgrade system.");
-    }
-
-    //풀 워밍
-    private void WarmPool()
-    {
-        if (cellPrefab == null || listRoot == null)
-        {
-            Debug.LogError("[SkillPopupContentController] List references missing.");
-            return;
-        }
-
-        for (int i = 0; i < poolWarmCount; i++)
-        {
-            SkillItemCell cell = Instantiate(cellPrefab, listRoot);
-            cell.gameObject.SetActive(false);
-            cellPool.Add(cell);
-        }
-    }
-
-    //풀 확보
-    private void EnsurePool(int need)
-    {
-        if (cellPrefab == null || listRoot == null)
+        if (string.IsNullOrEmpty(currentSkillId))
         {
             return;
         }
 
-        while (cellPool.Count < need)
-        {
-            SkillItemCell cell = Instantiate(cellPrefab, listRoot);
-            cell.gameObject.SetActive(false);
-            cellPool.Add(cell);
-        }
+        Debug.Log("[SkillPopupContentController] Upgrade clicked. Hook skill upgrade logic here: " + currentSkillId);
+        // TODO: 팀 스킬 강화 시스템 연결
     }
 
-    //속성 enum 매핑
-    private SkillElement ConvertAttributeToElement(SkillAttribute attribute)
+    /// <summary>
+    /// 텍스트/아이콘 초기화
+    /// </summary>
+    private void ClearTexts()
     {
-        switch (attribute)
+        if (popupDetailIcon != null) popupDetailIcon.sprite = null;
+        if (popupGradeAndNameText != null) popupGradeAndNameText.text = "";
+        if (popupExplainText != null) popupExplainText.text = "";
+        if (popupEffectText != null) popupEffectText.text = "";
+        if (popupDelayLabelText != null) popupDelayLabelText.text = "";
+        if (popupDelayValueText != null) popupDelayValueText.text = "";
+        if (popupMpValueText != null) popupMpValueText.text = "";
+        if (popupUpgradeCostText != null) popupUpgradeCostText.text = "";
+
+        if (popupUpgradeButton != null)
         {
-            case SkillAttribute.Fire:
-                return SkillElement.Fire;
-
-            case SkillAttribute.Water:
-                return SkillElement.Water;
-
-            case SkillAttribute.Wind:
-                return SkillElement.Wind;
-
-            case SkillAttribute.Earth:
-                return SkillElement.Earth;
+            popupUpgradeButton.interactable = false;
         }
-
-        return SkillElement.Fire;
     }
 
-    //스프라이트 로드+캐시
+    /// <summary>
+    /// 스킬 아이콘 로드
+    /// </summary>
     private Sprite ResolveSprite(string spriteName)
     {
         if (string.IsNullOrEmpty(spriteName))
@@ -277,22 +253,40 @@ public class SkillPopupContentController : MonoBehaviour
             return null;
         }
 
-        if (cacheSprites)
+        return Resources.Load<Sprite>(spriteResourcesBasePath + "/" + spriteName);
+    }
+
+    /// <summary>
+    /// 스킬 속성 enum 매핑
+    /// </summary>
+    private SkillAttribute ConvertElementToAttribute(SkillElement element)
+    {
+        switch (element)
         {
-            if (spriteCache.TryGetValue(spriteName, out Sprite cached))
-            {
-                return cached;
-            }
+            case SkillElement.Fire:
+                return SkillAttribute.Fire;
+            case SkillElement.Water:
+                return SkillAttribute.Water;
+            case SkillElement.Wind:
+                return SkillAttribute.Wind;
+            case SkillElement.Earth:
+                return SkillAttribute.Earth;
         }
 
-        string path = iconBasePath + "/" + spriteName;
-        Sprite loaded = Resources.Load<Sprite>(path);
+        return SkillAttribute.Fire;
+    }
 
-        if (cacheSprites)
-        {
-            spriteCache[spriteName] = loaded;
-        }
-
-        return loaded;
+    /// <summary>
+    /// 등급 한글 변환
+    /// </summary>
+    private string ConvertGradeToKorean(string grade)
+    {
+        if (string.IsNullOrEmpty(grade)) return "일반";
+        if (grade == "Common") return "일반";
+        if (grade == "Uncommon") return "고급";
+        if (grade == "Rare") return "레어";
+        if (grade == "Epic") return "영웅";
+        if (grade == "Legendary") return "레전";
+        return grade;
     }
 }
