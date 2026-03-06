@@ -500,6 +500,53 @@ namespace SlayerLegend.Equipment
 
             return true;
         }
+
+        /// <summary>
+        /// 일괄 융합 - 현재 타입의 모든 장비를 가능한 만큼 융합
+        /// (조민희 추가)
+        /// </summary>
+        /// <param name="type">장비 타입 (Weapon/Accessorie)</param>
+        /// <returns>총 융합 성공 횟수</returns>
+        public int FuseAll(EquipType type)
+        {
+            int totalFusionCount = 0;
+            bool fusionOccurred = true;
+
+            // 더 이상 융합할 수 없을 때까지 반복
+            while (fusionOccurred)
+            {
+                fusionOccurred = false;
+
+                // 현재 보유한 모든 장비 ID 복사 (반복 중 컬렉션 변경 방지)
+                var equipIds = new List<string>(EquipInfo.Keys);
+
+                foreach (string equipId in equipIds)
+                {
+                    EquipData equipData = GetEquipData(equipId);
+                    if (equipData == null) continue;
+
+                    // 타입 확인
+                    if (GetEquipType(equipData) != type) continue;
+
+                    // 융합 가능한지 확인
+                    if (CanFuse(equipId))
+                    {
+                        if (Fuse(equipId, out string resultId))
+                        {
+                            totalFusionCount++;
+                            fusionOccurred = true;
+                        }
+                    }
+                }
+            }
+
+            if (totalFusionCount > 0)
+            {
+                Debug.Log($"[EquipmentManager] 일괄 융합 완료: 총 {totalFusionCount}회 융합");
+            }
+
+            return totalFusionCount;
+        }
         #endregion
 
         #region StatManager 연동

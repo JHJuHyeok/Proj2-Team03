@@ -34,13 +34,25 @@ public class EquipPopupContentController : MonoBehaviour
     [SerializeField] private TMP_Text upgradeName; // 상위 등급 이름
     [SerializeField] private TMP_Text upgradeNumber; // 상위 등급 개수 (예: 3(+2)
 
-        private const int FUSION_REQUIRED_COUNT = 5; // 융합에 필요한 장비 개수
+    [Header("융합 수량 조절 (조민희 추가)")]
+    [SerializeField] private Button increaseAmountButton; // + 버튼
+    [SerializeField] private Button decreaseAmountButton; // - 버튼
+    [SerializeField] private TMP_Text fusionAmountText; // 생산량 숫자
+
+    private const int FUSION_REQUIRED_COUNT = 5; // 융합에 필요한 장비 개수
+    private int fusionAmount = 1; // 융합 생산량
 
     [Header("버튼")]
     [SerializeField] private Button equipButton;//장착 버튼
     [SerializeField] private Button fusionButton;//융합 버튼
     [SerializeField] private Button enhanceButton;//강화 버튼
     [SerializeField] private TMP_Text enhanceCostText;//강화 비용 텍스트
+
+    [Header("강화 효과 텍스트 (조민희 추가)")]
+    [SerializeField] private TMP_Text installationEffectText; // 장착 효과 수치 (예: 3%)
+    [SerializeField] private TMP_Text holdingEffectText1;     // 보유 효과 1 (AttackBoost)
+    [SerializeField] private TMP_Text holdingEffectText2;     // 보유 효과 2 (CriticalDamage - Rare부터)
+    [SerializeField] private TMP_Text holdingEffectText3;     // 보유 효과 3 (GoldGain - Myth부터)
 
     [SerializeField] private string spritePath = "Icons";//아이콘 경로
 
@@ -72,6 +84,16 @@ public class EquipPopupContentController : MonoBehaviour
         if (enhanceButton != null)
         {
             enhanceButton.onClick.AddListener(OnClickEnhance);
+        }
+
+        // 융합 수량 조절 버튼 (조민희 추가)
+        if (increaseAmountButton != null)
+        {
+            increaseAmountButton.onClick.AddListener(OnClickIncreaseAmount);
+        }
+        if (decreaseAmountButton != null)
+        {
+            decreaseAmountButton.onClick.AddListener(OnClickDecreaseAmount);
         }
 
         if (equipmentManager != null)
@@ -189,6 +211,21 @@ public class EquipPopupContentController : MonoBehaviour
 
             // [조민희] 상위 등급 아이콘 초기화
             if (upgradeIcon != null) upgradeIcon.sprite = null;
+            if (upgradeName != null) upgradeName.text = "";
+            if (upgradeNumber != null) upgradeNumber.text = "";
+            if (currentEquipIcon != null) currentEquipIcon.sprite = null;
+            if (currentEquipName != null) currentEquipName.text = "";
+            if (currentEquipNumber != null) currentEquipNumber.text = "";
+
+            // [조민희] 융합 수량 초기화
+            fusionAmount = 1;
+            UpdateFusionAmountUI();
+
+            // [조민희] 강화 효과 텍스트 초기화
+            if (installationEffectText != null) installationEffectText.text = "";
+            if (holdingEffectText1 != null) holdingEffectText1.text = "";
+            if (holdingEffectText2 != null) holdingEffectText2.text = "";
+            if (holdingEffectText3 != null) holdingEffectText3.text = "";
 
             if (equipButton != null) equipButton.interactable = false;
             if (fusionButton != null) fusionButton.interactable = false;
@@ -226,11 +263,18 @@ public class EquipPopupContentController : MonoBehaviour
         // 버튼 상태 업데이트 (조민희 추가)
         UpdateButtonStates(equip);
 
+        // [조민희] 융합 수량 초기화 및 UI 업데이트
+        fusionAmount = 1;
+        UpdateFusionAmountUI();
+
         // [조민희] 현재 장비 아이콘 업데이트
         UpdateCurrentEquipIcon(equip);
 
         // [조민희] 상위 등급 아이콘 로드
         LoadUpgradeIcon(equip);
+
+        // [조민희] 장비 효과 텍스트 업데이트
+        UpdateEffectTexts(equip, level);
     }
 
     /// <summary>버튼 상태 업데이트 (조민희 추가)</summary>
@@ -292,16 +336,38 @@ public class EquipPopupContentController : MonoBehaviour
     private void OnClickFusion()
     {
         if (selectedItem == null) return;
+        if (fusionAmount <= 0)
+        {
+            Debug.LogWarning("[EquipPopup] 융합 수량이 0입니다.");
+            return;
+        }
 
         EquipData equip = selectedItem.equipment;
         string equipId = equip.GetId();
 
-        // EquipmentManager의 Fuse 메서드 사용
-        if (equipmentManager.Fuse(equipId, out string resultId))
+        int successCount = 0;
+        string lastResultId = null;
+
+        // fusionAmount만큼 융합 수행
+        for (int i = 0; i < fusionAmount; i++)
         {
-            Debug.Log($"[EquipPopup] 융합 성공: {equip.GetName()} → {resultId}");
+            if (equipmentManager.Fuse(equipId, out string resultId))
+            {
+                successCount++;
+                lastResultId = resultId;
+            }
+            else
+            {
+                break; // 재료 부족 시 중단
+            }
+        }
+
+        if (successCount > 0)
+        {
+            Debug.Log($"[EquipPopup] 융합 성공: {equip.GetName()} x{successCount * FUSION_REQUIRED_COUNT} → {lastResultId} x{successCount}");
             // 성공 시 선택 해제
             selectedItem = null;
+            fusionAmount = 1; // 생산량 초기화
             ApplySelection(null);
             RebuildList();
         }
@@ -309,6 +375,54 @@ public class EquipPopupContentController : MonoBehaviour
         {
             string reason = equipmentManager.GetCannotFuseReason(equipId);
             Debug.LogWarning($"[EquipPopup] 융합 실패: {reason}");
+        }
+    }
+
+    /// <summary>융합 수량 증가 (+버튼) (조민희 추가)</summary>
+    private void OnClickIncreaseAmount()
+    {
+        if (selectedItem == null) return;
+
+        int maxAmount = GetMaxFusionAmount();
+        if (fusionAmount < maxAmount)
+        {
+            fusionAmount++;
+            UpdateFusionAmountUI();
+            UpdateCurrentEquipIcon(selectedItem.equipment);
+            LoadUpgradeIcon(selectedItem.equipment);
+        }
+    }
+
+    /// <summary>융합 수량 감소 (-버튼) (조민희 추가)</summary>
+    private void OnClickDecreaseAmount()
+    {
+        if (fusionAmount > 0)
+        {
+            fusionAmount--;
+            UpdateFusionAmountUI();
+            if (selectedItem != null)
+            {
+                UpdateCurrentEquipIcon(selectedItem.equipment);
+                LoadUpgradeIcon(selectedItem.equipment);
+            }
+        }
+    }
+
+    /// <summary>최대 융합 가능 수량 계산 (조민희 추가)</summary>
+    private int GetMaxFusionAmount()
+    {
+        if (selectedItem == null || equipmentManager == null) return 0;
+
+        int ownedCount = equipmentManager.GetCount(selectedItem.equipment.GetId());
+        return ownedCount / FUSION_REQUIRED_COUNT;
+    }
+
+    /// <summary>융합 수량 UI 업데이트 (조민희 추가)</summary>
+    private void UpdateFusionAmountUI()
+    {
+        if (fusionAmountText != null)
+        {
+            fusionAmountText.text = fusionAmount.ToString();
         }
     }
 
@@ -537,11 +651,8 @@ public class EquipPopupContentController : MonoBehaviour
             {
                 // [조민희] 다음 장비의 현재 보유 개수
                 int nextEquipOwnedCount = equipmentManager.GetCount(upgradeEquip.GetId());
-                // 현재 장비 보유 개수에서 융합으로 얻을 수 있는 개수 (소수점 내림)
-                int currentOwnedCount = equipmentManager.GetCount(currentEquip.GetId());
-                int fusionResultCount = Mathf.FloorToInt(currentOwnedCount / FUSION_REQUIRED_COUNT);
-                // 최종 개수 = 다음 장비 현재 보유 + 융합으로 얻을 개수
-                upgradeNumber.text = $"{nextEquipOwnedCount + fusionResultCount}(+{fusionResultCount})";
+                // 최종 개수 = 다음 장비 현재 보유 + 융합으로 얻을 개수 (fusionAmount 사용)
+                upgradeNumber.text = $"{nextEquipOwnedCount + fusionAmount}(+{fusionAmount})";
             }
         }
         else
@@ -575,7 +686,98 @@ public class EquipPopupContentController : MonoBehaviour
         if (currentEquipNumber != null)
         {
             int ownedCount = equipmentManager.GetCount(equip.GetId());
-            currentEquipNumber.text = $"{ownedCount}(-{FUSION_REQUIRED_COUNT})";
+            int consumeAmount = fusionAmount * FUSION_REQUIRED_COUNT;
+            currentEquipNumber.text = $"{ownedCount}(-{consumeAmount})";
+        }
+    }
+
+    /// <summary>
+    /// 장비 효과 텍스트 업데이트 (조민희 추가)
+    /// </summary>
+    private void UpdateEffectTexts(EquipData equip, int level)
+    {
+        // 장착 효과 (Installation Effect)
+        if (installationEffectText != null)
+        {
+            ItemEffect equipEffect = equip.GetEquipEffect();
+            if (equipEffect != null)
+            {
+                float value = equipEffect.initValue + (level - 1) * equipEffect.levelUpValue;
+                installationEffectText.text = FormatEffectValue(value, equipEffect.type);
+            }
+            else
+            {
+                installationEffectText.text = "";
+            }
+        }
+
+        // 보유 효과 (Holding Effects) - 여러 개 표시
+        var holdEffects = equip.GetHoldEffects();
+
+        // 보유 효과 1 - AttackBoost (모든 등급)
+        if (holdingEffectText1 != null)
+        {
+            if (holdEffects != null && holdEffects.Count >= 1)
+            {
+                ItemEffect effect = holdEffects[0];
+                float value = effect.initValue + (level - 1) * effect.levelUpValue;
+                holdingEffectText1.text = FormatEffectValue(value, effect.type);
+            }
+            else
+            {
+                holdingEffectText1.text = "";
+            }
+        }
+
+        // 보유 효과 2 - CriticalDamage (Rare부터)
+        if (holdingEffectText2 != null)
+        {
+            if (holdEffects != null && holdEffects.Count >= 2)
+            {
+                ItemEffect effect = holdEffects[1];
+                float value = effect.initValue + (level - 1) * effect.levelUpValue;
+                holdingEffectText2.text = FormatEffectValue(value, effect.type);
+            }
+            else
+            {
+                holdingEffectText2.text = "";
+            }
+        }
+
+        // 보유 효과 3 - GoldGain (Myth부터)
+        if (holdingEffectText3 != null)
+        {
+            if (holdEffects != null && holdEffects.Count >= 3)
+            {
+                ItemEffect effect = holdEffects[2];
+                float value = effect.initValue + (level - 1) * effect.levelUpValue;
+                holdingEffectText3.text = FormatEffectValue(value, effect.type);
+            }
+            else
+            {
+                holdingEffectText3.text = "";
+            }
+        }
+    }
+
+    /// <summary>
+    /// 효과 수치를 포맷팅 (조민희 추가)
+    /// </summary>
+    private string FormatEffectValue(float value, EffectType effectType)
+    {
+        // 효과 타입에 따라 단위 결정
+        switch (effectType)
+        {
+            case EffectType.AttackBoost:
+            case EffectType.CriticalDamage:
+            case EffectType.GoldGain:
+            case EffectType.ExpGain:
+                return $"{value:0.##}%";
+            case EffectType.HealthBoost:
+            case EffectType.ManaBoost:
+                return $"{value:0.##}";
+            default:
+                return $"{value:0.##}%";
         }
     }
 }

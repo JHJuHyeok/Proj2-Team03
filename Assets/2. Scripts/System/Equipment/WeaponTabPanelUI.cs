@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using SlayerLegend.Equipment;
 
 namespace SlayerLegend.Equipment
@@ -23,6 +24,9 @@ namespace SlayerLegend.Equipment
         [Header("참조")]
         [SerializeField] private bool autoRefreshOnEnable = true;
 
+        [Header("일괄 융합 버튼 (조민희 추가)")]
+        [SerializeField] private Button batchFusionButton;
+
         #region Unity 라이프사이클
 
         private void OnEnable()
@@ -37,6 +41,12 @@ namespace SlayerLegend.Equipment
             {
                 EquipmentManager.Instance.OnInventoryChanged += OnInventoryChanged;
             }
+
+            // [조민희] 일괄 융합 버튼 이벤트 연결
+            if (batchFusionButton != null)
+            {
+                batchFusionButton.onClick.AddListener(OnBatchFusionClick);
+            }
         }
 
         private void OnDisable()
@@ -45,6 +55,12 @@ namespace SlayerLegend.Equipment
             if (EquipmentManager.Instance != null)
             {
                 EquipmentManager.Instance.OnInventoryChanged -= OnInventoryChanged;
+            }
+
+            // [조민희] 일괄 융합 버튼 이벤트 해제
+            if (batchFusionButton != null)
+            {
+                batchFusionButton.onClick.RemoveListener(OnBatchFusionClick);
             }
         }
 
@@ -173,6 +189,34 @@ namespace SlayerLegend.Equipment
             result.Sort((a, b) => a.gradeStep.CompareTo(b.gradeStep));
 
             return result;
+        }
+
+        #endregion
+
+        #region 일괄 융합 (조민희 추가)
+
+        /// <summary>
+        /// 일괄 융합 버튼 클릭 시 호출
+        /// </summary>
+        private void OnBatchFusionClick()
+        {
+            if (EquipmentManager.Instance == null)
+            {
+                Debug.LogWarning("[WeaponTabPanelUI] EquipmentManager가 없습니다.");
+                return;
+            }
+
+            int fusionCount = EquipmentManager.Instance.FuseAll(EquipType.Weapon);
+
+            if (fusionCount > 0)
+            {
+                Debug.Log($"[WeaponTabPanelUI] 일괄 융합 완료: {fusionCount}회");
+                RefreshWeaponList();
+            }
+            else
+            {
+                Debug.Log("[WeaponTabPanelUI] 융합 가능한 장비가 없습니다.");
+            }
         }
 
         #endregion

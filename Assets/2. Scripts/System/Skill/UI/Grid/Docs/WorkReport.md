@@ -6,7 +6,7 @@
 Slayer Legend (슬레이어 키우기) - 스킬 그리드 배치 시스템
 
 ### 1.2 작업 기간
-Phase 1 ~ Phase 17 (총 17단계, 완료)
+Phase 1 ~ Phase 18 (총 18단계, 완료)
 
 ### 1.3 작업 목표
 백팩 히어로(Backpack Hero) 스타일의 테트리스 모양 스킬 슬롯 배치 시스템 구현
@@ -449,6 +449,123 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 
 ---
 
+### Phase 18: 스킬 프리셋 시스템 구현
+**날짜**: 2026-03-04
+
+**목표**: 5개의 스킬 프리셋을 저장하고 전환할 수 있는 시스템 구현
+
+**신규 파일**:
+- `Data/SkillPresetSaveData.cs` - 5개 프리셋 데이터 구조 (Unity JsonUtility 호환)
+- `SkillPresetManager.cs` - 프리셋 관리 (저장/로드/전환)
+- `SkillPresetButtonUI.cs` - 프리셋 버튼 UI
+
+**수정 파일**:
+- `SkillGridController.cs` - LoadFromPresetData(), DeregisterAllSkillsFromController() 추가
+- `SkillSetPanelUI.cs` - OnPresetChanged 이벤트 구독
+- `SkillGridManager.cs` - GetSaveData() null 체크 추가
+
+**핵심 구현 내용**:
+
+1. **프리셋 데이터 구조 (Unity JsonUtility 호환)**
+   ```csharp
+   public class SkillPresetSaveData
+   {
+       public const int MAX_PRESETS = 5;
+       public int currentPresetIndex = 0;
+
+       // Unity JsonUtility는 List<T>[] 직렬화 미지원 → 개별 필드 사용
+       public List<PlacedSkillData> preset0 = new List<PlacedSkillData>();
+       public List<PlacedSkillData> preset1 = new List<PlacedSkillData>();
+       public List<PlacedSkillData> preset2 = new List<PlacedSkillData>();
+       public List<PlacedSkillData> preset3 = new List<PlacedSkillData>();
+       public List<PlacedSkillData> preset4 = new List<PlacedSkillData>();
+   }
+   ```
+
+2. **프리셋 전환 로직**
+   ```csharp
+   public void SwitchPreset(int newIndex)
+   {
+       // 1. 현재 그리드 저장
+       SaveCurrentGridToPreset();
+
+       // 2. 인덱스 변경
+       presetData.SwitchPreset(newIndex);
+
+       // 3. 새 프리셋 로드 (기존 스킬 해제 후 새 스킬 등록)
+       LoadPresetToGrid();
+
+       // 4. 저장
+       SavePresetData();
+
+       // 5. 이벤트 발생
+       OnPresetChanged?.Invoke(newIndex);
+   }
+   ```
+
+3. **스킬 등록/해제 처리**
+   ```csharp
+   private void DeregisterAllSkillsFromController()
+   {
+       foreach (var item in inventoryItems)
+       {
+           if (item != null && item.IsOnGrid && !string.IsNullOrEmpty(item.SkillId))
+           {
+               // Active/Passive 모두 처리
+               DeregisterSkillFromController(item.SkillId);
+           }
+       }
+   }
+   ```
+
+4. **UI 동기화 (SkillSetPanelUI)**
+   ```csharp
+   private void HandlePresetChanged(int newPresetIndex)
+   {
+       placedSkillQueue.Clear();
+       skillMap.Clear();
+       LoadPlacedSkillsToQueue();  // 새 프리셋 스킬로 UI 갱신
+   }
+   ```
+
+5. **자동 저장 (게임 종료 시)**
+   ```csharp
+   private void OnApplicationQuit() => AutoSaveCurrentGrid();
+   private void OnDisable() => AutoSaveCurrentGrid();
+   private void OnDestroy() => AutoSaveCurrentGrid();
+   ```
+
+**해결된 이슈**:
+| 이슈 | 원인 | 해결 방법 |
+|------|------|-----------|
+| 마지막 프리셋만 저장됨 | Unity JsonUtility가 `List<T>[]` 직렬화 미지원 | 개별 preset0~preset4 필드로 변경 |
+| NullReferenceException | GetSaveData()에서 saveData가 null | null 체크 및 초기화 추가 |
+| 모든 프리셋 스킬 장착됨 | 프리셋 전환 시 기존 스킬 해제 안 됨 | DeregisterAllSkillsFromController() 추가 |
+| 패시브 스킬 미해제 | 액티브만 해제 처리됨 | DeregisterSkillFromController() 사용 (Active/Passive 모두 처리) |
+| SkillSetPanel UI 미갱신 | 프리셋 변경 이벤트 미구독 | OnPresetChanged 이벤트 구독 |
+
+**동작 흐름**:
+```
+[프리셋 전환]
+프리셋 버튼 클릭
+    ↓
+SkillPresetManager.SwitchPreset(newIndex)
+    ├─ SaveCurrentGridToPreset() - 현재 그리드를 현재 프리셋에 저장
+    ├─ presetData.SwitchPreset(newIndex) - 인덱스 변경
+    ├─ LoadPresetToGrid()
+    │      ├─ DeregisterAllSkillsFromController() - 모든 스킬 해제
+    │      └─ LoadFromPresetData() - 새 스킬 등록
+    ├─ SavePresetData() - PlayerPrefs 저장
+    └─ OnPresetChanged 이벤트 발생
+           ↓
+       SkillSetPanelUI.HandlePresetChanged()
+           └─ LoadPlacedSkillsToQueue() - UI 갱신
+```
+
+**결과**: 5개 프리셋 독립 저장/로드, 프리셋 전환 시 UI 동기화 완료
+
+---
+
 ## 4. 파일 구조
 
 ```
@@ -456,6 +573,7 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 ├── Data/
 │   ├── SkillShapeData.cs        # 테트리스 모양 정의
 │   ├── SkillGridSaveData.cs     # 저장 데이터 구조 (Phase 15 수정: spriteName 추가)
+│   ├── SkillPresetSaveData.cs   # 프리셋 데이터 구조 (Phase 18 추가)
 │   └── SkillDataGridExtensions.cs # SkillData 확장 메서드
 ├── Editor/
 │   ├── SkillGridPrefabCreator.cs # 프리팹 생성 에디터
@@ -473,10 +591,13 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 ├── SkillGridManager.cs          # 그리드 관리자
 ├── SkillGridValidator.cs        # 배치 검증
 ├── SkillDraggableItem.cs        # 드래그 가능 아이템 (Phase 15 수정: spriteName 추가)
-├── SkillGridController.cs       # 전체 컨트롤러 (Phase 15 수정: 4단계 fallback)
+├── SkillGridController.cs       # 전체 컨트롤러 (Phase 15, 18 수정)
 ├── SkillInventoryUI.cs          # 인벤토리 UI
 ├── InventorySlotUI.cs           # 인벤토리 슬롯
-└── SkillGridInitializer.cs      # DataManager 연동 (Phase 15 수정)
+├── SkillGridInitializer.cs      # DataManager 연동 (Phase 15 수정)
+├── EarlyGridDataLoader.cs       # 게임 시작 시 그리드 데이터 로드
+├── SkillPresetManager.cs        # 프리셋 관리 (Phase 18 추가)
+└── SkillPresetButtonUI.cs       # 프리셋 버튼 UI (Phase 18 추가)
 
 2. Scripts/Managers/Resource/
 └── ResourceManager.cs           # 리소스 로드/캐싱 (Phase 15 수정: 스킬 아이콘 경로 추가)
@@ -522,6 +643,10 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 | Phase 15 | JSON spriteName과 파일명 불일치 | 패턴 매칭 (번호 기반 검색) |
 | Phase 15 | skillIcon.name이 원본과 다름 | 원본 spriteName 별도 저장 |
 | Phase 16 | 런타임 디버그 로그 과다 | Debug.Log 제거 (에러/경고 로그 유지) |
+| Phase 18 | 마지막 프리셋만 저장됨 | 개별 preset0~4 필드로 변경 (JsonUtility 호환) |
+| Phase 18 | 모든 프리셋 스킬 장착 | DeregisterAllSkillsFromController() 추가 |
+| Phase 18 | 패시브 스킬 미해제 | DeregisterSkillFromController() 사용 |
+| Phase 18 | UI 미갱신 | OnPresetChanged 이벤트 구독 |
 
 ---
 
@@ -532,6 +657,7 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 | ~~비정형 스킬(L자, T자) 시각적 표시~~ | ~~연구 완료, 구현 대기~~ | **Phase 13에서 해결됨** |
 | ~~스킬 아이콘 표시 안 됨~~ | ~~진행 중~~ | **Phase 15에서 해결됨** |
 | ~~디버그 로그 제거~~ | ~~보류~~ | **Phase 16에서 해결됨** |
+| ~~그리드 프리셋 저장/로드~~ | ~~추가 기능~~ | **Phase 18에서 해결됨** |
 | 셀 스프라이트 임시 사용 중 | 보류 | 아티스트 스프라이트로 교체 필요 |
 
 ---
@@ -560,9 +686,14 @@ LoadGridData() → RestoreDraggableItemFromSave() → RegisterSkillToController(
 - ~~디버그 로그 제거~~ **Phase 16에서 완료**
 - 코드 주석 정리
 
-### 우선순위 4: 추가 기능 (선택)
+### 우선순위 4: ~~그리드 프리셋 시스템~~ ✓ 완료
+- ~~프리셋 저장/로드~~ **Phase 18에서 완료**
+- 5개 프리셋 독립 저장
+- 프리셋 전환 시 자동 저장/로드
+- UI 동기화
+
+### 우선순위 5: 추가 기능 (선택)
 - 스킬 장착 시 효과 적용
-- 그리드 프리셋 저장/로드
 - 아티스트 셀 스프라이트로 교체
 
 ---
