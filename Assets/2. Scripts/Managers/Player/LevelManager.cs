@@ -67,20 +67,22 @@ public class LevelManager : Singleton<LevelManager>
             int statPoints = 3;
             CurrencyManager.Instance.AddCurrency(CurrencyType.StatPoint, statPoints);
 
-            // 레벨 변경 이벤트 실행
-            OnLevelUp?.Invoke(_saveData.level);
-
             // 요구 경험치 재계산
             _requiredExp = GetRequiredExp(_saveData.level);
+
+            // 레벨 변경 이벤트 실행
+            OnLevelUp?.Invoke(_saveData.level);
+            NotifyExpChanged();
+
+            if (_requiredExp > _saveData.currentExp)
+            {
+                _isCanLevelUp = false;
+            }
         }
         else
         {
             Debug.Log("경험치가 부족해 레벨업이 불가능합니다.");
         }
-
-        // 레벨업 가능 여부 체크
-        if (!CheckLevelUp())
-            _isCanLevelUp = false;
     }
 
     /// <summary>
