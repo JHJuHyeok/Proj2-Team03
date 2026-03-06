@@ -4,65 +4,70 @@ using UnityEngine.UI;
 /*
 [승문]
 SkillPopup
--스킬 팝업 전용
--PopupManager에서 PopupId.Skill로 호출
--param으로 SkillAttribute(Fire/Water/Wind/Earth) 전달받음
--속성은 텍스트 없이 아이콘으로만 표시
--내부 UI는 SkillPopupContentController로 위임
+-스킬 상세 팝업 루트
+-메인메뉴 스킬 그리드에서 클릭된 skillId(string)를 받아 상세 패널에 전달
+-속성 아이콘은 전달받은 skillId의 실제 SkillData.element를 보고 결정
+-팝업 내부 리스트는 없고 상세만 표시
 */
 public class SkillPopup : UIPopup
 {
-    [Header("아이콘 이미지")]
-    [SerializeField] private Image elementIcon;//속성 아이콘 이미지
+    [Header("Popup UI(팝업 프리팹 내부)")]
+    [SerializeField] private Image popupElementIconImage; // 속성 아이콘
+    [SerializeField] private Sprite popupFireSprite;      // 불 아이콘
+    [SerializeField] private Sprite popupWaterSprite;     // 물 아이콘
+    [SerializeField] private Sprite popupWindSprite;      // 바람 아이콘
+    [SerializeField] private Sprite popupEarthSprite;     // 땅 아이콘
 
-    [Header("속성 아이콘 스프라이트")]
-    [SerializeField] private Sprite fireSprite;//불 아이콘
-    [SerializeField] private Sprite waterSprite;//물 아이콘
-    [SerializeField] private Sprite windSprite;//바람 아이콘
-    [SerializeField] private Sprite earthSprite;//땅 아이콘
+    [Header("Popup Controller(팝업 프리팹 내부)")]
+    [SerializeField] private SkillPopupContentController popupController; // 상세 컨트롤러
 
-    [Header("Content")]
-    [SerializeField] private SkillPopupContentController controller;//팝업 내부 컨텐츠
-
+    /// <summary>
+    /// 팝업 열기
+    /// - param은 skillId(string) 하나만 받음
+    /// </summary>
     public override void OnOpen(object param)
     {
         base.OnOpen(param);
 
-        SkillAttribute attribute = SkillAttribute.Fire;
-
-        if (param is SkillAttribute a)
+        string skillId = param as string;
+        if (string.IsNullOrEmpty(skillId))
         {
-            attribute = a;
+            Debug.LogWarning("[SkillPopup] skillId is null or empty.");
+            return;
         }
 
-        Apply(attribute);
-
-        if (controller != null)
+        if (popupController != null)
         {
-            controller.SetAttribute(attribute);
+            popupController.SetSkillId(skillId);
         }
     }
 
-    private void Apply(SkillAttribute attribute)
+    /// <summary>
+    /// 속성 아이콘 반영
+    /// </summary>
+    public void SetElementIcon(SkillAttribute attribute)
     {
-        if (elementIcon == null) return;
+        if (popupElementIconImage == null)
+        {
+            return;
+        }
 
         switch (attribute)
         {
             case SkillAttribute.Fire:
-                elementIcon.sprite = fireSprite;
+                popupElementIconImage.sprite = popupFireSprite;
                 break;
 
             case SkillAttribute.Water:
-                elementIcon.sprite = waterSprite;
+                popupElementIconImage.sprite = popupWaterSprite;
                 break;
 
             case SkillAttribute.Wind:
-                elementIcon.sprite = windSprite;
+                popupElementIconImage.sprite = popupWindSprite;
                 break;
 
             case SkillAttribute.Earth:
-                elementIcon.sprite = earthSprite;
+                popupElementIconImage.sprite = popupEarthSprite;
                 break;
         }
     }
