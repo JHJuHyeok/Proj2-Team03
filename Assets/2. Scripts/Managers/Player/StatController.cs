@@ -20,6 +20,9 @@ public class StatController
     // 각 소스별 스탯 저장소
     // Dictionary Key값 => SourceKey에 명시된 것을 이용할 것(오타 및 혼동 방지)
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
+    // 최종 결과 임시 저장용 딕셔너리
+    Dictionary<StatType, double> tempBase = new();
+    Dictionary<StatType, double> tempMult = new();
     // 최종 합산 스탯 캐시
     private Dictionary<StatType, double> _finalStats = new();
     // 스탯 변경을 알리는 이벤트
@@ -50,41 +53,34 @@ public class StatController
     /// </summary>
     private void RefreshFinalStats()
     {
-        _finalStats.Clear();
+        tempBase.Clear();
+        tempMult.Clear();
 
-        // 타입별 일괄 계산
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
+        // 각 소스의 type 별 계산
+        foreach (var sourceList in _statSources.Values)
         {
-            _finalStats.Clear();
-
-            // 각 소스의 type 별 계산
-            foreach (var sourceList in _statSources.Values)
+            foreach (var stat in sourceList)
             {
-                foreach (var stat in sourceList)
+                if (!tempBase.ContainsKey(stat.type))
                 {
-                    // 초기값이 없다면 기본 0 설정
-                    if (!_finalStats.ContainsKey(stat.type))
-                        _finalStats[stat.type] = 0;
+                    tempBase[stat.type] = 0;
+                    tempBase[stat.type] += stat.baseValue;
+                }
+
+                if (!tempMult.ContainsKey(stat.type))
+                {
+                    tempMult[stat.type] = 0;
+                    tempMult[stat.type] += stat.multiplier;
                 }
             }
         }
+        
+        _finalStats.Clear();
 
-        foreach (var type in _finalStats.Keys)
+        // 계산된 스탯 적용
+        foreach (var type in tempBase.Keys)
         {
-            double sumBase = 0;
-            double sumMultiplier = 1.0f;
-
-            foreach (var sourceList in _statSources.Values)
-            {
-                var match = sourceList.Find(s => s.type == type);
-                if (match != null)
-                {
-                    sumBase += match.baseValue;
-                    sumMultiplier += match.multiplier;
-                }
-            }
-
-            _finalStats[type] = sumBase * sumMultiplier;
+            _finalStats[type] = tempBase[type] * (1.0 + tempMult[type]);
         }
     }
 
