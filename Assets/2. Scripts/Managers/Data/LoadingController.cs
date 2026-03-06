@@ -191,6 +191,8 @@ public class LoadingController : MonoBehaviour
             await ResourcesLoadStep();
             // 8. 데이터베이스 로드
             await DataManager.LoadAllDatabase();
+            // 9. [조민희] 장비 아이콘 로드 (AssetBundleLoader 초기화)
+            SlayerLegend.Resource.AssetBundleLoader.Instance.Initialize();
 
             Debug.Log("전체 데이터 로드 완료");
             return true;

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class StatManager : Singleton<StatManager>
 {
-    // ╫га╕ ╟Х╩Й ╢Ц╢Г даф╝╥я╥╞
+    // О©╫О©╫О©╫О©╫ О©╫О©╫О©╫ О©╫О©╫О©╫ О©╫О©╫ф╝О©╫я╥О©╫
     private StatController _playerStatController = new StatController();
 
     /// <summary>
-    /// Controllerюг юл╨╔ф╝ ╥║гн
+    /// ControllerО©╫О©╫ О©╫л╨О©╫ф╝ О©╫О©╫О©╫О©╫
     /// </summary>
     public event Action OnStatUpdated
     {
@@ -17,7 +17,7 @@ public class StatManager : Singleton<StatManager>
     }
 
     /// <summary>
-    /// ©э╨н ╪р╫╨(юЕ╨Я, ╟╜х╜ ╣Н)©║╪╜ ╫╨ех ╨╞╟Ф ╫ц хёцБ
+    /// О©╫э╨О©╫ О©╫р╫О©╫(О©╫О©╫О©╫, О©╫О©╫х╜ О©╫О©╫)О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫ хёО©╫О©╫
     /// </summary>
     public void UpdatePlayerStat(string sourceName, List<StatValue> stats)
     {
@@ -25,14 +25,14 @@ public class StatManager : Singleton<StatManager>
     }
 
     /// <summary>
-    /// ╫╨ех ╟╙ бЭа╤
+    /// О©╫О©╫О©╫О©╫ О©╫О©╫ О©╫О©╫О©╫О©╫
     /// </summary>
-    /// <param name="type"> ╫╨ех е╦ют </param>
+    /// <param name="type"> О©╫О©╫О©╫О©╫ е╦О©╫О©╫ </param>
     /// <returns></returns>
     public double GetStat(StatType type) => _playerStatController.GetFinalStat(type);
 
     /// <summary>
-    /// ╣П╧Ж╠в©К: гЖюГ ╦П╣Г цжа╬ ╫╨ех х╝юн
+    /// О©╫О©╫О©╫О©╫в©О©╫: О©╫О©╫О©╫О©╫ О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ О©╫О©╫О©╫О©╫ х╝О©╫О©╫
     /// </summary>
     public void DebugAllStats()
     {
@@ -41,4 +41,9 @@ public class StatManager : Singleton<StatManager>
             Debug.Log($"{type} : {GetStat(type)}");
         }
     }
+
+    /// <summary>
+    /// StatController Л²╦Л┼╓М└╢Л┼╓ К╟≤М≥≤ (Л║╟К╞╪М²╛ Л╤■Й╟─ - PlayerCombatStats Л≈╟К▐≥Л ╘)
+    /// </summary>
+    public StatController GetStatController() => _playerStatController;
 }

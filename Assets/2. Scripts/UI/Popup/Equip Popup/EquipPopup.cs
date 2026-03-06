@@ -1,63 +1,67 @@
 ﻿using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
-using SlayerLegend.Equipment;
 
 /*
-[승문]
 EquipPopup
--장비 상세 팝업 루트
--메인메뉴 장비 그리드에서 클릭된 equipId(string)를 받아 상세 패널에 전달
--무기/악세 타입에 따라 상단 카테고리 아이콘만 변경
--강화/융합 탭 전환은 TabManager가 담당하므로 여기서는 건드리지 않음
+- 장비 팝업 전용 스크립트
+- PopupManager에서 PopupId.Equip로 호출
+- param으로 EquipTab을 받아 아이콘과 컨텐츠를 변경
+- param으로 "열릴 때 기본 탭"을 지정 : param이 int면: 0=강화, 1=융합
+- [조민희] EquipPopupParam으로 장비 ID도 전달받아 초기 선택 가능
 */
 public class EquipPopup : UIPopup
 {
-    [Header("Popup UI(팝업 프리팹 내부)")]
-    [SerializeField] private Image popupCategoryIconImage; // 상단 카테고리 아이콘
-    [SerializeField] private Sprite popupWeaponSprite;     // 무기 카테고리 아이콘
-    [SerializeField] private Sprite popupAccessorySprite;  // 악세 카테고리 아이콘
+    [Header("Tab")]
+    [SerializeField] private TabManager tabManager; // EquipPopup Tab Manager에 붙은 TabManager
 
-    [Header("Popup Controller(팝업 프리팹 내부)")]
-    [SerializeField] private EquipPopupController popupController; // 상세 컨트롤러
+    [Header("UI (선택)")]
+    [SerializeField] private Image iconImage;//상단 아이콘
+    [SerializeField] private Sprite weaponSprite;//무기 아이콘
+    [SerializeField] private Sprite accessorySprite;//악세 아이콘
 
-    /// <summary>
-    /// 팝업 열기
-    /// - param은 equipId(string) 하나만 받음
-    /// - 리스트/그리드는 메인메뉴에 있고, 팝업은 상세만 표시
-    /// </summary>
+    [SerializeField] private EquipPopupContentController controller;//팝업 내부 컨텐츠
+
     public override void OnOpen(object param)
     {
         base.OnOpen(param);
 
-        string equipId = param as string;
-        if (string.IsNullOrEmpty(equipId))
+        EquipTab tab = EquipTab.Weapon;
+        string initialEquipId = null; // [조민희] 초기 선택할 장비 ID
+
+        // [조민희] EquipPopupParam 처리 (우선순위)
+        if (param is EquipPopupParam popupParam)
         {
-            Debug.LogWarning("[EquipPopup] equipId is null or empty.");
-            return;
+            tab = popupParam.Tab;
+            initialEquipId = popupParam.EquipId;
+        }
+        else if (param is EquipTab t)
+        {
+            tab = t;
         }
 
-        if (popupController != null)
+        ApplyTab(tab);
+
+        if (controller != null)
         {
-            popupController.SetEquipId(equipId);
+            controller.SetEquipTab(tab);
+            // [조민희] 초기 선택 장비 ID가 있으면 설정
+            if (!string.IsNullOrEmpty(initialEquipId))
+            {
+                controller.SetInitialSelection(initialEquipId);
+            }
         }
     }
 
-    /// <summary>
-    /// 장비 타입에 맞는 카테고리 아이콘 반영
-    /// </summary>
-    public void SetCategoryIcon(EquipType type)
+    private void ApplyTab(EquipTab tab)
     {
-        if (popupCategoryIconImage == null)
+        if (tab == EquipTab.Weapon)
         {
-            return;
+            if (iconImage != null) iconImage.sprite = weaponSprite;
         }
-
-        if (type == EquipType.Weapon)
+        else
         {
-            popupCategoryIconImage.sprite = popupWeaponSprite;
-            return;
+            if (iconImage != null) iconImage.sprite = accessorySprite;
         }
-
-        popupCategoryIconImage.sprite = popupAccessorySprite;
     }
 }

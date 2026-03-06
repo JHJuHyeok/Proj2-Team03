@@ -50,26 +50,23 @@ public class StatController
     /// </summary>
     private void RefreshFinalStats()
     {
-        _finalStats.Clear();
+        // 기존에 있는 타입들의 값을 보존
+        var existingTypes = new List<StatType>(_finalStats.Keys);
 
-        // 타입별 일괄 계산
-        foreach (StatType type in Enum.GetValues(typeof(StatType)))
+        // 각 소스에서 스탯 수집
+        foreach (var sourceList in _statSources.Values)
         {
-            _finalStats.Clear();
-
-            // 각 소스의 type 별 계산
-            foreach (var sourceList in _statSources.Values)
+            foreach (var stat in sourceList)
             {
-                foreach (var stat in sourceList)
-                {
-                    // 초기값이 없다면 기본 0 설정
-                    if (!_finalStats.ContainsKey(stat.type))
-                        _finalStats[stat.type] = 0;
-                }
+                if (!_finalStats.ContainsKey(stat.type))
+                    _finalStats[stat.type] = 0;
             }
         }
 
-        foreach (var type in _finalStats.Keys)
+        // [조민희] 컬렉션 열거 중 수정 에러 방지를 위해 별도 리스트에서 처리
+        var types = existingTypes.Count > 0 ? existingTypes : new List<StatType>(_finalStats.Keys);
+
+        foreach (var type in types)
         {
             double sumBase = 0;
             double sumMultiplier = 1.0f;

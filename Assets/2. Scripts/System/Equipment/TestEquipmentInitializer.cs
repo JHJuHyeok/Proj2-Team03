@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SlayerLegend.Resource;
 
 namespace SlayerLegend.Testing
@@ -52,14 +53,22 @@ namespace SlayerLegend.Testing
             if (enableTestMode)
             {
                 AssetBundleLoader.Instance.Initialize();
+
+                // [조민희] Awake에서 즉시 초기화 (OnEnable보다 먼저 실행되도록)
+                if (initializeOnStart)
+                {
+                    InitializeTestData();
+                }
             }
         }
 
-        private void Start()
+        private async void Start()
         {
-            if (initializeOnStart && enableTestMode)
+            // [조민희] Start에서 Addressables 데이터 로드
+            if (enableTestMode)
             {
-                InitializeTestData();
+                await DataManager.LoadAllDatabase();
+                Debug.Log("[TestEquipmentInitializer] 데이터베이스 로드 완료");
             }
         }
 

@@ -2,26 +2,26 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-// Á¾ÇÕ ¼ºÀå µ¥ÀÌÅÍ
+// ì„¸ì´ë¸Œ ë°ì´í„° í´ë˜ìŠ¤
 [System.Serializable]
 public class GameData : ISavable
 {
-    public int level;                                           // ·¹º§
-    public double currentExp;                                   // ÇöÀç °æÇèÄ¡
-    public List<int> upgradeLevels = new();                     // °­È­ ·¹º§
-    public List<int> growthLevels = new();                      // ¼ºÀå ·¹º§
-    public string advanceGrade;                                 // ½Â±Ş ´Ü°è
-    public Dictionary<string, Possesion> skillInfo = new();     // ½ºÅ³ ÇöÈ²
-    public Dictionary<string, Possesion> equipInfo = new();     // Àåºñ ÇöÈ²
-    public Dictionary<string, List<int>> buddyInfo = new();     // µ¿·á ÇöÈ²
-    public Dictionary<string, applyOption> buddyOption = new(); // °¢ µ¿·á ½Â±Ş ¿É¼Ç
-    public List<int> gachaLevel = new();                        // »Ì±â ·¹º§
-    public string currentStageId;                               // ÇöÀç ½ºÅ×ÀÌÁö
-    public string lastStageId;                                  // ¸¶Áö¸· Å¬¸®¾î ½ºÅ×ÀÌÁö
+    public int level;                                           // ë ˆë²¨
+    public double currentExp;                                   // í˜„ì¬ ê²½í—˜ì¹˜
+    public List<int> upgradeLevels = new();                     // ê°•í™” ë ˆë²¨
+    public List<int> growthLevels = new();                      // ì„±ì¥ ë ˆë²¨
+    public string advanceGrade;                                 // ì§„í™” ë‹¨ê³„
+    public Dictionary<string, Possesion> skillInfo = new();     // ìŠ¤í‚¬ í˜„í™©
+    public Dictionary<string, Possesion> equipInfo = new();     // ì¥ë¹„ í˜„í™©
+    public Dictionary<string, List<int>> buddyInfo = new();     // ë²„ë”” í˜„í™©
+    public Dictionary<string, applyOption> buddyOption = new(); // ë²„ë”” ì¥ì°© ì§„í™” ì˜µì…˜
+    public List<int> gachaLevel = new();                        // ê°€ì°¨ ë ˆë²¨
+    public string currentStageId;                               // í˜„ì¬ ì§„í–‰ì¤‘ì¸ ìŠ¤í…Œì´ì§€
+    public string lastStageId;                                  // ê°€ì¥ ìµœê·¼ í´ë¦¬ì–´í•œ ìŠ¤í…Œì´ì§€
 
-    public long lastSaveTime { get; set; }           // ¸¶Áö¸· ÀúÀå ½Ã°£
+    public long lastSaveTime { get; set; }           // ë§ˆì§€ë§‰ ì €ì¥ ì‹œê°„
 
-    // °ÔÀÓ µ¥ÀÌÅÍ ÃÊ±âÈ­
+    // ê²Œì„ ë°ì´í„° ì´ˆê¸°í™”
     public static GameData CreateDefault()
     {
         return new GameData

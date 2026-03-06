@@ -11,6 +11,7 @@ namespace SlayerLegend.Equipment
     /// 작성자: 조민희
     /// Accessory Bundle 프리팹에 연결하여 악세서리 정보 표시
     /// WeaponBundleUI보다 단순한 구조 (이름/개수 텍스트 없음)
+    /// [조민희] 클릭 시 EquipPopup 열기 기능 추가
     /// </summary>
     public class AccessoryBundleUI : MonoBehaviour
     {
@@ -19,8 +20,42 @@ namespace SlayerLegend.Equipment
         [SerializeField] private TMP_Text enhanceText;     // Enhance Text (강화 레벨)
         [SerializeField] private TMP_Text gradeText;       // Grade Text (등급 단계)
         [SerializeField] private Slider enhanceSlider;     // Equipment Slider
+        [SerializeField] private Button clickButton;       // [조민희] 클릭용 버튼
 
         private EquipData currentEquipData;
+
+        private void Awake()
+        {
+            // [조민희] 버튼 이벤트 연결
+            if (clickButton != null)
+            {
+                clickButton.onClick.AddListener(OnClick);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // [조민희] 버튼 이벤트 해제
+            if (clickButton != null)
+            {
+                clickButton.onClick.RemoveListener(OnClick);
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 장비 슬롯 클릭 시 EquipPopup 열기
+        /// </summary>
+        private void OnClick()
+        {
+            if (currentEquipData == null) return;
+
+            // PopupManager를 통해 EquipPopup 열기
+            if (PopupManager.Instance != null)
+            {
+                var param = new EquipPopupParam(EquipTab.Accessory, currentEquipData.GetId());
+                PopupManager.Instance.Open(PopupId.Equip, param);
+            }
+        }
 
         /// <summary>
         /// 장비 데이터 설정 및 UI 갱신
