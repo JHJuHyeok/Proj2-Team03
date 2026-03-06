@@ -1,3 +1,4 @@
+using Combat.UI;
 using UnityEngine;
 
 namespace Combat.Drop
@@ -108,6 +109,10 @@ namespace Combat.Drop
             {
                 LevelManager.Instance.AddExp(_amount);
             }
+
+            // 드롭 알림 UI
+            if (DropNotificationUI.Instance != null)
+                DropNotificationUI.Instance.ShowNotification(dropType, _amount);
 
             // 상태 초기화
             _isInitialized = false;
