@@ -19,8 +19,20 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
     public event Action<double, double> OnManaChanged;
     public event Action OnDeath;
 
-    // ★★★★★ StatController 멤버 변수로 설정 ★★★★★ //
-    public StatController _statController { get; private set; } = new();
+    // [조민희 수정] StatManager.Instance의 컨트롤러 사용
+    // 기존: 자체 StatController 인스턴스 사용 (장비 효과 미반영 문제)
+    // 수정: StatManager.Instance를 통해 전역 스탯 관리
+    public StatController _statController
+    {
+        get
+        {
+            if (StatManager.Instance != null)
+            {
+                return StatManager.Instance.GetStatController();
+            }
+            return null;
+        }
+    }
 
     // === StatController에서 가져오는 스탯 ===
     public double MaxHealth => GetStatValue(StatType.HP);
@@ -97,15 +109,14 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
     private double GetStatValue(StatType type)
     {
         // StatController가 준비되지 않았으면 더미 데이터 반환
-        //if (StatController.Instance == null)
+        // [조민희 수정] 프로퍼티 사용 (_statController)
         if (_statController == null)
         {
             return GetDummyStatValue(type);
         }
 
-        //double value = StatController.Instance.GetFinalStat(type);
         double value = _statController.GetFinalStat(type);
-        
+
         // 값이 0이면 더미 데이터 사용 (아직 데이터가 수집되지 않은 경우)
         return value > 0 ? value : GetDummyStatValue(type);
     }

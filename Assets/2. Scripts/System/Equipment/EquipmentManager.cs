@@ -64,6 +64,26 @@ namespace SlayerLegend.Equipment
         {
             base.Awake();
             Debug.Log("[EquipmentManager] 초기화 완료 (Singleton<EquipmentManager>)");
+
+            // [조민희] EnhanceManager 초기화 - 강화 시스템 연동
+            InitializeEnhanceManager();
+        }
+
+        /// <summary>EnhanceManager 초기화 (조민희 추가)</summary>
+        private void InitializeEnhanceManager()
+        {
+            if (EnhanceManager.Instance != null)
+            {
+                EnhanceManager.Instance.Initialize(this);
+            }
+            else
+            {
+                // EnhanceManager가 씬에 없으면 생성
+                var enhanceObj = new GameObject("EnhanceManager");
+                var enhanceManager = enhanceObj.AddComponent<EnhanceManager>();
+                enhanceManager.Initialize(this);
+                Debug.Log("[EquipmentManager] EnhanceManager 자동 생성 및 초기화 완료");
+            }
         }
         #endregion
 

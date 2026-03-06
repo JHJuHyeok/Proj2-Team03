@@ -70,33 +70,6 @@ namespace SlayerLegend.Equipment
             return baseCost * currentLevel * currentLevel;
         }
 
-        /// <summary>강화 시도</summary>
-        public bool TryEnhance(EquipData equipment)
-        {
-            if (!CanEnhance(equipment))
-            {
-                string reason = GetCannotEnhanceReason(equipment);
-                OnEnhanceFailed?.Invoke(equipment.GetId(), reason);
-                Debug.LogWarning($"[EnhanceManager] 강화 불가: {reason}");
-                return false;
-            }
-
-            string equipId = equipment.GetId();
-            int previousLevel = equipmentManager.GetLevel(equipId);
-
-            // EquipmentManager의 Enhance 메서드 호출
-            bool success = equipmentManager.Enhance(equipId);
-
-            if (success)
-            {
-                int newLevel = equipmentManager.GetLevel(equipId);
-                OnEnhanceComplete?.Invoke(equipId, previousLevel, newLevel);
-                Debug.Log($"[EnhanceManager] 강화 성공: {equipment.GetName()} Lv.{previousLevel} → Lv.{newLevel}");
-            }
-
-            return success;
-        }
-
         /// <summary>강화 불가 사유 메시지</summary>
         public string GetCannotEnhanceReason(EquipData equipment)
         {
@@ -135,6 +108,35 @@ namespace SlayerLegend.Equipment
                 canEnhance = canEnhance,
                 cannotReason = canEnhance ? "" : GetCannotEnhanceReason(equipment)
             };
+        }
+
+        /// <summary>강화 시도 (EquipPopupController용)</summary>
+        public bool TryEnhance(EquipData equipment)
+        {
+            if (!CanEnhance(equipment))
+            {
+                string reason = GetCannotEnhanceReason(equipment);
+                string equipId = equipment?.GetId() ?? "unknown";
+                OnEnhanceFailed?.Invoke(equipId, reason);
+                Debug.LogWarning($"[EnhanceManager] 강화 실패: {reason}");
+                return false;
+            }
+
+            string id = equipment.GetId();
+            int prevLevel = equipmentManager.GetLevel(id);
+            bool success = equipmentManager.Enhance(id);
+
+            if (success)
+            {
+                int newLevel = equipmentManager.GetLevel(id);
+                OnEnhanceComplete?.Invoke(id, prevLevel, newLevel);
+                return true;
+            }
+            else
+            {
+                OnEnhanceFailed?.Invoke(id, "강화 실패 (재화 부족)");
+                return false;
+            }
         }
     }
 
