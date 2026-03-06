@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
 using System.Collections.Generic;
 using System.IO;
 
@@ -266,6 +268,33 @@ namespace SlayerLegend.Resource
             Debug.Log($"[AssetBundleLoader] 디렉토리 {System.IO.Path.GetFileName(directoryPath)}: .asset {assetCount}개 로드, 재생성 {recreatedCount}개, 건너뜀 {skippedCount}개");
         }
 #endif
+        private void LoadBundle(string label)
+        {
+            // 1. 어드레서블을 통해 skin 라벨 모든 스프라이트 로드
+            Addressables.LoadAssetsAsync<Sprite>(label, (sprite) =>
+            {
+                // 2. 각 스프라이트가 로드될 때마다 실행되는 콜백
+                if (sprite != null)
+                {
+                    string spriteName = sprite.name;
+                    if (!string.IsNullOrEmpty(spriteName) && !spriteCache.ContainsKey(spriteName))
+                    {
+                        spriteCache[spriteName] = sprite;
+                    }
+                }
+            }).Completed += (handle) =>
+            {
+                // 3. 로드 완료 후 처리
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                {
+                    Debug.Log($"[AssetBundleLoader] 빌드 모드: {label} 번들 로드 완료. 총 캐시: {spriteCache.Count}");
+                }
+                else
+                {
+                    Debug.LogError($"[AssetBundleLoader] 번들 로드 실패: {label}");
+                }
+            };
+        }
 
         /// <summary>
         /// 스프라이트 로드
