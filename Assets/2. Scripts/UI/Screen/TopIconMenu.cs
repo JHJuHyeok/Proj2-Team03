@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 /*
 [승문]
 TopIconMenu
-- 상단 아이콘 메뉴 펼침/접기 제어
-- Main Button은 항상 보임
-- Settings / Trophy / Sleep / Mail 버튼은 열렸을 때만 표시
-- 반투명 배경 패널도 메뉴와 함께 표시/숨김
-- Main Button 아이콘 변경은 Button/Image 설정에서 별도로 처리
+- 메인 버튼으로 상단 아이콘 메뉴 펼침/접기
+- 열렸을 때: 서브 버튼 + Dim 패널 표시
+- 닫혔을 때: 메인 버튼만 표시
+- 메인 버튼 아이콘은 햄버거 <-> X로 직접 교체
 */
 public class TopIconMenu : MonoBehaviour
 {
@@ -18,7 +18,12 @@ public class TopIconMenu : MonoBehaviour
     [SerializeField] private GameObject mailButton;
 
     [Header("Background")]
-    [SerializeField] private GameObject expandBackground; // 반투명 패널
+    [SerializeField] private GameObject dimPanel;
+
+    [Header("Main Button Icon")]
+    [SerializeField] private Image mainButtonImage;
+    [SerializeField] private Sprite closedSprite; // 햄버거
+    [SerializeField] private Sprite openedSprite; // X
 
     [Header("Options")]
     [SerializeField] private bool startClosed = true;
@@ -31,27 +36,12 @@ public class TopIconMenu : MonoBehaviour
         ApplyState();
     }
 
-    /// <summary>
-    /// 메인 버튼 클릭 시 호출
-    /// </summary>
     public void ToggleMenu()
     {
         isOpen = !isOpen;
         ApplyState();
     }
 
-    /// <summary>
-    /// 메뉴 열기
-    /// </summary>
-    public void OpenMenu()
-    {
-        isOpen = true;
-        ApplyState();
-    }
-
-    /// <summary>
-    /// 메뉴 닫기
-    /// </summary>
     public void CloseMenu()
     {
         isOpen = false;
@@ -64,7 +54,9 @@ public class TopIconMenu : MonoBehaviour
         if (trophyButton != null) trophyButton.SetActive(isOpen);
         if (sleepButton != null) sleepButton.SetActive(isOpen);
         if (mailButton != null) mailButton.SetActive(isOpen);
+        if (dimPanel != null) dimPanel.SetActive(isOpen);
 
-        if (expandBackground != null) expandBackground.SetActive(isOpen);
+        if (mainButtonImage != null)
+            mainButtonImage.sprite = isOpen ? openedSprite : closedSprite;
     }
 }
