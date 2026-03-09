@@ -90,7 +90,7 @@ public class EquipPopupController : MonoBehaviour
         // 상단 카테고리 아이콘 반영
         if (popupRoot != null)
         {
-            popupRoot.SetCategoryIcon(type);
+            //popupRoot.SetCategoryIcon(type);
         }
 
         // 상단 장비 정보 반영
