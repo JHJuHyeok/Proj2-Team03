@@ -1,81 +1,59 @@
 ﻿using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
+using SlayerLegend.Equipment;
 
 /*
 EquipItemCell
--장비팝업 리스트 셀
--컨트롤러가 넘겨주는 equipId/spriteName으로 표시
--클릭시 equipId를 컨트롤러로 콜백
+-장비 리스트 셀
+-아이콘 / 클릭 처리
 */
-[RequireComponent(typeof(Button))]
 public class EquipItemCell : MonoBehaviour
 {
-    [SerializeField] private Image iconImage;//셀 아이콘(팝업 프리팹 내부)
-    [SerializeField] private GameObject selectedMark;//선택표시(선택)
-    [SerializeField] private Button button;//셀 버튼(없으면 자동캐싱)
+    [SerializeField] private Image icon;
+    [SerializeField] private Button button;
+    [SerializeField] private GameObject selectedFrame;
 
-    private string equipId;
-    private System.Action<string> onClick;
+    private InventoryItem item;
+    private System.Action<InventoryItem> onClick;
     private System.Func<string, Sprite> spriteResolver;
+    public InventoryItem Item => item;
 
     private void Awake()
     {
-        //필수컴포넌트 캐싱
         if (button == null)
         {
             button = GetComponent<Button>();
         }
 
-        //클릭이벤트 연결
         if (button != null)
         {
-            button.onClick.AddListener(HandleClick);
+            button.onClick.AddListener(OnClick);
         }
-
-        SetSelected(false);
     }
 
-    //셀 바인딩(컨트롤러가 호출)
-    public void Bind(string id, string spriteName, System.Func<string, Sprite> resolver, System.Action<string> click)
+    public void Bind(InventoryItem data, System.Action<InventoryItem> click, System.Func<string, Sprite> resolver)
     {
-        equipId = id;
-        spriteResolver = resolver;
+        item = data;
         onClick = click;
+        spriteResolver = resolver;
 
-        if (iconImage != null)
+        if (icon != null && data != null)
         {
-            iconImage.sprite = spriteResolver != null ? spriteResolver(spriteName) : null;
+            icon.sprite = spriteResolver != null ? resolver(data.equipment.spriteName) : null;
         }
     }
 
-    //선택표시
+    private void OnClick()
+    {
+        if (item == null) return;
+
+        onClick?.Invoke(item);
+    }
+
     public void SetSelected(bool selected)
     {
-        if (selectedMark == null)
-        {
-            return;
-        }
-
-        selectedMark.SetActive(selected);
-    }
-
-    //현재 셀의 equipId 반환(컨트롤러가 선택 비교에 사용)
-    public string GetEquipId()
-    {
-        return equipId;
-    }
-
-    //버튼 클릭 처리
-    private void HandleClick()
-    {
-        if (string.IsNullOrEmpty(equipId))
-        {
-            return;
-        }
-
-        if (onClick != null)
-        {
-            onClick(equipId);
-        }
+        if (selectedFrame != null)
+            selectedFrame.SetActive(selected);
     }
 }
