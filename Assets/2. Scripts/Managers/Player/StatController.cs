@@ -20,6 +20,9 @@ public class StatController
     // 각 소스별 스탯 저장소
     // Dictionary Key값 => SourceKey에 명시된 것을 이용할 것(오타 및 혼동 방지)
     private Dictionary<string, List<StatValue>> _statSources = new Dictionary<string, List<StatValue>>();
+    // 최종 결과 임시 저장용 딕셔너리
+    Dictionary<StatType, double> tempBase = new();
+    Dictionary<StatType, double> tempMult = new();
     // 최종 합산 스탯 캐시
     private Dictionary<StatType, double> _finalStats = new();
     // 스탯 변경을 알리는 이벤트
@@ -50,38 +53,34 @@ public class StatController
     /// </summary>
     private void RefreshFinalStats()
     {
-        // 기존에 있는 타입들의 값을 보존
-        var existingTypes = new List<StatType>(_finalStats.Keys);
+        tempBase.Clear();
+        tempMult.Clear();
 
-        // 각 소스에서 스탯 수집
+        // 각 소스의 type 별 계산
         foreach (var sourceList in _statSources.Values)
         {
             foreach (var stat in sourceList)
             {
-                if (!_finalStats.ContainsKey(stat.type))
-                    _finalStats[stat.type] = 0;
-            }
-        }
-
-        // [조민희] 컬렉션 열거 중 수정 에러 방지를 위해 별도 리스트에서 처리
-        var types = existingTypes.Count > 0 ? existingTypes : new List<StatType>(_finalStats.Keys);
-
-        foreach (var type in types)
-        {
-            double sumBase = 0;
-            double sumMultiplier = 1.0f;
-
-            foreach (var sourceList in _statSources.Values)
-            {
-                var match = sourceList.Find(s => s.type == type);
-                if (match != null)
+                if (!tempBase.ContainsKey(stat.type))
                 {
-                    sumBase += match.baseValue;
-                    sumMultiplier += match.multiplier;
+                    tempBase[stat.type] = 0;
+                    tempBase[stat.type] += stat.baseValue;
+                }
+
+                if (!tempMult.ContainsKey(stat.type))
+                {
+                    tempMult[stat.type] = 0;
+                    tempMult[stat.type] += stat.multiplier;
                 }
             }
+        }
+        
+        _finalStats.Clear();
 
-            _finalStats[type] = sumBase * sumMultiplier;
+        // 계산된 스탯 적용
+        foreach (var type in tempBase.Keys)
+        {
+            _finalStats[type] = tempBase[type] * (1.0 + tempMult[type]);
         }
     }
 

@@ -20,7 +20,7 @@ public class EquipPopup : UIPopup
     [SerializeField] private Sprite weaponSprite;//무기 아이콘
     [SerializeField] private Sprite accessorySprite;//악세 아이콘
 
-    [SerializeField] private EquipPopupController controller;//팝업 내부 컨텐츠
+    [SerializeField] private EquipPopupContentController controller;//팝업 내부 컨텐츠
 
     public override void OnOpen(object param)
     {
