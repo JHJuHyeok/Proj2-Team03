@@ -121,14 +121,14 @@ namespace Combat.Drop
             {
 
                 Vector3 spawnPos = GetRandomSpreadPosition(position);
-                SpawnGoldDrop(spawnPos, 1);
+                SpawnGoldDrop(spawnPos, goldAmount);
             }
 
             // 경험치 드롭 생성
             if (expAmount > 0 && expCount > 0)
             {
                 Vector3 spawnPos = GetRandomSpreadPosition(position);
-                SpawnExpDrop(spawnPos, 1);
+                SpawnExpDrop(spawnPos, expAmount);
             }
         }
 
