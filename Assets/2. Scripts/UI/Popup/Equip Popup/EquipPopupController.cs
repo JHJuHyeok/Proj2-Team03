@@ -135,18 +135,25 @@ public class EquipPopupController : MonoBehaviour
     /// </summary>
     public void SetInitialSelection(string equipId)
     {
-        if (string.IsNullOrEmpty(equipId) || equipmentManager == null) return;
+        Debug.Log($"[EquipPopupController] SetInitialSelection called - equipId: {equipId}");
+
+        if (string.IsNullOrEmpty(equipId) || equipmentManager == null)
+        {
+            Debug.LogWarning($"[EquipPopupController] SetInitialSelection failed - equipId null: {string.IsNullOrEmpty(equipId)}, equipmentManager null: {equipmentManager == null}");
+            return;
+        }
 
         // EquipData 가져오기
         EquipData equip = equipmentManager.GetEquipData(equipId);
         if (equip == null)
         {
-            Debug.LogWarning($"[EquipPopup] 초기 선택 장비를 찾을 수 없음: {equipId}");
+            Debug.LogWarning($"[EquipPopupController] 초기 선택 장비를 찾을 수 없음: {equipId}");
             return;
         }
 
         // InventoryItem 생성 (레벨 포함)
         int level = equipmentManager.GetLevel(equipId);
+        Debug.Log($"[EquipPopupController] Found equip: {equip.GetName()}, level: {level}");
         selectedItem = new InventoryItem(equip, level);
 
         // UI 갱신
@@ -155,9 +162,14 @@ public class EquipPopupController : MonoBehaviour
 
     private void RebuildList()
     {
-        if (equipmentManager == null) return;
+        if (equipmentManager == null)
+        {
+            Debug.LogError("[EquipPopupController] equipmentManager is NULL!");
+            return;
+        }
 
         IReadOnlyList<InventoryItem> inventory = equipmentManager.GetInventory(currentType);
+        Debug.Log($"[EquipPopupController] RebuildList - type: {currentType}, inventory count: {inventory.Count}");
 
         EnsurePool(inventory.Count);
 
@@ -235,10 +247,13 @@ public class EquipPopupController : MonoBehaviour
         }
 
         EquipData equip = item.equipment;
+        Debug.Log($"[EquipPopupController] ApplySelection - equip: {equip?.GetName()}, spriteName: {equip?.spriteName}");
 
         if (detailIcon != null)
         {
-            detailIcon.sprite = ResolveSprite(equip.spriteName);
+            Sprite sprite = ResolveSprite(equip.spriteName);
+            Debug.Log($"[EquipPopupController] detailIcon sprite: {(sprite != null ? sprite.name : "NULL")}");
+            detailIcon.sprite = sprite;
         }
 
         if (detailName != null)
@@ -249,6 +264,7 @@ public class EquipPopupController : MonoBehaviour
         int count = equipmentManager.GetCount(equip.GetId());
         // EquipmentManager에서 최신 레벨 조회 (강화 후 반영)
         int level = equipmentManager.GetLevel(equip.GetId());
+        Debug.Log($"[EquipPopupController] count: {count}, level: {level}");
 
         if (ownedText != null)
         {
