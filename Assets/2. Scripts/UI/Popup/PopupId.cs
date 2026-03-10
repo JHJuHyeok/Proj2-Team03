@@ -4,15 +4,16 @@ public enum PopupId
     None = 0,
 
     // 기존
-    EnhanceStat = 1, // 승급스텟
-    Skill = 2,       //스킬
-    Equip = 3,       //장비
-    Shop = 4,        //상점
-                     
-    Settings = 5,    //설정
-    Mailbox = 6,     //메일함
-    Quest = 7,       //퀘스트
-    Scroll = 8,      //버프스크롤
+    CharactorStats = 1, //캐릭터스탯
+    Skill = 2,          //스킬
+    Equip = 3,          //장비
+    Shop = 4,           //상점
+                        
+    Settings = 5,       //설정
+    Mailbox = 6,        //메일함
+    Quest = 7,          //퀘스트
+    Scroll = 8,         //버프스크롤
+    EnhanceStat = 10,   //승급스텟
 
     // 조민희 추가: 스킬 상세 팝업
     SkillDetail = 9,
