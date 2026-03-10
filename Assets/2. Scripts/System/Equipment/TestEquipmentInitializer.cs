@@ -47,6 +47,46 @@ namespace SlayerLegend.Testing
             { "WP_023", (1, 25) },  // 귀멸의 검: 1개, +25
         };
 
+        // 각 등급별 테스트 악세서리 설정 (조민희 추가)
+        private readonly Dictionary<string, (int count, int level)> testAccessories = new()
+        {
+            // Common (녹슨 팔찌 ~ 오래된 팬던트)
+            { "AC_000", (5, 3) },   // 녹슨 팔찌: 5개, +3
+            { "AC_001", (3, 1) },   // 나태의 귀걸이: 3개, +1
+            { "AC_002", (2, 5) },   // 초조의 반지: 2개, +5
+            { "AC_003", (1, 2) },   // 오래된 팬던트: 1개, +2
+
+            // Uncommon (순수의 팔찌 ~ 기대의 팬던트)
+            { "AC_004", (4, 7) },   // 순수의 팔찌: 4개, +7
+            { "AC_005", (2, 3) },   // 항해의 귀걸이: 2개, +3
+            { "AC_006", (1, 1) },   // 희생의 반지: 1개, +1
+            { "AC_007", (1, 2) },   // 기대의 팬던트: 1개, +2
+
+            // Rare (소원의 팔찌 ~ 갈망의 팬던트)
+            { "AC_008", (3, 10) },  // 소원의 팔찌: 3개, +10
+            { "AC_009", (1, 5) },   // 호박 귀걸이: 1개, +5
+            { "AC_010", (2, 8) },   // 인내의 팔찌: 2개, +8
+            { "AC_011", (1, 3) },   // 갈망의 팬던트: 1개, +3
+
+            // Hero (단련의 팔찌 ~ 지혜의 팬던트)
+            { "AC_012", (2, 15) },  // 단련의 팔찌: 2개, +15
+            { "AC_013", (1, 8) },   // 성숙의 귀걸이: 1개, +8
+            { "AC_014", (1, 5) },   // 연금술의 반지: 1개, +5
+            { "AC_015", (1, 3) },   // 지혜의 팬던트: 1개, +3
+
+            // Legend (야망의 팔찌 ~ 용기의 팬던트)
+            { "AC_016", (1, 20) },  // 야망의 팔찌: 1개, +20
+            { "AC_017", (1, 12) },  // 십자가 귀걸이: 1개, +12
+            { "AC_018", (1, 8) },   // 마왕의 반지: 1개, +8
+            { "AC_019", (1, 5) },   // 용기의 팬던트: 1개, +5
+
+            // Myth (투신의 팔찌 ~ 혼돈의 팬던트)
+            { "AC_020", (1, 30) },  // 투신의 팔찌: 1개, +30
+            { "AC_021", (1, 25) },  // 고요의 귀걸이: 1개, +25
+            { "AC_022", (1, 20) },  // 환상의 반지: 1개, +20
+            { "AC_023", (1, 15) },  // 혼돈의 팬던트: 1개, +15
+        };
+
         private void Awake()
         {
             // AssetBundle 초기화 (Resources.Load보다 먼저)
@@ -94,7 +134,7 @@ namespace SlayerLegend.Testing
             // 새 GameData 생성
             GameData testData = GameData.CreateDefault();
 
-            // 테스트 장비 데이터 추가
+            // 테스트 무기 데이터 추가
             foreach (var kvp in testWeapons)
             {
                 string weaponId = kvp.Key;
@@ -108,10 +148,24 @@ namespace SlayerLegend.Testing
                 };
             }
 
+            // 테스트 악세서리 데이터 추가 (조민희 추가)
+            foreach (var kvp in testAccessories)
+            {
+                string accessoryId = kvp.Key;
+                int count = kvp.Value.count;
+                int level = kvp.Value.level;
+
+                testData.equipInfo[accessoryId] = new Possesion
+                {
+                    count = count,
+                    level = level
+                };
+            }
+
             // DataManager 초기화
             DataManager.Init(testData);
 
-            Debug.Log($"[TestEquipmentInitializer] 테스트 데이터 초기화 완료 - {testWeapons.Count}개 무기 추가됨");
+            Debug.Log($"[TestEquipmentInitializer] 테스트 데이터 초기화 완료 - {testWeapons.Count}개 무기, {testAccessories.Count}개 악세서리 추가됨");
 
             // 로그 출력
             LogTestDataSummary();
@@ -123,7 +177,13 @@ namespace SlayerLegend.Testing
         private void LogTestDataSummary()
         {
             Debug.Log("=== 테스트 장비 데이터 요약 ===");
+            Debug.Log("-- 무기 --");
             foreach (var kvp in testWeapons)
+            {
+                Debug.Log($"  {kvp.Key}: {kvp.Value.count}개, +{kvp.Value.level}");
+            }
+            Debug.Log("-- 악세서리 --");
+            foreach (var kvp in testAccessories)
             {
                 Debug.Log($"  {kvp.Key}: {kvp.Value.count}개, +{kvp.Value.level}");
             }
@@ -137,7 +197,18 @@ namespace SlayerLegend.Testing
         {
             GameData testData = GameData.CreateDefault();
 
+            // 무기 데이터 추가
             foreach (var kvp in testWeapons)
+            {
+                testData.equipInfo[kvp.Key] = new Possesion
+                {
+                    count = kvp.Value.count,
+                    level = kvp.Value.level
+                };
+            }
+
+            // 악세서리 데이터 추가 (조민희 추가)
+            foreach (var kvp in testAccessories)
             {
                 testData.equipInfo[kvp.Key] = new Possesion
                 {

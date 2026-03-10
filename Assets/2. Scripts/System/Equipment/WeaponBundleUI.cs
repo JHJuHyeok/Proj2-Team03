@@ -11,6 +11,7 @@ namespace SlayerLegend.Equipment
     /// 작성자: 조민희
     /// Weapon Bundle 프리팹에 연결하여 장비 정보 표시
     /// [조민희] 클릭 시 EquipPopup 열기 기능 추가
+    /// [조민희] PopupOpenButton과 연동하여 equipId 전달 기능 추가
     /// </summary>
     public class WeaponBundleUI : MonoBehaviour
     {
@@ -31,14 +32,61 @@ namespace SlayerLegend.Equipment
         [SerializeField] private Color mythColor = new Color(1f, 0.8f, 0f);     // 금색
 
         private EquipData currentEquipData;
+        private PopupOpenButton popupOpenButton; // [조민희] PopupOpenButton 참조
 
         private void Awake()
         {
+            // [조민희] PopupOpenButton 컴포넌트 확인
+            popupOpenButton = GetComponent<PopupOpenButton>();
+
+            // [조민희] clickButton이 null이면 자동으로 Button 컴포넌트 찾기
+            if (clickButton == null)
+            {
+                clickButton = GetComponent<Button>();
+            }
+
+            // [조민희] 그래도 없으면 자식에서 Equipment Slot Button 찾기
+            if (clickButton == null)
+            {
+                Transform slotButton = FindDeepChild(transform, "Equipment Slot Button");
+                if (slotButton != null)
+                {
+                    clickButton = slotButton.GetComponent<Button>();
+                }
+            }
+
             // [조민희] 버튼 이벤트 연결
             if (clickButton != null)
             {
                 clickButton.onClick.AddListener(OnClick);
             }
+            else
+            {
+                Debug.LogWarning($"[WeaponBundleUI] Button을 찾을 수 없습니다: {gameObject.name}");
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 깊이 우선 자식 검색
+        /// </summary>
+        private Transform FindDeepChild(Transform parent, string name)
+        {
+            // 직접 자식 확인
+            foreach (Transform child in parent)
+            {
+                if (child.name == name)
+                    return child;
+            }
+
+            // 재귀적으로 검색
+            foreach (Transform child in parent)
+            {
+                Transform found = FindDeepChild(child, name);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
         }
 
         private void OnDestroy()
@@ -56,6 +104,14 @@ namespace SlayerLegend.Equipment
         private void OnClick()
         {
             if (currentEquipData == null) return;
+
+            // [조민희] PopupOpenButton이 있으면 equipId 전달 후 사용
+            if (popupOpenButton != null)
+            {
+                popupOpenButton.SetEquipId(currentEquipData.GetId());
+                popupOpenButton.Open();
+                return;
+            }
 
             // PopupManager를 통해 EquipPopup 열기
             if (PopupManager.Instance != null)
@@ -79,6 +135,12 @@ namespace SlayerLegend.Equipment
             {
                 SetEmptyState();
                 return;
+            }
+
+            // [조민희] PopupOpenButton이 있으면 equipId 미리 설정
+            if (popupOpenButton != null)
+            {
+                popupOpenButton.SetEquipId(data.GetId());
             }
 
             // 아이콘 로드

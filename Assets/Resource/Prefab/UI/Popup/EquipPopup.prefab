@@ -3243,6 +3243,7 @@ GameObject:
   - component: {fileID: 3710593357048864111}
   - component: {fileID: 5767796865946978357}
   - component: {fileID: 5322283029657261415}
+  - component: {fileID: 1896672792459941643}
   m_Layer: 5
   m_Name: EquipPopup
   m_TagString: Untagged
@@ -3303,7 +3304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   equipmentManager: {fileID: 0}
   listRoot: {fileID: 0}
-  cellPrefab: {fileID: 2953735949312346409}
+  cellPrefab: {fileID: 0}
   detailIcon: {fileID: 6271952253650555198}
   detailName: {fileID: 957569977501329667}
   ownedText: {fileID: 5080276254352380061}
@@ -3326,6 +3327,27 @@ MonoBehaviour:
   holdingEffectText2: {fileID: 1206661351814119079}
   holdingEffectText3: {fileID: 4612008620995067665}
   spritePath: Icons
+  accessoryBinder: {fileID: 1896672792459941643}
+--- !u!114 &1896672792459941643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6138389999128184642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91705b746442c45469d49c3543435cb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detailIcon: {fileID: 6271952253650555198}
+  detailName: {fileID: 957569977501329667}
+  gradeText: {fileID: 5080276254352380061}
+  gradeStepText: {fileID: 3153289351486874140}
+  currentEquipIcon: {fileID: 359432533026209447}
+  currentEquipName: {fileID: 2977729620387078419}
+  upgradeIcon: {fileID: 1200056077673643896}
+  upgradeName: {fileID: 4397910209706811596}
 --- !u!1 &6606385964786294591
 GameObject:
   m_ObjectHideFlags: 0
@@ -5472,17 +5494,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fddbf82ee1bcc2f4bb8b03fe1ff7984c, type: 3}
---- !u!114 &2953735949312346409 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1481188720295046706, guid: fddbf82ee1bcc2f4bb8b03fe1ff7984c, type: 3}
-  m_PrefabInstance: {fileID: 4356100663765116699}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d3adb94599bc9f40abee84f632360b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5080276254352380061 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8859493265164384134, guid: fddbf82ee1bcc2f4bb8b03fe1ff7984c, type: 3}

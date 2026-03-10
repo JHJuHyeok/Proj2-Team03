@@ -189,10 +189,20 @@ public class SkillPopupJsonBinder : MonoBehaviour
             return cached;
         }
 
-        string path = iconBasePath + "/" + spriteName;
-        Sprite loaded = Resources.Load<Sprite>(path);
+        // [조민희] Resources.Load 대신 ResourceManager.Instance.LoadSprite 사용
+        Sprite loaded = null;
+        if (SlayerLegend.Resource.ResourceManager.Instance != null)
+        {
+            loaded = SlayerLegend.Resource.ResourceManager.Instance.LoadSprite(spriteName);
+        }
+        else
+        {
+            // Fallback: Resources 폴더에서 로드
+            string path = iconBasePath + "/" + spriteName;
+            loaded = Resources.Load<Sprite>(path);
+        }
 
-        if (cacheSprites)
+        if (cacheSprites && loaded != null)
         {
             spriteCache[spriteName] = loaded;
         }

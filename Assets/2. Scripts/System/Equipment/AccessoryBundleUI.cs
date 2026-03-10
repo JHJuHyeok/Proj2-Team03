@@ -12,6 +12,7 @@ namespace SlayerLegend.Equipment
     /// Accessory Bundle 프리팹에 연결하여 악세서리 정보 표시
     /// WeaponBundleUI보다 단순한 구조 (이름/개수 텍스트 없음)
     /// [조민희] 클릭 시 EquipPopup 열기 기능 추가
+    /// [조민희] PopupOpenButton과 연동하여 equipId 전달 기능 추가
     /// </summary>
     public class AccessoryBundleUI : MonoBehaviour
     {
@@ -23,14 +24,74 @@ namespace SlayerLegend.Equipment
         [SerializeField] private Button clickButton;       // [조민희] 클릭용 버튼
 
         private EquipData currentEquipData;
+        private PopupOpenButton popupOpenButton; // [조민희] PopupOpenButton 참조
 
         private void Awake()
         {
+            // [조민희] PopupOpenButton 컴포넌트 확인
+            popupOpenButton = GetComponent<PopupOpenButton>();
+
+            // [조민희] clickButton이 null이면 자동으로 Button 컴포넌트 찾기
+            if (clickButton == null)
+            {
+                clickButton = GetComponent<Button>();
+            }
+
+            // [조민희] 그래도 없으면 자식에서 Equipment Slot Button 찾기
+            if (clickButton == null)
+            {
+                Transform slotButton = FindDeepChild(transform, "Equipment Slot Button");
+                if (slotButton != null)
+                {
+                    clickButton = slotButton.GetComponent<Button>();
+                }
+            }
+
+            // [조민희] PopupOpenButton이 있으면 그것을 사용하고 중복 호출 방지
+            if (popupOpenButton != null)
+            {
+                // PopupOpenButton의 자체 클릭 리스너 제거 (AccessoryBundleUI.OnClick에서만 제어)
+                Button popupBtn = popupOpenButton.GetComponent<Button>();
+                if (popupBtn != null)
+                {
+                    // PopupOpenButton이 등록한 리스너 제거
+                    popupBtn.onClick.RemoveListener(popupOpenButton.Open);
+                    Debug.Log($"[AccessoryBundleUI] PopupOpenButton의 직접 클릭 리스너 제거됨");
+                }
+            }
+
             // [조민희] 버튼 이벤트 연결
             if (clickButton != null)
             {
                 clickButton.onClick.AddListener(OnClick);
             }
+            else
+            {
+                Debug.LogWarning($"[AccessoryBundleUI] Button을 찾을 수 없습니다: {gameObject.name}");
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 깊이 우선 자식 검색
+        /// </summary>
+        private Transform FindDeepChild(Transform parent, string name)
+        {
+            // 직접 자식 확인
+            foreach (Transform child in parent)
+            {
+                if (child.name == name)
+                    return child;
+            }
+
+            // 재귀적으로 검색
+            foreach (Transform child in parent)
+            {
+                Transform found = FindDeepChild(child, name);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
         }
 
         private void OnDestroy()
@@ -47,12 +108,31 @@ namespace SlayerLegend.Equipment
         /// </summary>
         private void OnClick()
         {
-            if (currentEquipData == null) return;
+            Debug.Log($"[AccessoryBundleUI] OnClick 호출됨 - gameObject: {gameObject.name}, currentEquipData: {(currentEquipData != null ? currentEquipData.GetId() : "NULL")}");
+
+            if (currentEquipData == null)
+            {
+                Debug.LogWarning($"[AccessoryBundleUI] currentEquipData가 null입니다!");
+                return;
+            }
+
+            string equipId = currentEquipData.GetId();
+            Debug.Log($"[AccessoryBundleUI] 클릭한 장비 ID: {equipId}");
+
+            // [조민희] PopupOpenButton이 있으면 equipId 전달 후 사용
+            if (popupOpenButton != null)
+            {
+                Debug.Log($"[AccessoryBundleUI] PopupOpenButton 사용 - equipId: {equipId}");
+                popupOpenButton.SetEquipId(equipId);
+                popupOpenButton.Open();
+                return;
+            }
 
             // PopupManager를 통해 EquipPopup 열기
             if (PopupManager.Instance != null)
             {
-                var param = new EquipPopupParam(EquipTab.Accessory, currentEquipData.GetId());
+                Debug.Log($"[AccessoryBundleUI] PopupManager 직접 호출 - equipId: {equipId}");
+                var param = new EquipPopupParam(EquipTab.Accessory, equipId);
                 PopupManager.Instance.Open(PopupId.Equip, param);
             }
         }
@@ -71,6 +151,12 @@ namespace SlayerLegend.Equipment
             {
                 SetEmptyState();
                 return;
+            }
+
+            // [조민희] PopupOpenButton이 있으면 equipId 미리 설정
+            if (popupOpenButton != null)
+            {
+                popupOpenButton.SetEquipId(data.GetId());
             }
 
             // 아이콘 로드

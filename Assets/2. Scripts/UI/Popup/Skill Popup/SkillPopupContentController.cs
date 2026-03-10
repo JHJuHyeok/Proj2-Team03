@@ -245,6 +245,7 @@ public class SkillPopupContentController : MonoBehaviour
 
     /// <summary>
     /// 스킬 아이콘 로드
+    /// [조민희] Resources.Load 대신 ResourceManager.Instance.LoadSprite 사용
     /// </summary>
     private Sprite ResolveSprite(string spriteName)
     {
@@ -253,6 +254,13 @@ public class SkillPopupContentController : MonoBehaviour
             return null;
         }
 
+        // [조민희] ResourceManager를 통해 스프라이트 로드 (Addressables 지원)
+        if (SlayerLegend.Resource.ResourceManager.Instance != null)
+        {
+            return SlayerLegend.Resource.ResourceManager.Instance.LoadSprite(spriteName);
+        }
+
+        // Fallback: Resources 폴더에서 로드
         return Resources.Load<Sprite>(spriteResourcesBasePath + "/" + spriteName);
     }
 

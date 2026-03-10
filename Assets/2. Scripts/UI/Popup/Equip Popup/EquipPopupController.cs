@@ -68,6 +68,20 @@ public class EquipPopupController : MonoBehaviour
             equipmentManager = EquipmentManager.Instance;
         }
 
+        // [조민희] listRoot가 null이면 자동으로 찾기
+        if (listRoot == null)
+        {
+            listRoot = FindListRoot();
+            if (listRoot != null)
+            {
+                Debug.Log($"[EquipPopupController] listRoot 자동 할당됨: {listRoot.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[EquipPopupController] listRoot를 찾을 수 없습니다! 인스펙터에서 수동으로 연결해주세요.");
+            }
+        }
+
         // 장착 버튼
         if (equipButton != null)
         {
@@ -111,6 +125,67 @@ public class EquipPopupController : MonoBehaviour
             equipmentManager.OnFusionComplete -= OnFusionComplete;
             equipmentManager.OnEquipmentEnhanced -= OnEquipmentEnhanced;
         }
+    }
+
+    /// <summary>
+    /// [조민희] listRoot 자동 찾기
+    /// </summary>
+    private Transform FindListRoot()
+    {
+        // 1. 직접 자식에서 "Content" 이름 검색
+        Transform found = transform.Find("Content");
+        if (found != null) return found;
+
+        // 2. 모든 자식에서 검색 (깊이 우선)
+        found = FindDeepChild(transform, "Content");
+        if (found != null) return found;
+
+        // 3. "ListRoot" 검색
+        found = FindDeepChild(transform, "ListRoot");
+        if (found != null) return found;
+
+        // 4. "Viewport/Content" 패턴 검색
+        found = FindDeepChild(transform, "Viewport");
+        if (found != null)
+        {
+            Transform content = found.Find("Content");
+            if (content != null) return content;
+        }
+
+        // 5. ScrollRect가 있는 자식의 Content 찾기
+        var scrollRects = GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true);
+        foreach (var scroll in scrollRects)
+        {
+            if (scroll.content != null)
+            {
+                return scroll.content;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// [조민희] 깊이 우선 자식 검색
+    /// </summary>
+    private Transform FindDeepChild(Transform parent, string name)
+    {
+        // 직접 자식 확인
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+                return child;
+        }
+
+        // 재귀적으로 검색
+        foreach (Transform child in parent)
+        {
+            Transform found = FindDeepChild(child, name);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     public void SetEquipTab(EquipTab tab)
@@ -190,6 +265,13 @@ public class EquipPopupController : MonoBehaviour
     {
         // [조민희] cellPrefab이 null이면 생성하지 않음
         if (cellPrefab == null) return;
+
+        // [조민희] listRoot가 null이면 경고 후 반환
+        if (listRoot == null)
+        {
+            Debug.LogError("[EquipPopupController] listRoot가 null입니다! 인스펙터에서 연결해주세요.");
+            return;
+        }
 
         while (cellPool.Count < count)
         {

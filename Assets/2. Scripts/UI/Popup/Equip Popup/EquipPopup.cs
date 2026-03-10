@@ -44,12 +44,8 @@ public class EquipPopup : UIPopup
 
         if (controller != null)
         {
-            controller.SetEquipTab(tab);
-            // [조민희] 초기 선택 장비 ID가 있으면 설정
-            if (!string.IsNullOrEmpty(initialEquipId))
-            {
-                controller.SetInitialSelection(initialEquipId);
-            }
+            // [조민희] SetEquipTab에 initialEquipId 전달
+            controller.SetEquipTab(tab, initialEquipId);
         }
     }
 
