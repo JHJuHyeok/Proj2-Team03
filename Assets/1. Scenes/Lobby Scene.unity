@@ -540,26 +540,12 @@ PrefabInstance:
     - target: {fileID: 5041713311786863777, guid: c297f04ac4efa420782250f01bede5e3, type: 3}
       propertyPath: skillController
       value: 
-      objectReference: {fileID: 1277772636}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 9148614385139819272, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1277772635}
-    - targetCorrespondingSourceObject: {fileID: 9148614385139819272, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1277772636}
-    - targetCorrespondingSourceObject: {fileID: 9148614385139819272, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1277772639}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
---- !u!1 &420315758 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9148614385139819272, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
-  m_PrefabInstance: {fileID: 407373074}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &489364032 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7198481429317594604, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
@@ -815,53 +801,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1932413389372372752, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
   m_PrefabInstance: {fileID: 407373074}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1277772635
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420315758}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 582b38fbfb6acec42b8935deb4401a5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1277772636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420315758}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d58caa1ca83687c488b5c339aa3894d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  activeSkills: []
-  passiveSkills: []
---- !u!114 &1277772639
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420315758}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29d713b9c81f9e1448bdfb0a0e1ea613, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  skillController: {fileID: 1277772636}
-  saveKey: SkillGridData
-  loadOnStart: 1
 --- !u!114 &1277772640 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7797056299943163445, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
   m_PrefabInstance: {fileID: 407373074}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420315758}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d58caa1ca83687c488b5c339aa3894d0, type: 3}
@@ -931,7 +876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc6ef8b0f1bedae45b27ecf48ca0315f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillController: {fileID: 1277772636}
+  skillController: {fileID: 0}
   fireProjectile: {fileID: 0}
   waterProjectile: {fileID: 0}
   windProjectile: {fileID: 0}
@@ -1082,6 +1027,23 @@ Canvas:
   m_SortingLayerID: -498307287
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1571985068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489364032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &1584254852
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3681,7 +3643,7 @@ PrefabInstance:
     - target: {fileID: 1476696217862121542, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: skillController
       value: 
-      objectReference: {fileID: 1277772636}
+      objectReference: {fileID: 0}
     - target: {fileID: 1481000771393519852, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -7305,7 +7267,7 @@ PrefabInstance:
     - target: {fileID: 7716015065412067178, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: skillController
       value: 
-      objectReference: {fileID: 1277772636}
+      objectReference: {fileID: 0}
     - target: {fileID: 7729571160529514478, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -7532,6 +7494,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8097345416007515207, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8124365076285841972, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8148687359899251317, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
@@ -8419,6 +8385,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7198481429317594604, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1571985067}
+    - targetCorrespondingSourceObject: {fileID: 7198481429317594604, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1571985068}
     - targetCorrespondingSourceObject: {fileID: 517290703731663396, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 98662970}

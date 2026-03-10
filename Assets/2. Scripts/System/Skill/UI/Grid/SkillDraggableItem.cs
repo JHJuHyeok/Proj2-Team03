@@ -651,5 +651,6 @@ namespace SlayerLegend.Skill.UI.Grid
         {
             return currentDraggingItem != null;
         }
+
     }
 }

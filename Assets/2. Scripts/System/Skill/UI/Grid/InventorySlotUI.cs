@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -31,17 +30,17 @@ namespace SlayerLegend.Skill.UI.Grid
         private SkillData skillData;
         private SkillDraggableItem draggableItem;
         private bool isSelected = false;
-        private bool isPlaced = false;  //그리드 배치 상태
-        private bool isOwned = true;    //스킬 보유 상태 (조민희 추가)
-        private Color originalColor;    //원래 색상 저장
+        private bool isPlaced = false;  // 그리드 배치 상태
+        private bool isOwned = true;    // 스킬 보유 상태 (조민희 추가)
+        private Color originalColor;    // 원래 색상 저장
 
         public event System.Action<InventorySlotUI> OnSlotClicked;
 
         public SkillData SkillData => skillData;
         public SkillDraggableItem DraggableItem => draggableItem;
         public bool IsSelected => isSelected;
-        public bool IsOwned => isOwned;  //스킬 보유 여부 노출 (조민희 추가)
-        public string SkillId => skillData?.id ?? "";  //스킬 ID 노출
+        public bool IsOwned => isOwned;  // 스킬 보유 여부 노출 (조민희 추가)
+        public string SkillId => skillData?.id ?? "";  // 스킬 ID 노출
 
         private void Awake()
         {
@@ -105,7 +104,7 @@ namespace SlayerLegend.Skill.UI.Grid
             if (background != null)
             {
                 originalColor = skillData.type == SkillType.Active ? activeColor : passiveColor;
-                //배치 상태면 placedColor 유지
+                // 배치 상태면 placedColor 유지
                 background.color = isPlaced ? placedColor : originalColor;
             }
 
@@ -142,7 +141,7 @@ namespace SlayerLegend.Skill.UI.Grid
                 }
                 else
                 {
-                    //배치 상태 고려
+                    // 배치 상태 고려
                     background.color = isPlaced ? placedColor : originalColor;
                 }
             }
