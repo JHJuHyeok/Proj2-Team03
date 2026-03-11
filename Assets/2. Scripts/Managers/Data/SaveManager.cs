@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BackEnd;
 
 public interface ISavable
 {
@@ -12,26 +13,29 @@ public interface ISavable
 
 public class SaveManager : Singleton<SaveManager>
 {
-    private bool _isDirty = false;              // 데이터 변경 여부
+    private bool _isDirty = true;              // 데이터 변경 여부
     private CancellationTokenSource _cts;
     private const int saveInterval = 300;       // 자동 저장 간격 5분
 
     private void Start()
     {
-        _cts = new CancellationTokenSource();
+        if (_cts != null) return;
 
+        _cts = new CancellationTokenSource();
         // 저장 루프 시작
         _ = AutoSaveLoop(_cts.Token);       // '_' 는 리턴값을 무시해도 된다는 의미 
     }
 
     private async Task AutoSaveLoop(CancellationToken token)
     {
+        Debug.Log("자동 저장 루프 시작");
         while (!token.IsCancellationRequested)
         {
             try
             {
                 // 5분 대기
                 await Task.Delay(TimeSpan.FromSeconds((double)saveInterval), token);
+                SetDirty();
 
                 // 저장 함수 호출
                 if (_isDirty)
@@ -42,11 +46,19 @@ public class SaveManager : Singleton<SaveManager>
             }
             catch (OperationCanceledException)
             {
-                // 게임 종료 등으로 인해 작업 취소
+                Debug.Log("[SaveManager] 작업 취소");
                 break;
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"[SaveManager] 루프 중 에러 발생 : {e.Message}");
+                await Task.Delay(2000, token);
             }
         }
     }
+
+    // 외부에서 원격 저장 요구 시 호출
+    public void SetDirty() => _isDirty = true;
 
     private void OnDestroy()
     {
@@ -58,24 +70,53 @@ public class SaveManager : Singleton<SaveManager>
         }
     }
 
+    private void OnApplicationPause(bool pause)
+    {
+        // 일시 정지 시 저장
+        if (pause && _isDirty)
+        {
+            _ = SaveToRemote();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _ = SaveToRemote();
+    }
+
     /// <summary>
     /// 서버에 현재 데이터 원격 저장
     /// </summary>
     public async Task SaveToRemote()
     {
-        GameData saveData = DataManager.CurrentSaveData;
-        CurrencyData saveCurrency = CurrencyManager.Instance.currencySave;
+        try
+        {
+            GameData saveData = DataManager.CurrentSaveData;
+            CurrencyData saveCurrency = CurrencyManager.Instance.currencySave;
 
-        // 저장 시간 기록
-        PrepareForSave(saveData);
-        PrepareForSave(saveCurrency);
+            // 저장 시간 기록
+            PrepareForSave(saveData);
+            PrepareForSave(saveCurrency);
 
-        Task saveResultTask = SaveToBackend("UserSave", DataManager.CurrentSaveData);
-        Task saveCurrencyTask = SaveToBackend("UserCurrency", CurrencyManager.Instance.currencySave);
+            Task<bool> saveDataTask = SaveToBackend("UserSave", saveData);
+            Task<bool> saveCurrencyTask = SaveToBackend("UserCurrency", saveCurrency);
 
-        await Task.WhenAll(saveResultTask, saveCurrencyTask);
+            bool[] results = await Task.WhenAll(saveDataTask, saveCurrencyTask);
 
-        _isDirty = false;
+            if (results[0] && results[1])
+            {
+                Debug.Log("<color=green>원격 저장소에 모든 데이터가 저장됐습니다.");
+                _isDirty = false;
+            }
+            else
+            {
+                Debug.LogError("원격 저장에 실패했습니다. 다음 루프에 다시 시도합니다.");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"SaveToRemote 중 예상치 못한 오류 발생: {e.Message}");
+        }
     }
 
     /// <summary>
@@ -90,9 +131,28 @@ public class SaveManager : Singleton<SaveManager>
         File.WriteAllText(Application.persistentDataPath + $"/temp_{data.ToString()}.json", json);
     }
 
-    private async Task SaveToBackend<T>(string tableName, T data) where T : ISavable
+    private async Task<bool> SaveToBackend<T>(string tableName, T data)
     {
-        await BackendManager.Instance.SaveDataAsync(tableName, data);
+        var tcs = new TaskCompletionSource<bool>();
+
+        string inDate = BackendManager.Instance.GetInDateForTable(tableName);
+        string jsonContent = JsonUtility.ToJson(data);
+
+        Param param = new Param();
+        param.Add("Content", jsonContent);
+
+        // 뒤끝 내부의 Async 메서드와 콜백 사용
+        Backend.GameData.UpdateV2(tableName, inDate, Backend.UserInDate, param, callback =>
+        {
+            if (callback.IsSuccess()) tcs.SetResult(true);
+            else
+            {
+                Debug.LogError($"[Backend Error] {callback.GetStatusCode()} : {callback.GetMessage()}");
+                tcs.SetResult(false);
+            }
+        });
+
+        return await tcs.Task;
     }
 
     /// <summary>

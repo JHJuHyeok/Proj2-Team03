@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 
 public class BackendManager : Singleton<BackendManager>
 {
+    private Dictionary<string, string> _tableInDates = new Dictionary<string, string>();
+
     protected override void Awake()
     {
         base.Awake();
@@ -61,9 +63,14 @@ public class BackendManager : Singleton<BackendManager>
                 if (rows.Count > 0)
                 {
                     Debug.Log($"[GetDataAsync] {tableName} 조회 성공: {rows[0]["Content"].ToString()}");
+
+                    string inDate = bro.Rows()[0]["inDate"]["S"].ToString();
+                    SetInDate(tableName, inDate);
+
                     return rows[0]["Content"].ToString();
                 }
                 Debug.Log($"[GetDataAsync] {tableName} 데이터가 존재하지 않습니다.");
+
                 return null;
             }
 
@@ -114,5 +121,30 @@ public class BackendManager : Singleton<BackendManager>
         {
             Debug.LogError($"{tableName} 서버 저장 실패: {bro.GetStatusCode()} / {bro.GetErrorCode()}");
         }
+    }
+
+    /// <summary>
+    /// 서버에서 데이터를 불러올 때의 inDate를 기록
+    /// </summary>
+    public void SetInDate(string tableName, string inDate)
+    {
+        if (_tableInDates.ContainsKey(tableName))
+            _tableInDates[tableName] = inDate;
+        else
+            _tableInDates.Add(tableName, inDate);
+    }
+
+    /// <summary>
+    /// 테이블 별 inDate 반환
+    /// </summary>
+    public string GetInDateForTable(string tableName)
+    {
+        if (_tableInDates.TryGetValue(tableName, out string inDate))
+        {
+            return inDate;
+        }
+
+        Debug.LogError($"[Backend] {tableName}의 inDate를 찾을 수 없습니다. 먼저 데이터를 불러와야 합니다.");
+        return string.Empty;
     }
 }
