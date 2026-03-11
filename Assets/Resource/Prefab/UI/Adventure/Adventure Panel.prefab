@@ -348,14 +348,15 @@ GameObject:
   - component: {fileID: 6827242162657209792}
   - component: {fileID: 5789540866081565721}
   - component: {fileID: 7501548658004710572}
-  - component: {fileID: 1095254684987424930}
+  - component: {fileID: 3887110313841576864}
+  - component: {fileID: 7225382555195785953}
   m_Layer: 5
   m_Name: Adventure Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6827242162657209792
 RectTransform:
   m_ObjectHideFlags: 0
@@ -417,18 +418,46 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!210 &1095254684987424930
-SortingGroup:
+--- !u!223 &3887110313841576864
+Canvas:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5557493103914154927}
   m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: -498307287
-  m_SortingLayer: 3
-  m_SortingOrder: 10
-  m_SortAtRoot: 0
+  m_SortingOrder: -1
+  m_TargetDisplay: 0
+--- !u!114 &7225382555195785953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5557493103914154927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &5940592277176528693
 GameObject:
   m_ObjectHideFlags: 0

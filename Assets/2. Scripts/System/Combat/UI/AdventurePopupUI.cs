@@ -81,9 +81,11 @@ public class AdventurePopupUI : MonoBehaviour
         if (transform.childCount > 0)
             transform.GetChild(0).gameObject.SetActive(true);
 
+        AdventureSaveManager.Load();
         UpdateAreaInfo();
-        UpdateQuestSlots();
         ClearQuestInfo();
+        UpdateQuestSlots();
+        AutoSelectNextQuest();
         UpdateEntryCurrency();
     }
 
@@ -124,6 +126,16 @@ public class AdventurePopupUI : MonoBehaviour
         if (currentAreaData == null || currentAreaData.stageList == null) return;
         if (questSlots == null) return;
 
+        int firstUncleared = currentAreaData.stageList.Count;
+        for (int i = 0; i < currentAreaData.stageList.Count; i++)
+        {
+            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+            {
+                firstUncleared = i;
+                break;
+            }
+        }
+
         for (int i = 0; i < questSlots.Length; i++)
         {
             if (questSlots[i] == null) continue;
@@ -133,6 +145,16 @@ public class AdventurePopupUI : MonoBehaviour
                 questSlots[i].gameObject.SetActive(true);
                 questSlots[i].SetData(currentAreaData.stageList[i], i);
                 questSlots[i].SetSelected(false);
+
+                AdventureSlotState state;
+                if (AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+                    state = AdventureSlotState.Cleared;
+                else if (i == firstUncleared)
+                    state = AdventureSlotState.Available;
+                else
+                    state = AdventureSlotState.Locked;
+
+                questSlots[i].SetSlotState(state);
             }
             else
             {
@@ -145,10 +167,34 @@ public class AdventurePopupUI : MonoBehaviour
     //  퀘스트 선택
     // ═══════════════════════════════════════
 
+    private void AutoSelectNextQuest()
+    {
+        if (currentAreaData == null || currentAreaData.stageList == null) return;
+
+        for (int i = 0; i < currentAreaData.stageList.Count; i++)
+        {
+            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+            {
+                SelectQuest(i);
+                return;
+            }
+        }
+    }
+
+    private bool IsSlotAvailable(int index)
+    {
+        if (AdventureSaveManager.IsCleared(currentAreaData.stageList[index].id)) return false;
+        for (int i = 0; i < index; i++)
+            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id)) return false;
+        return true;
+    }
+
     public void SelectQuest(int index)
     {
         if (currentAreaData == null || currentAreaData.stageList == null) return;
         if (index < 0 || index >= currentAreaData.stageList.Count) return;
+
+        if (!IsSlotAvailable(index)) return;
 
         // 이전 선택 해제
         if (selectedQuestIndex >= 0 && selectedQuestIndex < questSlots.Length && questSlots[selectedQuestIndex] != null)
