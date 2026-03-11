@@ -33,6 +33,8 @@ namespace SlayerLegend.Equipment
 
         private EquipData currentEquipData;
         private PopupOpenButton popupOpenButton; // [조민희] PopupOpenButton 참조
+        private string currentEquipId; // [조민희] 현재 장비 ID (이벤트용)
+        private int currentCount; // [조민희] 현재 보유 수량
 
         private void Awake()
         {
@@ -63,6 +65,12 @@ namespace SlayerLegend.Equipment
             else
             {
                 Debug.LogWarning($"[WeaponBundleUI] Button을 찾을 수 없습니다: {gameObject.name}");
+            }
+
+            // [조민희] 장비 강화 이벤트 구독
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnEquipmentEnhanced += OnEquipmentEnhanced;
             }
         }
 
@@ -95,6 +103,32 @@ namespace SlayerLegend.Equipment
             if (clickButton != null)
             {
                 clickButton.onClick.RemoveListener(OnClick);
+            }
+
+            // [조민희] EquipmentManager 이벤트 구독 해제
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnEquipmentEnhanced -= OnEquipmentEnhanced;
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 강화 이벤트 핸들러
+        /// </summary>
+        /// <param name="equipId">장비 ID</param>
+        /// <param name="newLevel">새로운 레벨</param>
+        private void OnEquipmentEnhanced(string equipId, int newLevel)
+        {
+            // 현재 장비가 강화된 장비인지 확인
+            if (currentEquipData == null || !currentEquipData.GetId().Equals(equipId))
+            {
+                return;
+            }
+
+            // 레벨 텍스트 업데이트
+            if (levelText != null)
+            {
+                levelText.text = $"+{newLevel}";
             }
         }
 

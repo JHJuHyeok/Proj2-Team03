@@ -164,5 +164,24 @@ namespace SlayerLegend.Skill
             skill.Initialize(data);
             return skill;
         }
+
+        // [조민희] 스킬 레벨 갱신 (외부에서 강화했을 때 호출)
+        public void RefreshSkillLevel(string skillId)
+        {
+            // 액티브 스킬에서 해당 ID 찾기
+            var activeSkill = activeSkills.Find(s => s.Data != null && s.Data.id == skillId);
+            if (activeSkill != null)
+            {
+                activeSkill.RefreshLevel();
+                return;
+            }
+
+            // 패시브 스킬에서 해당 ID 찾기
+            var passiveSkill = passiveSkills.Find(s => s.Data != null && s.Data.id == skillId);
+            if (passiveSkill != null)
+            {
+                passiveSkill.RefreshLevel();
+            }
+        }
     }
 }

@@ -56,7 +56,6 @@ namespace SlayerLegend.Equipment
                 {
                     // PopupOpenButton이 등록한 리스너 제거
                     popupBtn.onClick.RemoveListener(popupOpenButton.Open);
-                    Debug.Log($"[AccessoryBundleUI] PopupOpenButton의 직접 클릭 리스너 제거됨");
                 }
             }
 
@@ -68,6 +67,12 @@ namespace SlayerLegend.Equipment
             else
             {
                 Debug.LogWarning($"[AccessoryBundleUI] Button을 찾을 수 없습니다: {gameObject.name}");
+            }
+
+            // [조민희] 장비 강화 이벤트 구독
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnEquipmentEnhanced += OnEquipmentEnhanced;
             }
         }
 
@@ -101,6 +106,33 @@ namespace SlayerLegend.Equipment
             {
                 clickButton.onClick.RemoveListener(OnClick);
             }
+
+            // [조민희] EquipmentManager 이벤트 구독 해제
+            if (EquipmentManager.Instance != null)
+            {
+                EquipmentManager.Instance.OnEquipmentEnhanced -= OnEquipmentEnhanced;
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 강화 이벤트 핸들러
+        /// </summary>
+        /// <param name="equipId">장비 ID</param>
+        /// <param name="newLevel">새로운 레벨</param>
+        private void OnEquipmentEnhanced(string equipId, int newLevel)
+        {
+            // 현재 장비가 강화된 장비인지 확인
+            if (currentEquipData == null || !currentEquipData.GetId().Equals(equipId))
+            {
+                return;
+            }
+
+            // 레벨 텍스트 업데이트
+            if (enhanceText != null)
+            {
+                enhanceText.text = $"+{newLevel}";
+                enhanceText.gameObject.SetActive(newLevel > 0);
+            }
         }
 
         /// <summary>
@@ -108,8 +140,6 @@ namespace SlayerLegend.Equipment
         /// </summary>
         private void OnClick()
         {
-            Debug.Log($"[AccessoryBundleUI] OnClick 호출됨 - gameObject: {gameObject.name}, currentEquipData: {(currentEquipData != null ? currentEquipData.GetId() : "NULL")}");
-
             if (currentEquipData == null)
             {
                 Debug.LogWarning($"[AccessoryBundleUI] currentEquipData가 null입니다!");
@@ -117,12 +147,10 @@ namespace SlayerLegend.Equipment
             }
 
             string equipId = currentEquipData.GetId();
-            Debug.Log($"[AccessoryBundleUI] 클릭한 장비 ID: {equipId}");
 
             // [조민희] PopupOpenButton이 있으면 equipId 전달 후 사용
             if (popupOpenButton != null)
             {
-                Debug.Log($"[AccessoryBundleUI] PopupOpenButton 사용 - equipId: {equipId}");
                 popupOpenButton.SetEquipId(equipId);
                 popupOpenButton.Open();
                 return;
@@ -131,7 +159,6 @@ namespace SlayerLegend.Equipment
             // PopupManager를 통해 EquipPopup 열기
             if (PopupManager.Instance != null)
             {
-                Debug.Log($"[AccessoryBundleUI] PopupManager 직접 호출 - equipId: {equipId}");
                 var param = new EquipPopupParam(EquipTab.Accessory, equipId);
                 PopupManager.Instance.Open(PopupId.Equip, param);
             }
@@ -212,6 +239,23 @@ namespace SlayerLegend.Equipment
             {
                 equipmentIcon.enabled = false;
             }
+        }
+
+        /// <summary>
+        /// 등급에 따른 색상 반환
+        /// </summary>
+        private Color GetGradeColor(EquipGrade grade)
+        {
+            return grade switch
+            {
+                EquipGrade.Common => Color.white,
+                EquipGrade.Uncommon => Color.green,
+                EquipGrade.Rare => Color.blue,
+                EquipGrade.Hero => new Color(0.6f, 0.2f, 0.8f), // 보라색
+                EquipGrade.Legend => new Color(1f, 0.5f, 0f),   // 주황색
+                EquipGrade.Myth => new Color(1f, 0.8f, 0f),     // 금색
+                _ => Color.white
+            };
         }
 
         /// <summary>

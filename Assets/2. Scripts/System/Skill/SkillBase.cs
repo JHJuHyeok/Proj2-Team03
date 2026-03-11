@@ -40,12 +40,50 @@ namespace SlayerLegend.Skill
         public virtual void Initialize(SkillData data)
         {
             skillData = data;
-            currentLevel = 1;
+
+            // [조민희] 저장된 스킬 레벨 불러오기
+            currentLevel = GetSavedLevel(data.id);
+        }
+
+        /// <summary>
+        /// [조민희] 저장 데이터에서 스킬 레벨 조회
+        /// </summary>
+        protected int GetSavedLevel(string skillId)
+        {
+            if (DataManager.CurrentSaveData?.skillInfo == null)
+            {
+                return 1; // 기본 레벨
+            }
+
+            if (DataManager.CurrentSaveData.skillInfo.TryGetValue(skillId, out var info))
+            {
+                return info.level > 0 ? info.level : 1;
+            }
+
+            return 1; // 기본 레벨
         }
 
         protected virtual void OnLevelUp()
         {
             Debug.Log($"{skillData.name} 레벨업! 현재 레벨: {currentLevel}");
+        }
+
+        /// <summary>
+        /// [조민희] 저장 데이터에서 레벨을 다시 불러와 갱신
+        /// 외부(UI)에서 스킬 레벨을 변경했을 때 호출
+        /// </summary>
+        public void RefreshLevel()
+        {
+            if (skillData == null) return;
+
+            int savedLevel = GetSavedLevel(skillData.id);
+            if (savedLevel != currentLevel)
+            {
+                int oldLevel = currentLevel;
+                currentLevel = savedLevel;
+                OnLevelUp(); // 레벨 변경 알림
+                Debug.Log($"[SkillBase] {skillData.name} 레벨 갱신: {oldLevel} → {currentLevel}");
+            }
         }
 
         public override string ToString()
