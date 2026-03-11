@@ -111,6 +111,14 @@ public class BossMonster : MonsterBase
             _currentHp -= damage;
             _currentHp = System.Math.Max(0, _currentHp);
 
+            // 데미지 폰트 표시
+            var prefab = CombatManager.Instance?.DamageNumberPrefab;
+            if (prefab != null)
+                prefab.Spawn(transform.position, damage.ToString("N0"));
+
+            // StageUI HP 게이지 업데이트
+            CombatManager.Instance?.UpdateBossHpRatio((float)HPRatio);
+
             if (_currentHp <= 0)
                 Die();
 

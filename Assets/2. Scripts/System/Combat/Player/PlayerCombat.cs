@@ -30,12 +30,8 @@ public class PlayerCombat : MonoBehaviour
 
         if (playerStats == null)
         {
-            Debug.LogError("[PlayerCombat] Missing required components!");
             enabled = false;
         }
-
-        if (_animator == null)
-            Debug.LogWarning("[PlayerCombat] Animator not found. Attack animations will not play.");
     }
 
     private void OnEnable()
@@ -64,13 +60,10 @@ public class PlayerCombat : MonoBehaviour
         if (!autoAttackEnabled || playerStats.IsDead)
             return;
 
-        // 현재 타겟이 유효하지 않으면 타겟 갱신
-        if (!IsTargetValid())
+        // 매 프레임 맨 앞의 적을 타겟으로 갱신 (풀 재활용 시 뒤로 간 적을 계속 쫓는 문제 방지)
+        if (CombatManager.Instance != null && CombatManager.Instance.SpawnManager != null)
         {
-            if (CombatManager.Instance != null && CombatManager.Instance.SpawnManager != null)
-            {
-                _currentTarget = CombatManager.Instance.SpawnManager.GetFirstEnemy();
-            }
+            _currentTarget = CombatManager.Instance.SpawnManager.GetFirstEnemy();
         }
 
         // 현재 타겟 공격 시도

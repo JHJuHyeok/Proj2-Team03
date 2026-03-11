@@ -1,30 +1,41 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
+using System.Collections;
 
 // 스테이지 관련 UI를 관리하는 매니저
 public class StageUIManager : MonoBehaviour
 {
+    public static StageUIManager Instance { get; private set; }
+
     [Header("일반 전투 패널")]
     [SerializeField] private GameObject normalPanel;
     [SerializeField] private TMP_Text normalStageIdText;
     [SerializeField] private TMP_Text normalStageNameText;
-    [SerializeField] private RectTransform progressGauge;
-    [SerializeField] private float progressGaugeMaxWidth = 480f;
+    [SerializeField] private Image progressGauge;
 
     [Header("보스 전투 패널")]
     [SerializeField] private GameObject bossPanel;
     [SerializeField] private TMP_Text bossStageIdText;
     [SerializeField] private TMP_Text bossStageNameText;
-    [SerializeField] private RectTransform bossTimerGauge;
-    [SerializeField] private RectTransform bossHpGauge;
-    [SerializeField] private float bossGaugeMaxWidth = 450f;
+    [SerializeField] private Image bossTimerGauge;
+    [SerializeField] private Image bossHpGauge;
+
+    [Header("트랜지션")]
+    [SerializeField] private CanvasGroup transitionPanel;
+    [SerializeField] private float transitionDuration = 0.3f;
 
     [Header("버튼")]
     [SerializeField] private Button areaPopupButton;
     [SerializeField] private Button bossButton;
 
     private AreaUIManager areaUIManager;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -33,14 +44,16 @@ public class StageUIManager : MonoBehaviour
         {
             CombatManager.Instance.OnCombatStateChanged += OnCombatStateChanged;
             CombatManager.Instance.StageManager.OnProgressChanged += OnProgressChanged;
-            
+            CombatManager.Instance.OnAdventureMonsterCountChanged += OnAdventureMonsterCountChanged;
+            CombatManager.Instance.OnAdventureBossPhaseStarted += OnAdventureBossPhaseStarted;
+
             // 초기 UI 설정
             UpdateStageInfo();
             SetNormalPanelActive(true);
             SetBossPanelActive(false);
-            
+
             // 진행도 게이지 초기화 (0%에서 시작)
-            SetGaugeWidth(progressGauge, 0f);
+            SetGaugeFill(progressGauge, 0f);
         }
 
         areaUIManager = FindFirstObjectByType<AreaUIManager>();
@@ -56,6 +69,8 @@ public class StageUIManager : MonoBehaviour
         if (CombatManager.Instance != null)
         {
             CombatManager.Instance.OnCombatStateChanged -= OnCombatStateChanged;
+            CombatManager.Instance.OnAdventureMonsterCountChanged -= OnAdventureMonsterCountChanged;
+            CombatManager.Instance.OnAdventureBossPhaseStarted -= OnAdventureBossPhaseStarted;
             if (CombatManager.Instance.StageManager != null)
             {
                 CombatManager.Instance.StageManager.OnProgressChanged -= OnProgressChanged;
@@ -65,12 +80,20 @@ public class StageUIManager : MonoBehaviour
 
     private void Update()
     {
-        // 보스전일 때만 타이머와 HP 게이지 업데이트
         if (CombatManager.Instance == null) return;
-        if (CombatManager.Instance.CurrentState != CombatState.BossBattle) return;
 
-        UpdateBossTimerGauge();
-        UpdateBossHpGauge();
+        var state = CombatManager.Instance.CurrentState;
+        if (state == CombatState.BossBattle)
+        {
+            UpdateBossTimerGauge();
+            UpdateBossHpGauge();
+        }
+        else if (state == CombatState.Adventure)
+        {
+            UpdateAdventureTimerGauge();
+            if (CombatManager.Instance.IsAdventureBossPhase)
+                UpdateBossHpGauge();
+        }
     }
 
     // 스테이지 정보 업데이트 (양쪽 패널 모두)
@@ -95,66 +118,111 @@ public class StageUIManager : MonoBehaviour
     // 전투 상태 변경 시 호출
     private void OnCombatStateChanged(CombatState newState)
     {
-        bool isBossBattle = newState == CombatState.BossBattle;
-        SetNormalPanelActive(!isBossBattle);
-        SetBossPanelActive(isBossBattle);
+        SetNormalPanelActive(newState == CombatState.Farming);
+        SetBossPanelActive(newState == CombatState.BossBattle || newState == CombatState.Adventure);
 
-        if (isBossBattle)
+        switch (newState)
         {
-            // 보스전 시작 시 보스 게이지 초기화 (100%)
-            SetGaugeWidth(bossTimerGauge, bossGaugeMaxWidth);
-            SetGaugeWidth(bossHpGauge, bossGaugeMaxWidth);
-        }
-        else
-        {
-            // 일반 전투로 전환 시 진행도 게이지 초기화 (0%)
-            SetGaugeWidth(progressGauge, 0f);
+            case CombatState.BossBattle:
+                SetGaugeFill(bossTimerGauge, 1f);
+                SetGaugeFill(bossHpGauge, 1f);
+                break;
+            case CombatState.Adventure:
+                SetGaugeFill(bossTimerGauge, 1f); // 타이머 100%
+                SetGaugeFill(bossHpGauge, 1f);    // 남은 몬스터 100%
+                break;
+            case CombatState.Farming:
+                SetGaugeFill(progressGauge, 0f);
+                break;
         }
 
-        // 스테이지 정보 갱신
         UpdateStageInfo();
     }
 
     // 진행도 변경 시 호출 (일반 전투)
     private void OnProgressChanged(float progressRatio)
     {
-        if (progressGauge == null) return;
-        
-        float newWidth = progressGaugeMaxWidth * progressRatio;
-        SetGaugeWidth(progressGauge, newWidth);
+        SetGaugeFill(progressGauge, progressRatio);
     }
 
     // 보스 타이머 게이지 업데이트
     private void UpdateBossTimerGauge()
     {
-        if (bossTimerGauge == null) return;
-
-        float remaining = CombatManager.Instance.BossTimeRemaining;
-        float maxTime = CombatManager.BOSS_TIME_LIMIT;
-        float ratio = Mathf.Clamp01(remaining / maxTime);
-        
-        float newWidth = bossGaugeMaxWidth * ratio;
-        SetGaugeWidth(bossTimerGauge, newWidth);
+        float ratio = Mathf.Clamp01(CombatManager.Instance.BossTimeRemaining / CombatManager.BOSS_TIME_LIMIT);
+        SetGaugeFill(bossTimerGauge, ratio);
     }
 
     // 보스 HP 게이지 업데이트
     private void UpdateBossHpGauge()
     {
-        if (bossHpGauge == null) return;
-
-        float ratio = CombatManager.Instance.BossHpRatio;
-        float newWidth = bossGaugeMaxWidth * ratio;
-        SetGaugeWidth(bossHpGauge, newWidth);
+        SetGaugeFill(bossHpGauge, CombatManager.Instance.BossHpRatio);
     }
 
-    // 게이지 너비 설정
-    private void SetGaugeWidth(RectTransform gauge, float width)
+    // 모험 타이머 게이지 (bossTimerGauge 재사용)
+    private void UpdateAdventureTimerGauge()
+    {
+        float ratio = Mathf.Clamp01(
+            CombatManager.Instance.AdventureTimeRemaining / CombatManager.ADVENTURE_TIME_LIMIT);
+        SetGaugeFill(bossTimerGauge, ratio);
+    }
+
+    // 남은 몬스터 수 게이지 (bossHpGauge 재사용) — 100%→0%로 감소
+    private void OnAdventureMonsterCountChanged(int killed, int total)
+    {
+        if (total <= 0) return;
+        SetGaugeFill(bossHpGauge, (float)(total - killed) / total);
+    }
+
+    // 모험 보스 페이즈 시작 → bossHpGauge 100% 리셋
+    private void OnAdventureBossPhaseStarted()
+    {
+        SetGaugeFill(bossHpGauge, 1f);
+    }
+
+    public void PlayFadeTransition(Action midAction)
+    {
+        StartCoroutine(FadeTransition(midAction));
+    }
+
+    private IEnumerator FadeTransition(Action midAction)
+    {
+        // Fade in (transparent → black)
+        if (transitionPanel != null)
+        {
+            transitionPanel.gameObject.SetActive(true);
+            float t = 0f;
+            while (t < transitionDuration)
+            {
+                transitionPanel.alpha = t / transitionDuration;
+                t += Time.deltaTime;
+                yield return null;
+            }
+            transitionPanel.alpha = 1f;
+        }
+
+        midAction?.Invoke();
+        yield return null; // 1프레임 대기 (스폰/씬 정리 반영)
+
+        // Fade out (black → transparent)
+        if (transitionPanel != null)
+        {
+            float t = 0f;
+            while (t < transitionDuration)
+            {
+                transitionPanel.alpha = 1f - (t / transitionDuration);
+                t += Time.deltaTime;
+                yield return null;
+            }
+            transitionPanel.alpha = 0f;
+            transitionPanel.gameObject.SetActive(false);
+        }
+    }
+
+    // 게이지 채우기 설정
+    private void SetGaugeFill(Image gauge, float ratio)
     {
         if (gauge == null) return;
-        
-        Vector2 sizeDelta = gauge.sizeDelta;
-        sizeDelta.x = width;
-        gauge.sizeDelta = sizeDelta;
+        gauge.fillAmount = Mathf.Clamp01(ratio);
     }
 
     // 일반 패널 활성화/비활성화

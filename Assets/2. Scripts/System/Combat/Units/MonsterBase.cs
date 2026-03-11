@@ -58,10 +58,10 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         if (_animator == null)
             _animator = GetComponent<Animator>();
 
-        Debug.Log($"[MonsterBase] 몬스터 데이터를 로드합니다: {data.name}");
         // Sprite Load & 스프라이트 프리로드
         if (!string.IsNullOrEmpty(data.spriteName))
         {
+            Debug.Log($"data.spriteName {data.spriteName}");
             LoadSprite(data.spriteName);
             PreloadSprites(data.spriteName);
         }
@@ -72,7 +72,6 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
 
     protected async void LoadSprite(string spriteName)
     {
-        Debug.Log($"[MonsterBase] 스프라이트를 로드합니다: {spriteName}");
 
         Sprite sprite = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2", spriteName);
         if (sprite != null && _renderer != null)
@@ -92,25 +91,38 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
     /// </summary>
     protected async void PreloadSprites(string spriteName)
     {
-        // "001_13" → "001" 추출
-        int underscoreIndex = spriteName.LastIndexOf('_');
-        if (underscoreIndex < 0)
+        // RewardBox 판별: SpawnManager의 rewardBoxId와 일치하거나 언더스코어가 없는 스프라이트
+        string rewardBoxId = CombatManager.Instance?.SpawnManager?.RewardBoxId;
+        bool isRewardBox = (_data != null && _data.id == rewardBoxId)
+                        || spriteName.LastIndexOf('_') < 0;
+
+        if (isRewardBox)
         {
-            Debug.LogWarning($"[MonsterBase] 스프라이트 이름 형식이 올바르지 않습니다: {spriteName}");
+            // 단일 스프라이트를 전체 프레임에 적용
+            _sprites = new Sprite[TOTAL_FRAME_COUNT];
+            string atlasPath = SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2";
+            Sprite single = await SpriteManager.GetSprite(atlasPath, spriteName);
+            if (single != null)
+            {
+                for (int i = 0; i < TOTAL_FRAME_COUNT; i++)
+                    _sprites[i] = single;
+            }
             return;
         }
+
+        // "001_13" → "001" 추출
+        int underscoreIndex = spriteName.LastIndexOf('_');
         _spriteBaseName = spriteName.Substring(0, underscoreIndex);
 
         _sprites = new Sprite[TOTAL_FRAME_COUNT];
-        string atlasPath = SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2";
+        string atlas = SpriteManager.AtlasBase + "Atlas_Monster.spriteatlasv2";
 
         for (int i = 0; i < TOTAL_FRAME_COUNT; i++)
         {
             string frameName = $"{_spriteBaseName}_{i}";
-            _sprites[i] = await SpriteManager.GetSprite(atlasPath, frameName);
+            _sprites[i] = await SpriteManager.GetSprite(atlas, frameName);
         }
 
-        Debug.Log($"[MonsterBase] 스프라이트 프리로드 완료: {_spriteBaseName} ({TOTAL_FRAME_COUNT}프레임)");
     }
 
     // ──────────────────────────────────────
