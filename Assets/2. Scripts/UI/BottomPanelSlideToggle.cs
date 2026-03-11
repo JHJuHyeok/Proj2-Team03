@@ -329,6 +329,15 @@ public class BottomPanelSlideToggle : MonoBehaviour
         OnShownChanged?.Invoke(false);
     }
 
+    public void RefreshLayoutAndPositions()
+    {
+        positionsCached = false;
+        RebuildAndCachePositions();
+
+        float targetY = isShown ? shownY : hiddenY;
+        SetY(targetY);
+    }
+
     //해상도/안전영역/캔버스 크기 바뀌면 코너 기준 재계산 필요
     private void OnRectTransformDimensionsChange()
     {

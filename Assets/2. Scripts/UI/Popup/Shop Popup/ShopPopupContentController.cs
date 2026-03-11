@@ -1,35 +1,48 @@
 ﻿using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /*
 [승문]
 ShopPopupContentController
--상점/소환 팝업 내부 UI 컨트롤러
--Summon Panel 아래 미리 배치된 슬롯(최대31개)을 자동 수집해서 사용
--SetTab으로 현재 탭을 갱신하고 슬롯 UI를 다시 바인딩
--Provider가 ShopSummonSystem이면 현재탭도 같이 전달해서 하단 뽑기버튼이 탭을 몰라도 동작하게 함
+- 상점/소환 팝업 내부 UI 컨트롤러
+- Summon Panel 아래 미리 배치된 슬롯을 자동 수집해서 사용
+- SetTab으로 현재 탭을 갱신하고 슬롯 UI를 다시 바인딩
+- ShopSummonSystem의 OnSummonResult를 구독해서
+  1회 / 11회 / 33회 결과 개수만큼만 슬롯을 표시
+- Weapon / Accessory는 인스펙터 Sprite 배열 사용
+- Skill은 Resources/Skill/skillicon 에서 자동 로드
+- Accessory는 JSON spriteName(acce_00)를 실제 Sprite 이름(Acc_000)으로 변환해서 찾음
 */
 public class ShopPopupContentController : MonoBehaviour
 {
     [Header("Auto Connect")]
-    [SerializeField] private Transform slotRoot;//Summon Panel(슬롯들의 부모)
-    [SerializeField] private GridLayoutGroup grid;//Summon Panel의 GridLayoutGroup(선택)
+    [SerializeField] private Transform slotRoot; // Summon Panel(슬롯들의 부모)
+    [SerializeField] private GridLayoutGroup grid; // Summon Panel의 GridLayoutGroup(선택)
 
     [Header("Provider")]
-    [SerializeField] private MonoBehaviour providerBehaviour;//IShopItemProvider구현체(선택)
+    [SerializeField] private MonoBehaviour providerBehaviour; // IShopItemProvider 구현체
 
-    [Header("Sprite")]
-    [SerializeField] private string spriteResourcesBasePath = "Icons";//Resources 경로
+    [Header("Sprite Database (Inspector)")]
+    [SerializeField] private Sprite[] weaponSprites;     // 무기 스프라이트
+    [SerializeField] private Sprite[] accessorySprites;  // 악세 스프라이트
 
-    private readonly List<ShopItemSlotView> slots = new List<ShopItemSlotView>(31);
-    private readonly Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>(128);
+    [Header("Skill Sprite Auto Load")]
+    [Tooltip("Resources 기준 경로")]
+    [SerializeField] private string skillSpriteResourcesPath = "Skill/skillicon";
+
+    [Header("Slot Limit")]
+    [SerializeField] private int maxSlotCount = 33; // 1/11/33 대응
+
+    private readonly List<ShopItemSlotView> slots = new List<ShopItemSlotView>(33);
+    private readonly Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>(256);
+    private readonly Dictionary<string, Sprite> skillSpriteMap = new Dictionary<string, Sprite>(128);
+    private readonly List<ShopItemInfo> summonResults = new List<ShopItemInfo>(33);
 
     private IShopItemProvider provider;
     private ShopSummonSystem summonSystem;
     private ShopTab currentTab;
-    private int lastCount;
+    private bool showingSummonResults;
 
     private void Awake()
     {
@@ -38,29 +51,44 @@ public class ShopPopupContentController : MonoBehaviour
             slotRoot = transform;
         }
 
-        if (grid == null)
+        if (grid == null && slotRoot != null)
         {
             grid = slotRoot.GetComponent<GridLayoutGroup>();
         }
 
         CollectSlots();
-
         ResolveProvider();
+        LoadSkillSprites();
+
+        if (summonSystem != null)
+        {
+            summonSystem.OnSummonResult += HandleSummonResult;
+        }
 
         currentTab = ShopTab.Weapon;
-        lastCount = 0;
+        showingSummonResults = false;
 
         ApplySlots(0);
 
         Debug.Log("[ShopPopupContentController] Awake completed.");
     }
 
-    //팝업에서 탭 전달받아 UI 갱신
+    private void OnDestroy()
+    {
+        if (summonSystem != null)
+        {
+            summonSystem.OnSummonResult -= HandleSummonResult;
+        }
+    }
+
+    /// <summary>
+    /// 팝업에서 탭 전달받아 UI 갱신
+    /// </summary>
     public void SetTab(ShopTab tab)
     {
         currentTab = tab;
+        showingSummonResults = false;
 
-        //하단 뽑기 버튼이 탭을 몰라도 되게 시스템에 현재탭 전달
         if (summonSystem != null)
         {
             summonSystem.SetCurrentTab(tab);
@@ -71,7 +99,9 @@ public class ShopPopupContentController : MonoBehaviour
         Debug.Log("[ShopPopupContentController] SetTab applied.");
     }
 
-    //현재 탭 데이터로 슬롯 갱신
+    /// <summary>
+    /// 현재 탭 기준으로 기본 목록 표시
+    /// </summary>
     private void Rebuild()
     {
         if (provider == null)
@@ -81,17 +111,52 @@ public class ShopPopupContentController : MonoBehaviour
         }
 
         int count = provider.GetCount(currentTab);
-        if (count > 31)
+        if (count > maxSlotCount)
         {
-            Debug.LogWarning("[ShopPopupContentController] Count over 31. Clamped.");
-            count = 31;
+            Debug.LogWarning("[ShopPopupContentController] Count over maxSlotCount. Clamped.");
+            count = maxSlotCount;
         }
 
-        lastCount = count;
-        ApplySlots(lastCount);
+        ApplySlots(count);
     }
 
-    //슬롯 SetActive+레이아웃+바인딩
+    /// <summary>
+    /// 소환 결과 이벤트 수신
+    /// </summary>
+    private void HandleSummonResult(ShopTab tab, IReadOnlyList<ShopItemInfo> results)
+    {
+        currentTab = tab;
+        showingSummonResults = true;
+
+        if (summonSystem != null)
+        {
+            summonSystem.SetCurrentTab(tab);
+        }
+
+        summonResults.Clear();
+
+        if (results != null)
+        {
+            int count = results.Count;
+            if (count > maxSlotCount)
+            {
+                count = maxSlotCount;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                summonResults.Add(results[i]);
+            }
+        }
+
+        ApplySummonResults();
+
+        Debug.Log("[ShopPopupContentController] Summon results applied. Count=" + summonResults.Count);
+    }
+
+    /// <summary>
+    /// 기본 목록 표시
+    /// </summary>
     private void ApplySlots(int count)
     {
         int slotCount = slots.Count;
@@ -117,8 +182,9 @@ public class ShopPopupContentController : MonoBehaviour
             bool active = i < count;
             slot.gameObject.SetActive(active);
 
-            if (active == false)
+            if (!active)
             {
+                slot.Clear();
                 continue;
             }
 
@@ -127,10 +193,59 @@ public class ShopPopupContentController : MonoBehaviour
         }
     }
 
-    //provider 기반 바인딩
+    /// <summary>
+    /// 소환 결과 표시
+    /// </summary>
+    private void ApplySummonResults()
+    {
+        int slotCount = slots.Count;
+        if (slotCount <= 0)
+        {
+            Debug.LogError("[ShopPopupContentController] Slots empty.");
+            return;
+        }
+
+        int count = summonResults.Count;
+        if (count > slotCount)
+        {
+            count = slotCount;
+        }
+
+        for (int i = 0; i < slotCount; i++)
+        {
+            ShopItemSlotView slot = slots[i];
+            if (slot == null)
+            {
+                continue;
+            }
+
+            bool active = i < count;
+            slot.gameObject.SetActive(active);
+
+            if (!active)
+            {
+                slot.Clear();
+                continue;
+            }
+
+            slot.ApplyTabLayout(currentTab);
+
+            ShopItemInfo info = summonResults[i];
+            Sprite icon = ResolveSprite(info.SpriteName);
+
+            string primary = info.Name;
+            string secondary = info.PriceText;
+
+            slot.Bind(icon, primary, secondary, info.CanBuy, null);
+        }
+    }
+
+    /// <summary>
+    /// Provider에서 데이터 받아 슬롯 바인딩
+    /// </summary>
     private void BindFromProvider(ShopItemSlotView slot, int index)
     {
-        if (provider == null)
+        if (provider == null || slot == null)
         {
             return;
         }
@@ -141,19 +256,26 @@ public class ShopPopupContentController : MonoBehaviour
         string primary = info.Name;
         string secondary = info.PriceText;
 
-        //슬롯 클릭 구매는 지금 구조에서 안 쓰면 null로 둬도 됨
         slot.Bind(icon, primary, secondary, info.CanBuy, null);
     }
 
-    //슬롯 자동 수집(자식 순서대로,최대31개)
+    /// <summary>
+    /// Summon Panel 아래 자식 슬롯 자동 수집
+    /// </summary>
     private void CollectSlots()
     {
         slots.Clear();
 
+        if (slotRoot == null)
+        {
+            Debug.LogError("[ShopPopupContentController] slotRoot is null.");
+            return;
+        }
+
         int childCount = slotRoot.childCount;
         for (int i = 0; i < childCount; i++)
         {
-            if (slots.Count >= 31)
+            if (slots.Count >= maxSlotCount)
             {
                 break;
             }
@@ -181,11 +303,73 @@ public class ShopPopupContentController : MonoBehaviour
         }
         else
         {
-            Debug.Log("[ShopPopupContentController] Slots collected.");
+            Debug.Log("[ShopPopupContentController] Slots collected. Count=" + slots.Count);
         }
     }
 
-    //스프라이트 로드+캐시
+    /// <summary>
+    /// 스킬 스프라이트 자동 로드
+    /// Resources/Skill/skillicon 아래에 있는 Sprite 전부 수집
+    /// </summary>
+    private void LoadSkillSprites()
+    {
+        skillSpriteMap.Clear();
+
+        Sprite[] sprites = Resources.LoadAll<Sprite>(skillSpriteResourcesPath);
+
+        if (sprites == null || sprites.Length <= 0)
+        {
+            Debug.LogWarning("[ShopPopupContentController] No skill sprites found at: " + skillSpriteResourcesPath);
+            return;
+        }
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            Sprite sp = sprites[i];
+            if (sp == null)
+            {
+                continue;
+            }
+
+            if (!skillSpriteMap.ContainsKey(sp.name))
+            {
+                skillSpriteMap.Add(sp.name, sp);
+            }
+        }
+
+        Debug.Log("[ShopPopupContentController] Skill sprites loaded: " + skillSpriteMap.Count);
+    }
+
+    /// <summary>
+    /// JSON의 악세 spriteName을 실제 Sprite 이름으로 변환
+    /// 예: acce_00 -> Acc_000
+    /// </summary>
+    private string ConvertAccessorySpriteName(string jsonSpriteName)
+    {
+        if (string.IsNullOrEmpty(jsonSpriteName))
+        {
+            return jsonSpriteName;
+        }
+
+        if (jsonSpriteName.StartsWith("acce_"))
+        {
+            string numberPart = jsonSpriteName.Substring(5);
+
+            if (int.TryParse(numberPart, out int number))
+            {
+                return "Acc_" + number.ToString("000");
+            }
+        }
+
+        return jsonSpriteName;
+    }
+
+    /// <summary>
+    /// spriteName으로 스프라이트 찾기
+    /// - Skill: Resources 자동 로드 맵 사용
+    /// - Weapon/Accessory: 인스펙터 배열 사용
+    /// - Accessory는 JSON 이름을 실제 Sprite 이름으로 보정
+    /// </summary>
     private Sprite ResolveSprite(string spriteName)
     {
         if (string.IsNullOrEmpty(spriteName))
@@ -193,19 +377,82 @@ public class ShopPopupContentController : MonoBehaviour
             return null;
         }
 
-        if (spriteCache.TryGetValue(spriteName, out Sprite cached))
+        string cacheKey = currentTab + ":" + spriteName;
+
+        if (spriteCache.TryGetValue(cacheKey, out Sprite cached))
         {
             return cached;
         }
 
-        string path = spriteResourcesBasePath + "/" + spriteName;
-        Sprite loaded = Resources.Load<Sprite>(path);
-        spriteCache.Add(spriteName, loaded);
+        Sprite found = null;
 
-        return loaded;
+        if (currentTab == ShopTab.Skill)
+        {
+            if (skillSpriteMap.TryGetValue(spriteName, out Sprite skillSprite))
+            {
+                found = skillSprite;
+            }
+        }
+        else
+        {
+            Sprite[] source = GetCurrentSpriteArray();
+            if (source != null)
+            {
+                string targetName = spriteName;
+
+                // 악세는 JSON 이름 -> 실제 Sprite 이름으로 변환
+                if (currentTab == ShopTab.Accessory)
+                {
+                    targetName = ConvertAccessorySpriteName(spriteName);
+                }
+
+                for (int i = 0; i < source.Length; i++)
+                {
+                    Sprite sp = source[i];
+                    if (sp == null)
+                    {
+                        continue;
+                    }
+
+                    if (sp.name == targetName)
+                    {
+                        found = sp;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (found == null)
+        {
+            Debug.LogWarning("[ShopPopupContentController] Sprite not found. tab=" + currentTab + ", spriteName=" + spriteName);
+            return null;
+        }
+
+        spriteCache.Add(cacheKey, found);
+        return found;
     }
 
-    //Provider 확정+SummonSystem 캐싱
+    /// <summary>
+    /// 현재 탭에 맞는 무기/악세 Sprite 배열 반환
+    /// </summary>
+    private Sprite[] GetCurrentSpriteArray()
+    {
+        switch (currentTab)
+        {
+            case ShopTab.Weapon:
+                return weaponSprites;
+
+            case ShopTab.Accessory:
+                return accessorySprites;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Provider 확정 + SummonSystem 캐싱
+    /// </summary>
     private void ResolveProvider()
     {
         provider = null;
@@ -224,7 +471,6 @@ public class ShopPopupContentController : MonoBehaviour
             Debug.LogError("[ShopPopupContentController] providerBehaviour is not IShopItemProvider.");
         }
 
-        //씬에서 자동 탐색(비활성 포함,씬 오브젝트만)
         MonoBehaviour[] all = Resources.FindObjectsOfTypeAll<MonoBehaviour>();
         for (int i = 0; i < all.Length; i++)
         {
@@ -234,7 +480,7 @@ public class ShopPopupContentController : MonoBehaviour
                 continue;
             }
 
-            if (mb.gameObject.scene.IsValid() == false)
+            if (!mb.gameObject.scene.IsValid())
             {
                 continue;
             }
