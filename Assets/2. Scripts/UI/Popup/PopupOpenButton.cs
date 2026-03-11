@@ -27,6 +27,9 @@ public class PopupOpenButton : MonoBehaviour
     [SerializeField] private bool useShopParam = false;
     [SerializeField] private ShopTab shopTab;
 
+    [Header("Equip ID 옵션 (동적 설정용)")]
+    [SerializeField] private string equipId;
+
     private Button _btn;
 
     private void Awake()
@@ -51,7 +54,15 @@ public class PopupOpenButton : MonoBehaviour
         // Equip 파라미터 사용 시
         if (useEquipParam)
         {
-            param = equipTab;
+            // [조민희] equipId가 있으면 EquipPopupParam 사용
+            if (!string.IsNullOrEmpty(equipId))
+            {
+                param = new EquipPopupParam(equipTab, equipId);
+            }
+            else
+            {
+                param = equipTab;
+            }
         }
         // Skill 파라미터 사용 시
         else if (useSkillParam)
@@ -65,5 +76,14 @@ public class PopupOpenButton : MonoBehaviour
         }
 
         PopupManager.Instance.Open(popupId, param);
+    }
+
+    /// <summary>
+    /// [조민희] 외부에서 equipId를 동적으로 설정
+    /// AccessoryBundleUI 등에서 클릭 시 해당 장비 ID 전달용
+    /// </summary>
+    public void SetEquipId(string id)
+    {
+        equipId = id;
     }
 }

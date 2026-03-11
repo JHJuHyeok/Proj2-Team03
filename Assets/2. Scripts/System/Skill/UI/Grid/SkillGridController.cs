@@ -192,8 +192,7 @@ namespace SlayerLegend.Skill.UI.Grid
                 return null;
             }
 
-            // saveData에 고아 데이터가 있는지 확인하고 정리
-            // (A-fix 적용 전 저장 데이터 또는 예외 상황 대응)
+            // saveData에 잔여 데이터가 있는지 확인하고 정리
             if (gridManager != null)
             {
                 var placedSkill = gridManager.GetSaveData().GetPlacedSkill(skillId);

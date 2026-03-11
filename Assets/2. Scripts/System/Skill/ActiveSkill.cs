@@ -18,6 +18,12 @@ namespace SlayerLegend.Skill
         [SerializeField] private int currentAttackCount = 0;
         [SerializeField] private int requiredAttackCount = 0;
 
+        [Header("데미지 정보 (조민희 추가 - 읽기 전용)")]
+        [SerializeField, Tooltip("현재 레벨 기준 스킬 기본 데미지")] private double baseSkillDamage;
+        [SerializeField, Tooltip("플레이어 공격력 합산 후 데미지 (치명타 제외)")] private double totalBaseDamage;
+        [SerializeField, Tooltip("치명타 적용 시 최종 데미지")] private double criticalDamage;
+        [SerializeField, Tooltip("현재 쿨타임")] private float displayCooldown;
+
         [Header("발사체 설정")]
         [SerializeField] private SkillProjectile2D projectilePrefab;
         [SerializeField] private Vector3 fireDirection = Vector3.right;  // 발사 방향
@@ -110,6 +116,17 @@ namespace SlayerLegend.Skill
                     requiredAttackCount = (int)skillData.wantedDelay;
                     currentAttackCount = 0;
                 }
+
+                // [조민희] 장비 이벤트 구독 (장착/강화 시 데미지 갱신용)
+                SubscribeToEquipmentEvents();
+
+                // [조민희] 활성화 시 Inspector 데미지 정보 갱신
+                UpdateInspectorDamageInfo();
+            }
+            else
+            {
+                // [조민희] 비활성화 시 이벤트 구독 해제
+                UnsubscribeFromEquipmentEvents();
             }
         }
 
@@ -129,10 +146,41 @@ namespace SlayerLegend.Skill
             cachedCaster = gameObject;
         }
 
+        // [조민희] 에디터에서 데미지 정보 미리보기
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (skillData == null) return;
+
+            // 기본 스킬 데미지 계산
+            baseSkillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
+
+            // 플레이어 공격력은 런타임에만 확인 가능하므로 기본값 표시
+            var stats = GetComponentInParent<IStatsProvider>();
+            if (stats != null)
+            {
+                totalBaseDamage = baseSkillDamage + stats.AttackDamage;
+                criticalDamage = totalBaseDamage * 2.0;
+            }
+            else
+            {
+                // 플레이어 없을 때는 스킬 데미지만 표시
+                totalBaseDamage = baseSkillDamage;
+                criticalDamage = baseSkillDamage * 2.0;
+            }
+
+            // 쿨타임 표시
+            displayCooldown = SkillCalculator.GetCooldown(skillData, currentLevel);
+        }
+#endif
+
         //Update()에서 쿨타임 처리 및 스킬 자동 발동
         private void Update()
         {
             if (!isActive) return;
+
+            // [조민희] 인스펙터 표시용 쿨타임 업데이트
+            displayCooldown = currentCooldown;
 
             // AttackCount 모드는 Update에서 처리하지 않음 (OnAttack에서 처리)
             if (IsAttackCountMode) return;
@@ -302,11 +350,24 @@ namespace SlayerLegend.Skill
             double totalDamage = skillDamage;
             bool isCritical = false;
 
+            // [조민희] 인스펙터 표시용 데미지 정보 업데이트
+            baseSkillDamage = skillDamage;
+
             if (stats != null)
             {
-                totalDamage += stats.AttackDamage;
+                // [조민희] 스킬 데미지 + 공격력 합산 후 치명타 적용
+                double baseDamage = skillDamage + stats.AttackDamage;
                 isCritical = stats.IsCriticalHit();
-                totalDamage = stats.CalculateFinalDamage(isCritical);
+                totalDamage = isCritical ? baseDamage * 2.0 : baseDamage; // 치명타 시 2배
+
+                // [조민희] 인스펙터 표시용
+                totalBaseDamage = baseDamage;
+                criticalDamage = totalDamage;
+            }
+            else
+            {
+                totalBaseDamage = skillDamage;
+                criticalDamage = skillDamage;
             }
 
             string critText = isCritical ? " [치명타!]" : "";
@@ -543,6 +604,82 @@ namespace SlayerLegend.Skill
         {
             base.OnLevelUp();
             Debug.Log($"{skillData.name} 액티브 스킬 레벨업! 쿨타임: {SkillCalculator.GetCooldown(skillData, currentLevel):F1}초");
+
+            // [조민희] 레벨업 시 Inspector 필드 갱신
+            UpdateInspectorDamageInfo();
+        }
+
+        /// <summary>
+        /// [조민희] Inspector 데미지 정보 갱신 (런타임용)
+        /// </summary>
+        public void UpdateInspectorDamageInfo()
+        {
+            if (skillData == null) return;
+
+            // 기본 스킬 데미지 계산
+            baseSkillDamage = SkillCalculator.GetDamage(skillData, currentLevel);
+
+            // 플레이어 공격력 합산
+            var stats = GetComponentInParent<IStatsProvider>();
+            if (stats != null)
+            {
+                totalBaseDamage = baseSkillDamage + stats.AttackDamage;
+                criticalDamage = totalBaseDamage * 2.0;
+            }
+            else
+            {
+                totalBaseDamage = baseSkillDamage;
+                criticalDamage = baseSkillDamage * 2.0;
+            }
+
+            // 쿨타임 표시
+            displayCooldown = SkillCalculator.GetCooldown(skillData, currentLevel);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            // [조민희] 장비 이벤트 구독 해제
+            UnsubscribeFromEquipmentEvents();
+        }
+
+        /// <summary>
+        /// [조민희] 장비 이벤트 구독 (장착/강화 시 데미지 갱신용)
+        /// </summary>
+        public void SubscribeToEquipmentEvents()
+        {
+            if (SlayerLegend.Equipment.EquipmentManager.Instance != null)
+            {
+                SlayerLegend.Equipment.EquipmentManager.Instance.OnEquipmentEquipped += OnEquipmentChanged;
+                SlayerLegend.Equipment.EquipmentManager.Instance.OnEquipmentEnhanced += OnEquipmentEnhanced;
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 장비 이벤트 구독 해제
+        /// </summary>
+        private void UnsubscribeFromEquipmentEvents()
+        {
+            if (SlayerLegend.Equipment.EquipmentManager.Instance != null)
+            {
+                SlayerLegend.Equipment.EquipmentManager.Instance.OnEquipmentEquipped -= OnEquipmentChanged;
+                SlayerLegend.Equipment.EquipmentManager.Instance.OnEquipmentEnhanced -= OnEquipmentEnhanced;
+            }
+        }
+
+        /// <summary>
+        /// [조민희] 장비 장착/해제 시 데미지 정보 갱신
+        /// </summary>
+        private void OnEquipmentChanged(string equipId, EquipType type, int level)
+        {
+            UpdateInspectorDamageInfo();
+        }
+
+        /// <summary>
+        /// [조민희] 장비 강화 시 데미지 정보 갱신
+        /// </summary>
+        private void OnEquipmentEnhanced(string equipId, int newLevel)
+        {
+            UpdateInspectorDamageInfo();
         }
 
         #region ISkillDisplayable 구현

@@ -230,6 +230,7 @@ namespace SlayerLegend.Skill.UI.Grid
             // 미보유 스킬이면 차단 (조민희 추가)
             if (!slot.IsOwned)
             {
+                Debug.LogWarning($"[SkillInventoryUI] 미보유 스킬 클릭 차단: {slot.SkillId}");
                 return;
             }
 
@@ -245,22 +246,33 @@ namespace SlayerLegend.Skill.UI.Grid
 
             OnSkillSelected?.Invoke(slot.SkillData);
 
-            // 새로운 방식: 슬롯 클릭 시 아이템 생성
-            if (gridController != null && slot.SkillData != null)
+            // 디버그: gridController 상태 확인
+            if (gridController == null)
             {
-                // 이미 그리드에 있으면 아이템 생성 안 함
-                if (gridController.IsSkillOnGrid(slot.SkillData.id))
-                {
-                    return;
-                }
+                Debug.LogError("[SkillInventoryUI] gridController가 null입니다! 인스펙터에서 연결해주세요.");
+                return;
+            }
 
-                // 아이템 생성
-                var item = gridController.CreateDraggableItemFromSlot(slot.SkillData.id);
-                if (item != null)
-                {
-                    // 아이템 참조 업데이트
-                    slot.SetDraggableItem(item);
-                }
+            if (slot.SkillData == null)
+            {
+                Debug.LogError("[SkillInventoryUI] slot.SkillData가 null입니다!");
+                return;
+            }
+
+            // 이미 그리드에 있으면 아이템 생성 안 함
+            if (gridController.IsSkillOnGrid(slot.SkillData.id))
+            {
+                Debug.Log($"[SkillInventoryUI] 이미 그리드에 있음: {slot.SkillData.id}");
+                return;
+            }
+
+            // 아이템 생성
+            Debug.Log($"[SkillInventoryUI] 아이템 생성 시도: {slot.SkillData.id}");
+            var item = gridController.CreateDraggableItemFromSlot(slot.SkillData.id);
+            if (item != null)
+            {
+                // 아이템 참조 업데이트
+                slot.SetDraggableItem(item);
             }
         }
 

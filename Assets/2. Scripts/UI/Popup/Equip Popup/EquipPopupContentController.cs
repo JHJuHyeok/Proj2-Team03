@@ -56,6 +56,9 @@ public class EquipPopupContentController : MonoBehaviour
 
     [SerializeField] private string spritePath = "Icons";//아이콘 경로
 
+    [Header("AccessoryBinder (조민희 추가)")]
+    [SerializeField] private EquipAccessoryBinder accessoryBinder; // 악세서리 전용 바인더
+
     private readonly List<EquipItemCell> cellPool = new List<EquipItemCell>();
 
     private EquipType currentType;
@@ -66,6 +69,34 @@ public class EquipPopupContentController : MonoBehaviour
         if (equipmentManager == null)
         {
             equipmentManager = EquipmentManager.Instance;
+        }
+
+        // [조민희] accessoryBinder가 null이면 같은 게임오브젝트 또는 부모에서 자동으로 찾기
+        if (accessoryBinder == null)
+        {
+            accessoryBinder = GetComponent<EquipAccessoryBinder>();
+            if (accessoryBinder == null)
+            {
+                accessoryBinder = GetComponentInParent<EquipAccessoryBinder>();
+            }
+            if (accessoryBinder != null)
+            {
+                Debug.Log($"[EquipPopupContentController] accessoryBinder 자동 할당됨");
+            }
+        }
+
+        // [조민희] listRoot가 null이면 자동으로 찾기 (Content 또는 ListRoot 이름의 자식 검색)
+        if (listRoot == null)
+        {
+            listRoot = FindListRoot();
+            if (listRoot != null)
+            {
+                Debug.Log($"[EquipPopupContentController] listRoot 자동 할당됨: {listRoot.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[EquipPopupContentController] listRoot를 찾을 수 없습니다! 인스펙터에서 수동으로 연결해주세요.");
+            }
         }
 
         // 장착 버튼
@@ -113,8 +144,71 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    public void SetEquipTab(EquipTab tab)
+    /// <summary>
+    /// [조민희] listRoot 자동 찾기 - Content, ListRoot, ScrollView Content 등의 이름을 가진 Transform 검색
+    /// </summary>
+    private Transform FindListRoot()
     {
+        // 1. 직접 자식에서 "Content" 이름 검색
+        Transform found = transform.Find("Content");
+        if (found != null) return found;
+
+        // 2. 모든 자식에서 검색 (깊이 우선)
+        found = FindDeepChild(transform, "Content");
+        if (found != null) return found;
+
+        // 3. "ListRoot" 검색
+        found = FindDeepChild(transform, "ListRoot");
+        if (found != null) return found;
+
+        // 4. "Scroll View/Viewport/Content" 패턴 검색
+        found = FindDeepChild(transform, "Viewport");
+        if (found != null)
+        {
+            Transform content = found.Find("Content");
+            if (content != null) return content;
+        }
+
+        // 5. ScrollRect가 있는 자식의 Content 찾기
+        var scrollRects = GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true);
+        foreach (var scroll in scrollRects)
+        {
+            if (scroll.content != null)
+            {
+                return scroll.content;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// [조민희] 깊이 우선 자식 검색
+    /// </summary>
+    private Transform FindDeepChild(Transform parent, string name)
+    {
+        // 직접 자식 확인
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+                return child;
+        }
+
+        // 재귀적으로 검색
+        foreach (Transform child in parent)
+        {
+            Transform found = FindDeepChild(child, name);
+            if (found != null)
+                return found;
+        }
+
+        return null;
+    }
+
+    public void SetEquipTab(EquipTab tab, string initialEquipId = null)
+    {
+        Debug.Log($"[EquipPopup] SetEquipTab 시작 - tab: {tab}, initialEquipId: {initialEquipId}");
+
         if (tab == EquipTab.Weapon)
         {
             currentType = EquipType.Weapon;
@@ -126,8 +220,53 @@ public class EquipPopupContentController : MonoBehaviour
 
         selectedItem = null;
 
+        // [조민희] initialEquipId가 있으면 해당 장비 선택, 없으면 첫 번째 아이템 선택
+        if (equipmentManager != null)
+        {
+            if (!string.IsNullOrEmpty(initialEquipId))
+            {
+                // initialEquipId로 선택
+                Debug.Log($"[EquipPopup] GetEquipData 호출 전 - initialEquipId: {initialEquipId}");
+                EquipData equip = equipmentManager.GetEquipData(initialEquipId);
+                Debug.Log($"[EquipPopup] GetEquipData 결과 - equip: {(equip != null ? equip.GetId() : "NULL")}");
+
+                if (equip != null)
+                {
+                    int level = equipmentManager.GetLevel(initialEquipId);
+                    selectedItem = new InventoryItem(equip, level);
+                    Debug.Log($"[EquipPopup] SetEquipTab - initialEquipId로 선택: {initialEquipId}, selectedItem.equipment.GetId(): {selectedItem.equipment.GetId()}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[EquipPopup] SetEquipTab - initialEquipId를 찾을 수 없음: {initialEquipId}");
+                }
+            }
+
+            // initialEquipId가 없거나 찾지 못한 경우 첫 번째 아이템 선택
+            if (selectedItem == null)
+            {
+                IReadOnlyList<InventoryItem> inventory = equipmentManager.GetInventory(currentType);
+                if (inventory.Count > 0)
+                {
+                    selectedItem = inventory[0];
+                    Debug.Log($"[EquipPopup] SetEquipTab - 첫 번째 아이템 선택: {selectedItem.equipment.GetId()}");
+                }
+            }
+        }
+
+        Debug.Log($"[EquipPopup] RebuildList 호출 전 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
         RebuildList();
-        ApplySelection(null);
+        Debug.Log($"[EquipPopup] RebuildList 호출 후 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
+
+        // [조민희] 선택된 아이템이 있으면 UI 갱신
+        if (selectedItem != null)
+        {
+            ApplySelection(selectedItem);
+        }
+        else
+        {
+            ApplySelection(null);
+        }
     }
 
     /// <summary>
@@ -155,29 +294,75 @@ public class EquipPopupContentController : MonoBehaviour
 
     private void RebuildList()
     {
-        if (equipmentManager == null) return;
+        if (equipmentManager == null)
+        {
+            Debug.LogWarning("[EquipPopup] EquipmentManager가 null입니다!");
+            return;
+        }
 
         IReadOnlyList<InventoryItem> inventory = equipmentManager.GetInventory(currentType);
 
-        EnsurePool(inventory.Count);
+        // [조민희] 디버그: 인벤토리 내용 확인
+        Debug.Log($"[EquipPopup] RebuildList - currentType: {currentType}, inventory.Count: {inventory.Count}");
 
-        for (int i = 0; i < cellPool.Count; i++)
+        // [조민희] 디버그: cellPrefab, listRoot 확인
+        Debug.Log($"[EquipPopup] cellPrefab: {(cellPrefab != null ? cellPrefab.name : "NULL")}, listRoot: {(listRoot != null ? listRoot.name : "NULL")}, cellPool.Count: {cellPool.Count}");
+
+        foreach (var item in inventory)
         {
-            bool active = i < inventory.Count;
+            Debug.Log($"  [EquipPopup] 아이템: {item.equipment.GetId()} - {item.equipment.GetName()}");
+        }
 
-            cellPool[i].gameObject.SetActive(active);
+        // [조민희] cellPrefab이 있을 때만 리스트 생성 시도
+        if (cellPrefab != null && listRoot != null)
+        {
+            EnsurePool(inventory.Count);
 
-            if (active)
+            // [조민희] 디버그: 풀 생성 후 확인
+            Debug.Log($"[EquipPopup] EnsurePool 후 cellPool.Count: {cellPool.Count}");
+
+            for (int i = 0; i < cellPool.Count; i++)
             {
-                cellPool[i].Bind(inventory[i], OnClickItem, ResolveSprite);
+                bool active = i < inventory.Count;
+
+                cellPool[i].gameObject.SetActive(active);
+
+                if (active)
+                {
+                    Debug.Log($"[EquipPopup] Bind 호출 - 인덱스: {i}, 아이템: {inventory[i].equipment.GetId()}");
+                    cellPool[i].Bind(inventory[i], OnClickItem, ResolveSprite);
+                }
+            }
+        }
+        else
+        {
+            // [조민희] cellPrefab이 없으면 리스트 없이 상세 정보만 표시
+            if (cellPrefab == null)
+            {
+                Debug.LogWarning("[EquipPopupContentController] cellPrefab이 null - 리스트 없이 상세 정보만 표시");
             }
         }
     }
 
     private void EnsurePool(int count)
     {
-        // [조민희] cellPrefab이 null이면 생성하지 않음
-        if (cellPrefab == null) return;
+        // [조민희] cellPrefab 또는 listRoot가 null이면 생성하지 않음
+        if (cellPrefab == null)
+        {
+            Debug.LogWarning("[EquipPopupContentController] cellPrefab이 null - 리스트 생성 건너뜀");
+            return;
+        }
+
+        if (listRoot == null)
+        {
+            // 다시 한번 listRoot 찾기 시도
+            listRoot = FindListRoot();
+            if (listRoot == null)
+            {
+                Debug.LogWarning("[EquipPopupContentController] listRoot가 null - 리스트 생성 건너뜀");
+                return;
+            }
+        }
 
         while (cellPool.Count < count)
         {
@@ -201,6 +386,8 @@ public class EquipPopupContentController : MonoBehaviour
 
     private void ApplySelection(InventoryItem item)
     {
+        Debug.Log($"[EquipPopup] ApplySelection 호출 - item: {(item != null ? item.equipment?.GetId() : "NULL")}");
+
         if (item == null)
         {
             if (detailIcon != null) detailIcon.sprite = null;
@@ -238,12 +425,15 @@ public class EquipPopupContentController : MonoBehaviour
 
         if (detailIcon != null)
         {
-            detailIcon.sprite = ResolveSprite(equip.spriteName);
+            Sprite loadedSprite = ResolveSprite(equip.spriteName);
+            Debug.Log($"[EquipPopup] ResolveSprite 호출 - spriteName: {equip.spriteName}, sprite: {(loadedSprite != null ? loadedSprite.name : "NULL")}");
+            detailIcon.sprite = loadedSprite;
         }
 
         if (detailName != null)
         {
             detailName.text = equip.GetName();
+            Debug.Log($"[EquipPopup] detailName 설정 - {equip.GetName()}");
         }
 
         int count = equipmentManager.GetCount(equip.GetId());
@@ -275,6 +465,12 @@ public class EquipPopupContentController : MonoBehaviour
 
         // [조민희] 장비 효과 텍스트 업데이트
         UpdateEffectTexts(equip, level);
+
+        // [조민희] 악세서리인 경우 EquipAccessoryBinder 사용
+        if (currentType == EquipType.Accessorie && accessoryBinder != null)
+        {
+            accessoryBinder.Bind(equip, level);
+        }
     }
 
     /// <summary>버튼 상태 업데이트 (조민희 추가)</summary>

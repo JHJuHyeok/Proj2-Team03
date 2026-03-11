@@ -68,14 +68,17 @@ public class EquipPopupJsonBinder : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        //팝업이 켜질 때 기본값이라도 보여주기
-        if (string.IsNullOrEmpty(defaultEquipId) == false)
-        {
-            SetEquipId(defaultEquipId);
-        }
-    }
+    // [조민희] OnEnable에서 defaultEquipId 설정 제거
+    // EquipPopupContentController.SetEquipTab()에서 올바른 equipId로 설정됨
+    // OnEnable이 ApplySelection() 이후에 실행되어 UI를 덮어쓰는 문제 방지
+    // private void OnEnable()
+    // {
+    //     //팝업이 켜질 때 기본값이라도 보여주기
+    //     if (string.IsNullOrEmpty(defaultEquipId) == false)
+    //     {
+    //         SetEquipId(defaultEquipId);
+    //     }
+    // }
 
     //외부에서 선택된 장비 id를 넘겨주면 UI 갱신
     public void SetEquipId(string equipId)

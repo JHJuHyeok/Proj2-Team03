@@ -14,7 +14,21 @@ public class Test_Controller : MonoBehaviour
 
     private void AddCurrencyTest(CurrencyType type, double amount = 1000)
     {
+        // 디버그: CurrencyManager 상태 확인
+        if (CurrencyManager.Instance == null)
+        {
+            Debug.LogError("[Test_Controller] CurrencyManager.Instance가 null입니다!");
+            return;
+        }
+
+        // 디버그: 추가 전 현재 값 확인
+        double beforeAmount = CurrencyManager.Instance.GetAmount(type);
+        Debug.Log($"[Test_Controller] {type} 추가 전: {beforeAmount}");
+
         CurrencyManager.Instance.AddCurrency(type, amount);
-        Debug.Log($"{type}��/�� {amount}��ŭ ȹ��");
+
+        // 디버그: 추가 후 값 확인
+        double afterAmount = CurrencyManager.Instance.GetAmount(type);
+        Debug.Log($"[Test_Controller] {type} 추가 후: {afterAmount} (획득: {amount})");
     }
 }

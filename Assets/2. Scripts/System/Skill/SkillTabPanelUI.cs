@@ -220,7 +220,8 @@ namespace SlayerLegend.Skill
             // 팝업 매니저를 통해 스킬 상세 팝업 열기
             if (PopupManager.Instance != null)
             {
-                PopupManager.Instance.Open(PopupId.SkillDetail, skillId);
+                // [조민희] PopupId.SkillDetail → PopupId.Skill로 변경 (기존 SkillPopup 프리팹 사용)
+                PopupManager.Instance.Open(PopupId.Skill, skillId);
             }
             else
             {
