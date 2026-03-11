@@ -10,19 +10,22 @@ NestedScrollManager
 public class NestedScrollManager : MonoBehaviour
 {
     [Header("Select 표시")]
-    [SerializeField] private Slider tabSlider;        //0~1로 위치 표시(선택바)
+    [SerializeField] private Slider tabSlider;
 
     [Header("Tabs(개수 기준)")]
-    [SerializeField] private RectTransform[] btnRect; //탭 개수
+    [SerializeField] private RectTransform[] btnRect;
 
     [Header("Pages")]
-    [SerializeField] private GameObject[] pages;      //각 탭 패널
+    [SerializeField] private GameObject[] pages;
 
     [Header("Skill Grid (Optional)")]
     [SerializeField] private SkillGridPanelController skillGridPanel;
 
     [Tooltip("스킬탭 인덱스(하단 탭 기준). 스킬이 1번이면 1")]
     [SerializeField] private int skillTabIndex = 1;
+
+    [Header("Bottom Panel Refresh (Optional)")]
+    [SerializeField] private BottomPanelSlideToggle bottomPanelSlideToggle;
 
     private float[] pos;
     private int size;
@@ -75,7 +78,6 @@ public class NestedScrollManager : MonoBehaviour
         }
     }
 
-    //하단 버튼에서 호출
     public void TabClick(int n)
     {
         if (pos == null || pos.Length == 0) return;
@@ -97,17 +99,24 @@ public class NestedScrollManager : MonoBehaviour
             }
         }
 
-        // 선택 표시(슬라이더)
+        // 선택 표시
         if (tabSlider != null)
         {
             tabSlider.value = pos[currentIndex];
         }
 
-        // 스킬탭 여부를 그리드 컨트롤러에 전달(표시 여부는 컨트롤러가 결정)
+        // 스킬탭 여부 전달
         if (skillGridPanel != null)
         {
             bool inSkillTab = (currentIndex == skillTabIndex);
             skillGridPanel.SetIsSkillTab(inSkillTab);
+        }
+
+        // 탭 내용이 달라졌으니 BottomPanel 숨김 위치 재계산
+        if (bottomPanelSlideToggle != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            bottomPanelSlideToggle.RefreshLayoutAndPositions();
         }
     }
 

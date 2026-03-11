@@ -573,10 +573,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5262019862450674125}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 36.096985, y: -35}
-  m_SizeDelta: {x: 70, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 196.09698, y: -135}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8881117666317438991
 CanvasRenderer:
@@ -1918,6 +1918,7 @@ GameObject:
   - component: {fileID: 2614488475188318459}
   - component: {fileID: 1308033519561570462}
   - component: {fileID: 2870715850526862546}
+  - component: {fileID: 5413633341856297700}
   m_Layer: 5
   m_Name: Settings Button
   m_TagString: Untagged
@@ -1939,10 +1940,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5262019862450674125}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 116.096985, y: -35}
-  m_SizeDelta: {x: 70, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2614488475188318459
 CanvasRenderer:
@@ -2025,7 +2026,38 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1308033519561570462}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5413633341856297700}
+        m_TargetAssemblyTypeName: PopupOpenButton, Assembly-CSharp
+        m_MethodName: Open
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5413633341856297700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6697472823264144468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc4dafb422ddae64aa6d46237ab1d352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popupId: 5
+  useEquipParam: 0
+  equipTab: 0
+  useSkillParam: 0
+  skillAttribute: 0
+  useShopParam: 0
+  shopTab: 0
 --- !u!1 &7635509090976583206
 GameObject:
   m_ObjectHideFlags: 0
@@ -2196,10 +2228,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5262019862450674125}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 36.096985, y: -35}
-  m_SizeDelta: {x: 70, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4157554521347511251
 CanvasRenderer:
@@ -2316,10 +2348,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 5262019862450674125}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 116.096985, y: -135}
-  m_SizeDelta: {x: 70, y: 70}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1165698792406554032
 CanvasRenderer:

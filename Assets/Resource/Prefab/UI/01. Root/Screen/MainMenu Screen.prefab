@@ -1435,6 +1435,9 @@ MonoBehaviour:
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  tabContents: []
+  tabScrollAutoSizer: {fileID: 0}
+  bottomPanelSlideToggle: {fileID: 0}
   defaultIndex: 0
   keepLastIndexOnEnable: 0
 --- !u!1 &3455124766199026633
@@ -2208,7 +2211,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2596459116585440717}
-  - component: {fileID: 6050718105311401246}
   m_Layer: 5
   m_Name: PageContainer
   m_TagString: Untagged
@@ -2241,31 +2243,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &6050718105311401246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3855409980391344170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d523c2870ff16e499d077ae8a46b933, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bottomRoot: {fileID: 2596459116585440717}
-  rootCanvas: {fileID: 0}
-  ignoreRoots:
-  - {fileID: 8540693638637007978}
-  - {fileID: 0}
-  - {fileID: 0}
-  nestedScrollManager: {fileID: 3233384028477689975}
-  slideLerp: 0.2
-  hiddenExtra: 0
-  arriveEpsilon: 0.5
-  lockWhenPopupOpen: 1
-  ignoreWhenTouchingUI: 1
-  graphicRaycaster: {fileID: 0}
 --- !u!1 &3861783046992065349
 GameObject:
   m_ObjectHideFlags: 0
@@ -3471,6 +3448,9 @@ MonoBehaviour:
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 8427761695629884985}
+  tabContents: []
+  tabScrollAutoSizer: {fileID: 0}
+  bottomPanelSlideToggle: {fileID: 0}
   defaultIndex: 0
   keepLastIndexOnEnable: 0
 --- !u!1 &5779950639949767672
@@ -4755,6 +4735,9 @@ MonoBehaviour:
   selectedColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 1}
   dimColor: {r: 0.16862746, g: 0.13333334, b: 0.10588236, a: 0.39215687}
   scrollRect: {fileID: 0}
+  tabContents: []
+  tabScrollAutoSizer: {fileID: 0}
+  bottomPanelSlideToggle: {fileID: 0}
   defaultIndex: 0
   keepLastIndexOnEnable: 0
 --- !u!1 &7213197235214384670
@@ -19521,10 +19504,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 214079704358798810, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
-    - target: {fileID: 214079704358798810, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
       objectReference: {fileID: 0}
@@ -19532,10 +19511,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: BottomPanelSlideToggle, Assembly-CSharp
       objectReference: {fileID: 0}
-    - target: {fileID: 220447967972279877, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
     - target: {fileID: 220447967972279877, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
@@ -19652,10 +19627,6 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 8c45703b3f8dd9840aa58e1145c5e642, type: 2}
-    - target: {fileID: 1423019704546716370, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
     - target: {fileID: 1423019704546716370, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
@@ -19777,10 +19748,6 @@ PrefabInstance:
       value: 0.57254905
       objectReference: {fileID: 0}
     - target: {fileID: 4901688289883797832, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
-    - target: {fileID: 4901688289883797832, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
       objectReference: {fileID: 0}
@@ -19797,10 +19764,6 @@ PrefabInstance:
       value: BTN Tab
       objectReference: {fileID: 0}
     - target: {fileID: 5330635064367593158, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
-    - target: {fileID: 5330635064367593158, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
       objectReference: {fileID: 0}
@@ -19808,10 +19771,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: BottomPanelSlideToggle, Assembly-CSharp
       objectReference: {fileID: 0}
-    - target: {fileID: 5624754781230140836, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6050718105311401246}
     - target: {fileID: 5624754781230140836, guid: 57b451053378f9a468f51a17d2af2fc1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnTabButtonClick
