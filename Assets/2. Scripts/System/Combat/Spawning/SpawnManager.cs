@@ -18,6 +18,7 @@ public class SpawnManager : MonoBehaviour
     private Coroutine _spawnCoroutine;
     private StageData _currentStageData;
     private Transform _playerTransform;
+    private bool _isAdventureMode = false;
 
     // 활성화된 몬스터 추적 (Queue)
     // 인덱스 0이 가장 앞에 있는 몬스터 (플레이어와 가장 가까움)
@@ -41,6 +42,7 @@ public class SpawnManager : MonoBehaviour
 
     public void StartFarmingSpawn(StageData stageData)
     {
+        _isAdventureMode = false;
         _currentStageData = stageData;
 
         InitializePools(stageData);
@@ -49,6 +51,40 @@ public class SpawnManager : MonoBehaviour
 
         StopSpawning();
         _spawnCoroutine = StartCoroutine(SpawnRoutine());
+    }
+
+    public void StartAdventureSpawn(StageData stageData)
+    {
+        _isAdventureMode = true;
+        _currentStageData = stageData;
+
+        InitializePools(stageData);
+
+        _totalSpawnedCount = 0;
+
+        StopSpawning();
+        _spawnCoroutine = StartCoroutine(SpawnRoutine());
+    }
+
+    public void SpawnAdventureBoss(StageData stageData)
+    {
+        StopSpawning();
+        CleanUpEnemies();
+
+        _currentStageData = stageData;
+
+        MonsterData bossData = DataManager.monsters.Get(stageData.bossId);
+        if (bossData == null)
+        {
+            Debug.LogError($"[SpawnManager] 모험 보스 데이터 없음: {stageData.bossId}");
+            return;
+        }
+
+        MonsterBase boss = SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
+        if (boss != null)
+        {
+            Debug.Log($"[SpawnManager] 모험 보스 소환: {bossData.name} ({bossData.id})");
+        }
     }
 
     public void StopSpawning()
@@ -252,6 +288,9 @@ public class SpawnManager : MonoBehaviour
         if (_enemyQueue.Contains(enemy))
         {
             _enemyQueue.Remove(enemy);
+
+            // 모험 모드에서는 CombatManager가 처리하므로 리워드박스/스테이지클리어 로직 스킵
+            if (_isAdventureMode) return;
 
             // 죽은 적이 보상 상자라면, 다른 것을 소환하지 않음.
             if (enemy.IsRewardBox)

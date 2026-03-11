@@ -16,6 +16,7 @@ public enum GameDataType
 }
 
 // [신태환] - LoadAllDatabase에 try catch 추가
+// [신태환] - AdventureList.json 파일 읽도록 추가
 public static class DataManager
 {
     // 실시간 유저 데이터(나중에 옮겨야 됨)
@@ -27,6 +28,7 @@ public static class DataManager
     public static readonly GameDB<EquipData, EquipDataList> weapons = new();
     public static readonly GameDB<EquipData, EquipDataList> accessories = new();
     public static readonly GameDB<AreaData, StageDataList> stages = new();
+    public static readonly GameDB<AreaData, StageDataList> adventures = new();
 
     // UI 이벤트 전달
     public static event Action<GameDataType, string> OnDataUpdated;
@@ -54,7 +56,8 @@ public static class DataManager
                 skills.LoadAsync("Json/Skill/SkillList"),
                 weapons.LoadAsync("Json/Equip/WeaponList"),
                 accessories.LoadAsync("Json/Equip/AccessorieList"),
-                stages.LoadAsync("Json/Stage/StageList")
+                stages.LoadAsync("Json/Stage/StageList"),
+                adventures.LoadAsync("Json/Stage/AdventureList")
             );
             Debug.Log("데이터베이스 로드 완료");
         }

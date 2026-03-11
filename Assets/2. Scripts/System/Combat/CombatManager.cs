@@ -8,7 +8,8 @@ using System;
 public enum CombatState
 {
     Farming,
-    BossBattle
+    BossBattle,
+    Adventure
 }
 
 // 전투 로직을 담당하는 매니저
@@ -43,8 +44,26 @@ public class CombatManager : MonoBehaviour
     private bool _isBossTimerActive = false;
     public float BossTimeRemaining => _bossTimeRemaining;
 
+    // 모험 관련
+    public const float ADVENTURE_TIME_LIMIT = 60f;
+    private float _adventureTimeRemaining = 0f;
+    private bool _isAdventureTimerActive = false;
+    private StageData _savedStageData;
+    private StageData _adventureStageData;
+    private int _adventureMonsterKillCount;
+    private int _adventureTotalMonsters;
+    private bool _adventureBossPhase;
+
+    public float AdventureTimeRemaining => _adventureTimeRemaining;
+    public int AdventureMonsterKillCount => _adventureMonsterKillCount;
+    public int AdventureTotalMonsters => _adventureTotalMonsters;
+    public bool IsAdventureBossPhase => _adventureBossPhase;
+
     // 이벤트
     public event Action<CombatState> OnCombatStateChanged;
+    public event Action<int, int> OnAdventureMonsterCountChanged;
+    public event Action OnAdventureBossPhaseStarted;
+    public event Action<bool> OnAdventureCompleted;
 
     // 보스 HP 비율 (UI용)
     public float BossHpRatio { get; private set; } = 1f;
@@ -104,12 +123,45 @@ public class CombatManager : MonoBehaviour
                 HandleBossFail();
             }
         }
+
+        // 모험 타이머 체크
+        if (CurrentState == CombatState.Adventure && _isAdventureTimerActive)
+        {
+            _adventureTimeRemaining -= Time.deltaTime;
+            if (_adventureTimeRemaining <= 0f)
+            {
+                _isAdventureTimerActive = false;
+                Debug.Log("[CombatManager] 모험 시간 초과!");
+                HandleAdventureFail();
+            }
+        }
     }
 
     // 적 사망 시 호출
     public void OnEnemyKilled(bool isBoss, bool isRewardBox)
     {
-        if (CurrentState == CombatState.BossBattle)
+        if (CurrentState == CombatState.Adventure)
+        {
+            if (_adventureBossPhase)
+            {
+                if (isBoss)
+                {
+                    HandleAdventureSuccess();
+                }
+            }
+            else
+            {
+                _adventureMonsterKillCount++;
+                OnAdventureMonsterCountChanged?.Invoke(_adventureMonsterKillCount, _adventureTotalMonsters);
+                Debug.Log($"[CombatManager] 모험 몬스터 처치: {_adventureMonsterKillCount}/{_adventureTotalMonsters}");
+
+                if (_adventureMonsterKillCount >= _adventureTotalMonsters)
+                {
+                    StartAdventureBossPhase();
+                }
+            }
+        }
+        else if (CurrentState == CombatState.BossBattle)
         {
             if (isBoss)
             {
@@ -193,7 +245,11 @@ public class CombatManager : MonoBehaviour
 
     private void OnPlayerDeath()
     {
-        if (CurrentState == CombatState.BossBattle)
+        if (CurrentState == CombatState.Adventure)
+        {
+            HandleAdventureFail();
+        }
+        else if (CurrentState == CombatState.BossBattle)
         {
             HandleBossFail();
         }
@@ -202,5 +258,81 @@ public class CombatManager : MonoBehaviour
             Debug.Log("[CombatManager] 파밍 중 플레이어 사망. 스테이지 재시작.");
             StartFarming();
         }
+    }
+
+    // 모험 시작
+    public void StartAdventure(StageData adventureData)
+    {
+        if (adventureData == null) return;
+
+        Debug.Log($"[CombatManager] 모험 시작: {adventureData.name}");
+
+        // 현재 스테이지 저장
+        _savedStageData = stageManager.CurrentStageData;
+
+        // 모험 데이터 설정
+        _adventureStageData = adventureData;
+        _adventureMonsterKillCount = 0;
+        _adventureTotalMonsters = adventureData.monsterCount;
+        _adventureBossPhase = false;
+        BossHpRatio = 1f;
+
+        // 상태 전환
+        CurrentState = CombatState.Adventure;
+        OnCombatStateChanged?.Invoke(CurrentState);
+
+        // 타이머 시작
+        _adventureTimeRemaining = ADVENTURE_TIME_LIMIT;
+        _isAdventureTimerActive = true;
+
+        // 기존 스폰 정리 + 모험 스폰 시작
+        spawnManager.StopSpawning();
+        spawnManager.CleanUpEnemies();
+
+        if (playerStats != null)
+        {
+            playerStats.FullRestore();
+        }
+
+        spawnManager.StartAdventureSpawn(adventureData);
+        OnAdventureMonsterCountChanged?.Invoke(0, _adventureTotalMonsters);
+    }
+
+    private void StartAdventureBossPhase()
+    {
+        Debug.Log("[CombatManager] 모험 보스 페이즈 시작!");
+        _adventureBossPhase = true;
+        BossHpRatio = 1f;
+        OnAdventureBossPhaseStarted?.Invoke();
+        spawnManager.SpawnAdventureBoss(_adventureStageData);
+    }
+
+    private void HandleAdventureSuccess()
+    {
+        _isAdventureTimerActive = false;
+        Debug.Log("[CombatManager] 모험 성공!");
+        OnAdventureCompleted?.Invoke(true);
+        RestoreFromAdventure();
+    }
+
+    private void HandleAdventureFail()
+    {
+        _isAdventureTimerActive = false;
+        spawnManager.CleanUpEnemies();
+        Debug.Log("[CombatManager] 모험 실패.");
+        OnAdventureCompleted?.Invoke(false);
+        RestoreFromAdventure();
+    }
+
+    private void RestoreFromAdventure()
+    {
+        if (_savedStageData != null)
+        {
+            stageManager.SetStage(_savedStageData);
+            _savedStageData = null;
+        }
+        _adventureStageData = null;
+        _adventureBossPhase = false;
+        StartFarming();
     }
 }
