@@ -14,6 +14,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private MonsterBase commonMonsterPrefab;
     [SerializeField] private MonsterBase bossMonsterPrefab;
     [SerializeField] private string rewardBoxId = "Box_001"; // 보상 상자 몬스터 ID
+    public string RewardBoxId => rewardBoxId;
 
     private Coroutine _spawnCoroutine;
     private StageData _currentStageData;
@@ -35,7 +36,7 @@ public class SpawnManager : MonoBehaviour
         if (stageData == null) return;
 
         if (commonMonsterPrefab != null)
-            PoolManager.Instance.CreatePool(commonMonsterPrefab, 10, transform);
+            PoolManager.Instance.CreatePool(commonMonsterPrefab, maxQueueSize + 5, transform);
         if (bossMonsterPrefab != null)
             PoolManager.Instance.CreatePool(bossMonsterPrefab, 2, transform);
     }
@@ -66,7 +67,7 @@ public class SpawnManager : MonoBehaviour
         _spawnCoroutine = StartCoroutine(SpawnRoutine());
     }
 
-    public void SpawnAdventureBoss(StageData stageData)
+    public bool SpawnAdventureBoss(StageData stageData)
     {
         StopSpawning();
         CleanUpEnemies();
@@ -77,7 +78,7 @@ public class SpawnManager : MonoBehaviour
         if (bossData == null)
         {
             Debug.LogError($"[SpawnManager] 모험 보스 데이터 없음: {stageData.bossId}");
-            return;
+            return false;
         }
 
         MonsterBase boss = SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
@@ -85,6 +86,7 @@ public class SpawnManager : MonoBehaviour
         {
             Debug.Log($"[SpawnManager] 모험 보스 소환: {bossData.name} ({bossData.id})");
         }
+        return boss != null;
     }
 
     public void StopSpawning()
@@ -244,7 +246,7 @@ public class SpawnManager : MonoBehaviour
         if (enemy != null)
         {
             _totalSpawnedCount++;
-            Debug.Log($"[SpawnManager] {data.name} 소환됨. 총 소환: {_totalSpawnedCount}/{_currentStageData.monsterCount}");
+            // Debug.Log($"[SpawnManager] {data.name} 소환됨. 총 소환: {_totalSpawnedCount}/{_currentStageData.monsterCount}");
         }
     }
 
@@ -305,6 +307,16 @@ public class SpawnManager : MonoBehaviour
             if (_currentStageData != null && _totalSpawnedCount >= _currentStageData.monsterCount && _enemyQueue.Count == 0)
             {
                 SpawnRewardBox();
+            }
+            // 아직 스폰할 몬스터가 남아있으면 즉시 보충 스폰
+            else if (_currentStageData != null && _totalSpawnedCount < _currentStageData.monsterCount
+                     && _enemyQueue.Count < maxQueueSize)
+            {
+                MonsterData monsterData = DataManager.monsters.Get(_currentStageData.monsterId);
+                if (monsterData != null)
+                {
+                    SpawnEnemy(monsterData);
+                }
             }
         }
     }

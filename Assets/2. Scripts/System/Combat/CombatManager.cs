@@ -234,13 +234,23 @@ public class CombatManager : MonoBehaviour
     {
         if (stageData == null) return;
 
-        // 기존 몬스터 스폰 중지 및 풀로 반환
         spawnManager.StopSpawning();
         spawnManager.CleanUpEnemies();
 
-        // 새로운 스테이지 설정 및 해당 스테이지 몬스터 소환
-        stageManager.SetStage(stageData);
-        StartFarming();
+        PlayFadeTransition(() =>
+        {
+            stageManager.SetStage(stageData);
+            StartFarming();
+        });
+    }
+
+    private void PlayFadeTransition(Action midAction)
+    {
+        var stageUI = StageUIManager.Instance;
+        if (stageUI != null)
+            stageUI.PlayFadeTransition(midAction);
+        else
+            midAction?.Invoke();
     }
 
     private void OnPlayerDeath()
@@ -265,37 +275,34 @@ public class CombatManager : MonoBehaviour
     {
         if (adventureData == null) return;
 
-        Debug.Log($"[CombatManager] 모험 시작: {adventureData.name}");
-
-        // 현재 스테이지 저장
+        // 현재 스테이지 저장 및 기존 스폰 정리 (페이드 전)
         _savedStageData = stageManager.CurrentStageData;
-
-        // 모험 데이터 설정
-        _adventureStageData = adventureData;
-        _adventureMonsterKillCount = 0;
-        _adventureTotalMonsters = adventureData.monsterCount;
-        _adventureBossPhase = false;
-        BossHpRatio = 1f;
-
-        // 상태 전환
-        CurrentState = CombatState.Adventure;
-        OnCombatStateChanged?.Invoke(CurrentState);
-
-        // 타이머 시작
-        _adventureTimeRemaining = ADVENTURE_TIME_LIMIT;
-        _isAdventureTimerActive = true;
-
-        // 기존 스폰 정리 + 모험 스폰 시작
         spawnManager.StopSpawning();
         spawnManager.CleanUpEnemies();
 
-        if (playerStats != null)
+        PlayFadeTransition(() =>
         {
-            playerStats.FullRestore();
-        }
+            Debug.Log($"[CombatManager] 모험 시작: {adventureData.name}");
 
-        spawnManager.StartAdventureSpawn(adventureData);
-        OnAdventureMonsterCountChanged?.Invoke(0, _adventureTotalMonsters);
+            _adventureStageData = adventureData;
+            _adventureMonsterKillCount = 0;
+            _adventureTotalMonsters = adventureData.monsterCount;
+            _adventureBossPhase = false;
+            BossHpRatio = 1f;
+
+            CurrentState = CombatState.Adventure;
+            OnCombatStateChanged?.Invoke(CurrentState);
+
+            _adventureTimeRemaining = ADVENTURE_TIME_LIMIT;
+            _isAdventureTimerActive = true;
+
+            if (playerStats != null)
+                playerStats.FullRestore();
+
+            stageManager.SetStage(adventureData); // OnStageChanged 발동
+            spawnManager.StartAdventureSpawn(adventureData);
+            OnAdventureMonsterCountChanged?.Invoke(0, _adventureTotalMonsters);
+        });
     }
 
     private void StartAdventureBossPhase()
@@ -304,13 +311,20 @@ public class CombatManager : MonoBehaviour
         _adventureBossPhase = true;
         BossHpRatio = 1f;
         OnAdventureBossPhaseStarted?.Invoke();
-        spawnManager.SpawnAdventureBoss(_adventureStageData);
+        bool spawnSuccess = spawnManager.SpawnAdventureBoss(_adventureStageData);
+        if (!spawnSuccess)
+        {
+            Debug.LogError("[CombatManager] 모험 보스 스폰 실패. 모험 실패 처리.");
+            HandleAdventureFail();
+        }
     }
 
     private void HandleAdventureSuccess()
     {
         _isAdventureTimerActive = false;
         Debug.Log("[CombatManager] 모험 성공!");
+        if (_adventureStageData != null)
+            AdventureSaveManager.MarkCleared(_adventureStageData.id);
         OnAdventureCompleted?.Invoke(true);
         RestoreFromAdventure();
     }
@@ -326,13 +340,16 @@ public class CombatManager : MonoBehaviour
 
     private void RestoreFromAdventure()
     {
-        if (_savedStageData != null)
+        PlayFadeTransition(() =>
         {
-            stageManager.SetStage(_savedStageData);
-            _savedStageData = null;
-        }
-        _adventureStageData = null;
-        _adventureBossPhase = false;
-        StartFarming();
+            if (_savedStageData != null)
+            {
+                stageManager.SetStage(_savedStageData);
+                _savedStageData = null;
+            }
+            _adventureStageData = null;
+            _adventureBossPhase = false;
+            StartFarming();
+        });
     }
 }
