@@ -6,17 +6,18 @@ NestedScrollManager
 -하단 BTN Tab 버튼 클릭으로만 탭을 전환
 -탭 개수는 btnRect.Length 기준으로 자동 결정
 -선택 표시는 tabSlider로만 처리
+-모험탭처럼 큰 탭은 BottomPanelSlideToggle에 extra를 더 줘서 완전히 숨김
 */
 public class NestedScrollManager : MonoBehaviour
 {
     [Header("Select 표시")]
-    [SerializeField] private Slider tabSlider;
+    [SerializeField] private Slider tabSlider;        // 0~1로 위치 표시(선택바)
 
     [Header("Tabs(개수 기준)")]
-    [SerializeField] private RectTransform[] btnRect;
+    [SerializeField] private RectTransform[] btnRect; // 탭 개수
 
     [Header("Pages")]
-    [SerializeField] private GameObject[] pages;
+    [SerializeField] private GameObject[] pages;      // 각 탭 패널
 
     [Header("Skill Grid (Optional)")]
     [SerializeField] private SkillGridPanelController skillGridPanel;
@@ -26,6 +27,16 @@ public class NestedScrollManager : MonoBehaviour
 
     [Header("Bottom Panel Refresh (Optional)")]
     [SerializeField] private BottomPanelSlideToggle bottomPanelSlideToggle;
+
+    [Header("Per Tab Hidden Extra")]
+    [Tooltip("모험탭 인덱스")]
+    [SerializeField] private int adventureTabIndex = 4;
+
+    [Tooltip("기본 숨김 추가값")]
+    [SerializeField] private float defaultHiddenExtra = 0f;
+
+    [Tooltip("모험탭일 때만 추가로 더 내릴 값")]
+    [SerializeField] private float adventureHiddenExtra = 120f;
 
     private float[] pos;
     private int size;
@@ -78,6 +89,7 @@ public class NestedScrollManager : MonoBehaviour
         }
     }
 
+    // 하단 버튼에서 호출
     public void TabClick(int n)
     {
         if (pos == null || pos.Length == 0) return;
@@ -99,7 +111,7 @@ public class NestedScrollManager : MonoBehaviour
             }
         }
 
-        // 선택 표시
+        // 선택 표시(슬라이더)
         if (tabSlider != null)
         {
             tabSlider.value = pos[currentIndex];
@@ -112,9 +124,15 @@ public class NestedScrollManager : MonoBehaviour
             skillGridPanel.SetIsSkillTab(inSkillTab);
         }
 
-        // 탭 내용이 달라졌으니 BottomPanel 숨김 위치 재계산
+        // 탭별 숨김 추가값 적용
         if (bottomPanelSlideToggle != null)
         {
+            float extra = (currentIndex == adventureTabIndex)
+                ? adventureHiddenExtra
+                : defaultHiddenExtra;
+
+            bottomPanelSlideToggle.SetRuntimeHiddenExtra(extra);
+
             Canvas.ForceUpdateCanvases();
             bottomPanelSlideToggle.RefreshLayoutAndPositions();
         }
