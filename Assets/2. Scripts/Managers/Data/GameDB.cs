@@ -44,7 +44,6 @@ public class GameDB<T, TList> where TList : IDataList<T>
             FieldInfo idFieldInfo = typeof(T).GetField("id");
             if (idFieldInfo == null)
             {
-                Debug.LogError($"클래스에 'id' 필드가 없습니다.");
                 return;
             }
 
