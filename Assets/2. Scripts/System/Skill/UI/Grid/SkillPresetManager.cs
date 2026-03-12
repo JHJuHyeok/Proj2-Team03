@@ -93,7 +93,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (currentPresetSkills != null && currentPresetSkills.Count > 0)
                 {
                     LoadPresetToGrid();
-                    Debug.Log($"[SkillPresetManager] 시작 시 프리셋 {presetData.currentPresetIndex + 1} 로드");
                 }
             }
         }
@@ -139,7 +138,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 {
                     presetData.SetCurrentPreset(placedSkills);
                     SavePresetData();
-                    Debug.Log($"[SkillPresetManager] 자동 저장 완료: 프리셋 {presetData.currentPresetIndex + 1}, {placedSkills.Count}개 스킬");
                 }
             }
             catch (System.Exception e)
@@ -167,7 +165,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             if (newIndex == presetData.currentPresetIndex)
             {
-                Debug.Log($"[SkillPresetManager] 이미 선택된 프리셋: {newIndex + 1}");
                 return;
             }
 
@@ -183,8 +180,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             // 4. 저장
             SavePresetData();
-
-            Debug.Log($"[SkillPresetManager] 프리셋 전환: {oldIndex + 1} → {newIndex + 1}");
 
             // 이벤트 호출
             OnPresetChanged?.Invoke(newIndex);
@@ -207,7 +202,6 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 presetData.SetCurrentPreset(placedSkills);
                 OnPresetSaved?.Invoke(presetData.currentPresetIndex, placedSkills);
-                Debug.Log($"[SkillPresetManager] 프리셋 {presetData.currentPresetIndex + 1} 저장: {placedSkills.Count}개 스킬");
             }
         }
 
@@ -229,14 +223,11 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 // 빈 프리셋이면 그리드만 클리어
                 gridController.ClearAll();
-                Debug.Log($"[SkillPresetManager] 프리셋 {presetData.currentPresetIndex + 1}은(는) 비어있음");
                 return;
             }
 
             // 새로운 메서드 사용하여 로드
             gridController.LoadFromPresetData(currentPresetSkills);
-
-            Debug.Log($"[SkillPresetManager] 프리셋 {presetData.currentPresetIndex + 1} 로드: {currentPresetSkills.Count}개 스킬");
         }
 
         /// <summary>
@@ -270,12 +261,10 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 string json = PlayerPrefs.GetString(saveKey);
                 presetData = SkillPresetSaveData.FromJson(json);
-                Debug.Log($"[SkillPresetManager] 프리셋 데이터 로드 완료, 현재 프리셋: {presetData.currentPresetIndex + 1}");
             }
             else
             {
                 presetData = new SkillPresetSaveData();
-                Debug.Log("[SkillPresetManager] 저장된 프리셋 없음, 새로 생성");
             }
         }
 
@@ -294,8 +283,6 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 gridController?.ClearAll();
             }
-
-            Debug.Log($"[SkillPresetManager] 프리셋 {index + 1} 초기화");
         }
 
         /// <summary>

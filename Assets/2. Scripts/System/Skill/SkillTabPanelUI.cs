@@ -95,8 +95,6 @@ namespace SlayerLegend.Skill
             {
                 FillSkillBar(skillBars[barIndex], barIndex + 1); // 스킬 번호는 1부터 시작
             }
-
-            Debug.Log("[SkillTabPanelUI] 스킬 목록 새로고침 완료");
         }
 
         /// <summary>

@@ -262,12 +262,10 @@ namespace SlayerLegend.Skill.UI.Grid
             // 이미 그리드에 있으면 아이템 생성 안 함
             if (gridController.IsSkillOnGrid(slot.SkillData.id))
             {
-                Debug.Log($"[SkillInventoryUI] 이미 그리드에 있음: {slot.SkillData.id}");
                 return;
             }
 
             // 아이템 생성
-            Debug.Log($"[SkillInventoryUI] 아이템 생성 시도: {slot.SkillData.id}");
             var item = gridController.CreateDraggableItemFromSlot(slot.SkillData.id);
             if (item != null)
             {
@@ -511,7 +509,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 }
             }
 
-            Debug.Log("[SkillInventoryUI] 테스트 스킬 데이터 추가 완료");
             RefreshAllSkillUIs();
         }
 
@@ -521,7 +518,6 @@ namespace SlayerLegend.Skill.UI.Grid
             if (DataManager.CurrentSaveData != null)
             {
                 DataManager.CurrentSaveData.skillInfo.Clear();
-                Debug.Log("[SkillInventoryUI] 스킬 보유 데이터 전체 삭제");
                 RefreshAllSkillUIs();
             }
         }
@@ -546,7 +542,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 DataManager.CurrentSaveData.skillInfo[skill.id] = new Possesion { count = UnityEngine.Random.Range(1, 20) };
             }
 
-            Debug.Log("[SkillInventoryUI] 모든 스킬 보유 추가 완료");
             RefreshAllSkillUIs();
         }
 

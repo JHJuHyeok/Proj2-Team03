@@ -348,20 +348,7 @@ namespace SlayerLegend.Skill.StatusEffects
         public static void LogSkillDataSummary(SkillData skillData)
         {
             if (skillData == null) return;
-
-            try
-            {
-                Debug.Log("=== 스킬 데이터 요약 ===");
-                Debug.Log($"이름: {skillData.name}");
-                Debug.Log($"ID: {skillData.id}");
-                Debug.Log($"레벨 정보: {GetLevelInfo(skillData)}");
-                Debug.Log($"DoT 정보: {(skillData.IsDotSkill() ? $"활성화 ({skillData.GetDotDuration()}s)" : "비활성화")}");
-                Debug.Log($"CC 정보: {GetCcInfo(skillData)}");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"[StatusEffectManager] 스킬 데이터 로깅 실패: {ex.Message}");
-            }
+            // 디버그 로그 비활성화
         }
 
         #endregion

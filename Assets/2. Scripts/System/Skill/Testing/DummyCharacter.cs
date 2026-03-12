@@ -99,7 +99,6 @@ namespace SlayerLegend.Skill.Testing
 
         private void Start()
         {
-            Debug.Log($"[DummyCharacter] 초기화 완료 - HP: {CurrentHealth}, MP: {CurrentMana}, ATK: {AttackDamage}, Gold: {CurrentGold}");
         }
 
         private void Update()
@@ -122,12 +121,10 @@ namespace SlayerLegend.Skill.Testing
         {
             if (CurrentMana < amount)
             {
-                Debug.Log($"마나 부족! 필요: {amount}, 현재: {CurrentMana}");
                 return false;
             }
 
             CurrentMana -= amount;
-            Debug.Log($"마나 사용: -{amount}, 남은: {CurrentMana}");
             return true;
         }
 
@@ -335,21 +332,18 @@ namespace SlayerLegend.Skill.Testing
         {
             float sacrificeAmount = MaxHealth * percent;
             CurrentHealth = Mathf.Max(0, CurrentHealth - sacrificeAmount);
-            Debug.Log($"[DummyCharacter] 체력 소모: -{sacrificeAmount:F1} ({percent * 100}%), 남은: {CurrentHealth:F1}");
         }
 
         public void RestoreHealth(float percent)
         {
             float restoreAmount = MaxHealth * percent;
             CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + restoreAmount);
-            Debug.Log($"[DummyCharacter] 체력 회복: +{restoreAmount:F1} ({percent * 100}%), 현재: {CurrentHealth:F1}");
         }
 
         public void RestoreMana(float percent)
         {
             float restoreAmount = MaxMana * percent;
             CurrentMana = Mathf.Min(MaxMana, CurrentMana + restoreAmount);
-            Debug.Log($"[DummyCharacter] 마나 회복: +{restoreAmount:F1} ({percent * 100}%), 현재: {CurrentMana:F1}");
         }
 
         private void RecalculateStats()
@@ -436,8 +430,6 @@ namespace SlayerLegend.Skill.Testing
                 double bonusDamage = AttackDamage * missingHpDamageBonus / 100.0 * missingHpPercent;
                 AttackDamage += bonusDamage;
             }
-
-            Debug.Log($"[DummyCharacter] 스탯 재계산 - ATK: {AttackDamage:F1}, HP: {_maxHealth:F1}, CRIT: {_criticalRate:P2}, CRIT_DMG: {_criticalDamage:F2}, ATKSPD: {_attackSpeed:F2}, MOVSPD: {_moveSpeed:F2}, EVADE: {evasionRate:F1}%, CDR: {cooldownReduction:F1}%");
         }
         #endregion
 
@@ -451,13 +443,11 @@ namespace SlayerLegend.Skill.Testing
         {
             if (!HasEnoughGold(amount))
             {
-                Debug.Log($"골드 부족! 필요: {amount}, 현재: {CurrentGold}");
                 return false;
             }
 
             CurrentGold -= amount;
             OnGoldChanged?.Invoke(CurrentGold);
-            Debug.Log($"골드 사용: -{amount}, 남은: {CurrentGold}");
             return true;
         }
 
@@ -465,7 +455,6 @@ namespace SlayerLegend.Skill.Testing
         {
             CurrentGold += amount;
             OnGoldChanged?.Invoke(CurrentGold);
-            Debug.Log($"골드 획득: +{amount}, 현재: {CurrentGold}");
         }
         #endregion
 
@@ -480,7 +469,6 @@ namespace SlayerLegend.Skill.Testing
         {
             CurrentHealth = MaxHealth;
             CurrentMana = MaxMana;
-            Debug.Log("[DummyCharacter] 체력/마나 완전 회복");
         }
 
         #region IEquippable 구현
@@ -504,7 +492,6 @@ namespace SlayerLegend.Skill.Testing
                         AddAttackDamagePercentModifier(equipmentSource, finalValue);
                     else
                         RemoveAttackDamagePercentModifier(equipmentSource);
-                    Debug.Log($"[DummyCharacter] 공격력 {(equip ? "+" : "-")}{finalValue}% = {AttackDamage:F1}");
                     break;
 
                 case EffectType.CriticalDamage:
@@ -513,7 +500,6 @@ namespace SlayerLegend.Skill.Testing
                         AddCriticalDamageModifier(equipmentSource, finalValue);
                     else
                         RemoveCriticalDamageModifier(equipmentSource);
-                    Debug.Log($"[DummyCharacter] 크리뎀 {(equip ? "+" : "-")}{finalValue:F2} = {CriticalDamage:F2}");
                     break;
 
                 case EffectType.HealthBoost:
@@ -522,7 +508,6 @@ namespace SlayerLegend.Skill.Testing
                         AddMaxHealthModifier(equipmentSource, finalValue);
                     else
                         RemoveMaxHealthModifier(equipmentSource);
-                    Debug.Log($"[DummyCharacter] 체력 {(equip ? "+" : "-")}{finalValue} = {MaxHealth:F1}");
                     break;
 
                 case EffectType.GoldGain:
@@ -531,21 +516,17 @@ namespace SlayerLegend.Skill.Testing
                         AddGoldGainPercentModifier(equipmentSource, finalValue);
                     else
                         RemoveGoldGainPercentModifier(equipmentSource);
-                    Debug.Log($"[DummyCharacter] 골드 획득 {(equip ? "+" : "-")}{finalValue}%");
                     break;
 
                 case EffectType.ExpGain:
                     // 경험치 획득 % 증가 (현재는 로그만)
-                    Debug.Log($"[DummyCharacter] 경험치 획득 {(equip ? "+" : "-")}{finalValue}%");
                     break;
 
                 case EffectType.ManaBoost:
                     // 마나 증가 (추후 구현)
-                    Debug.Log($"[DummyCharacter] 마나 증가 {finalValue} (미구현)");
                     break;
 
                 default:
-                    Debug.LogWarning($"[DummyCharacter] 알 수 없는 장비 효과: {effect.type}");
                     break;
             }
         }

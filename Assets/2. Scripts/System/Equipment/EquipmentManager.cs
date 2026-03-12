@@ -63,7 +63,6 @@ namespace SlayerLegend.Equipment
         protected override void Awake()
         {
             base.Awake();
-            Debug.Log("[EquipmentManager] 초기화 완료 (Singleton<EquipmentManager>)");
 
             // [조민희] EnhanceManager 초기화 - 강화 시스템 연동
             InitializeEnhanceManager();
@@ -82,7 +81,6 @@ namespace SlayerLegend.Equipment
                 var enhanceObj = new GameObject("EnhanceManager");
                 var enhanceManager = enhanceObj.AddComponent<EnhanceManager>();
                 enhanceManager.Initialize(this);
-                Debug.Log("[EquipmentManager] EnhanceManager 자동 생성 및 초기화 완료");
             }
         }
         #endregion
@@ -248,9 +246,6 @@ namespace SlayerLegend.Equipment
 
             EquipType type = GetEquipTypeFromId(equipId);
             EquipData data = GetEquipData(equipId);
-            string name = data != null ? data.GetName() : equipId;
-
-            Debug.Log($"[EquipmentManager] 장비 획득: {name} x{count} (총 {EquipInfo[equipId].count}개)");
 
             // 보유 효과 적용 (장착 중이 아닌 경우만)
             if (equippedIds[type] != equipId)
@@ -283,10 +278,6 @@ namespace SlayerLegend.Equipment
                 ApplyHoldEffects(equipId, EquipInfo[equipId].level, apply: false);
                 EquipInfo.Remove(equipId);
             }
-
-            EquipData data = GetEquipData(equipId);
-            string name = data != null ? data.GetName() : equipId;
-            Debug.Log($"[EquipmentManager] 장비 제거: {name} x{count}");
 
             OnInventoryChanged?.Invoke(type);
             return true;
@@ -322,7 +313,6 @@ namespace SlayerLegend.Equipment
             // 이미 장착 중인 장비면 무시
             if (equippedIds[type] == equipId)
             {
-                Debug.Log($"[EquipmentManager] 이미 장착 중인 장비입니다: {data.GetName()}");
                 return true;
             }
 
@@ -342,8 +332,6 @@ namespace SlayerLegend.Equipment
             // 장착 상태 업데이트
             equippedIds[type] = equipId;
 
-            Debug.Log($"[EquipmentManager] [{type}] {data.GetName()} 장착 완료 (Lv.{level})");
-
             OnEquipmentEquipped?.Invoke(equipId, type, level);
             return true;
         }
@@ -354,7 +342,6 @@ namespace SlayerLegend.Equipment
             string equippedId = equippedIds[type];
             if (string.IsNullOrEmpty(equippedId))
             {
-                Debug.Log($"[EquipmentManager] {type} 슬롯이 이미 비어있습니다.");
                 return true;
             }
 
@@ -369,9 +356,6 @@ namespace SlayerLegend.Equipment
             {
                 ApplyHoldEffects(equippedId, level, apply: true);
             }
-
-            string name = data != null ? data.GetName() : equippedId;
-            Debug.Log($"[EquipmentManager] [{type}] {name} 해제 완료");
 
             equippedIds[type] = null;
 
@@ -401,10 +385,6 @@ namespace SlayerLegend.Equipment
             CurrencyManager.Instance.ConsumeCurrency(CurrencyType.Cube, cost);
 
             EquipInfo[equipId].level++;
-
-            EquipData data = GetEquipData(equipId);
-            string name = data != null ? data.GetName() : equipId;
-            Debug.Log($"[EquipmentManager] {name} 강화: Lv.{oldLevel} → Lv.{EquipInfo[equipId].level}");
 
             // 장착 중이면 스탯 재적용
             if (equippedIds[type] == equipId)
@@ -512,8 +492,6 @@ namespace SlayerLegend.Equipment
             }
             EquipInfo[resultId].count += 1;
 
-            Debug.Log($"[EquipmentManager] 융합 성공: {currentData.GetName()} x{FUSION_MATERIAL_COUNT} → {nextData.GetName()} x1");
-
             EquipType equipType = GetEquipType(currentData);
             OnInventoryChanged?.Invoke(equipType);
             OnFusionComplete?.Invoke(equipId, resultId);
@@ -558,11 +536,6 @@ namespace SlayerLegend.Equipment
                         }
                     }
                 }
-            }
-
-            if (totalFusionCount > 0)
-            {
-                Debug.Log($"[EquipmentManager] 일괄 융합 완료: 총 {totalFusionCount}회 융합");
             }
 
             return totalFusionCount;

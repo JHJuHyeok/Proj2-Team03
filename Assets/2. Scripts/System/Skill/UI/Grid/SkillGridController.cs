@@ -499,7 +499,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (skill != null)
                 {
                     skillController.AddActiveSkill(skill);
-                    UnityEngine.Debug.Log($"[SkillGridController] Active 스킬 등록: {skillData.name}");
                 }
             }
             else if (skillData.type == SkillType.Passive)
@@ -508,7 +507,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 if (skill != null)
                 {
                     skillController.AddPassiveSkill(skill);
-                    UnityEngine.Debug.Log($"[SkillGridController] Passive 스킬 등록: {skillData.name}");
                 }
             }
         }
@@ -547,12 +545,10 @@ namespace SlayerLegend.Skill.UI.Grid
             if (skillData.type == SkillType.Active)
             {
                 skillController.RemoveActiveSkill(skillId);
-                UnityEngine.Debug.Log($"[SkillGridController] Active 스킬 해제: {skillData.name}");
             }
             else if (skillData.type == SkillType.Passive)
             {
                 skillController.RemovePassiveSkill(skillId);
-                UnityEngine.Debug.Log($"[SkillGridController] Passive 스킬 해제: {skillData.name}");
             }
         }
 
@@ -601,7 +597,6 @@ namespace SlayerLegend.Skill.UI.Grid
             // 중복 로드 방지: 이 인스턴스에서 이미 로드했으면 스킵
             if (isGridDataLoaded)
             {
-                UnityEngine.Debug.Log("[SkillGridController] 이미 그리드 데이터가 로드됨, 스킵");
                 return;
             }
 
@@ -686,7 +681,6 @@ namespace SlayerLegend.Skill.UI.Grid
 
             if (skills.Count == 0)
             {
-                Debug.Log("[SkillGridController] 프리셋이 비어있음");
                 return;
             }
 
@@ -709,8 +703,6 @@ namespace SlayerLegend.Skill.UI.Grid
                     RegisterSkillToController(placedSkill.skillId);
                 }
             }
-
-            Debug.Log($"[SkillGridController] 프리셋 로드 완료: {restoredCount}개 스킬");
 
             // 이벤트 호출
             OnGridDataLoaded?.Invoke();
@@ -737,7 +729,6 @@ namespace SlayerLegend.Skill.UI.Grid
                 }
             }
 
-            Debug.Log($"[SkillGridController] SkillController에서 {removedCount}개 스킬 해제 (Active/Passive 포함)");
         }
 
         /// <summary>

@@ -29,10 +29,6 @@ namespace SlayerLegend.Skill
             {
                 Debug.LogWarning("[SkillEffectLoader] effectDatabase가 할당되지 않았습니다!");
             }
-            else
-            {
-                Debug.Log($"[SkillEffectLoader] 초기화 완료 - 등록된 이펙트: {effectDatabase.Count}개");
-            }
         }
 
         /// <summary>

@@ -73,7 +73,6 @@ namespace SlayerLegend.Resource
             }
 
             isInitialized = true;
-            Debug.Log($"[EquipmentSpriteDatabase] 초기화 완료 - {spriteLookup.Count}개 스프라이트 등록");
         }
 
         /// <summary>

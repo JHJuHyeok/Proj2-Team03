@@ -83,8 +83,6 @@ namespace SlayerLegend.Skill.Testing
 
             // EquipmentLevelManager는 EquipmentManager가 이미 생성하므로 제거
             // EquipmentManager.Awake()에서 자동 생성됨
-
-            Debug.Log("[SimpleSkillTest] 초기화 완료 - EquipmentManager 연결됨");
         }
 
         private void Update()
@@ -146,22 +144,18 @@ namespace SlayerLegend.Skill.Testing
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 currentMenu = MenuState.GeneralSkill;
-                Debug.Log("[Menu] 일반 스킬 테스트 메뉴로 진입");
             }
             else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 currentMenu = MenuState.StatusEffect;
-                Debug.Log("[Menu] 상태이상 스킬 테스트 메뉴로 진입");
             }
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
                 currentMenu = MenuState.Equipment;
-                Debug.Log("[Menu] 장비 테스트 메뉴로 진입");
             }
             else if (Input.GetKeyDown(KeyCode.Alpha4))
             {
                 currentMenu = MenuState.LevelUp;
-                Debug.Log("[Menu] 장비 레벨업 메뉴로 진입");
             }
         }
         #endregion
@@ -188,7 +182,6 @@ namespace SlayerLegend.Skill.Testing
             else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Main;
-                Debug.Log("[Menu] 메인 메뉴로 돌아감");
             }
         }
         #endregion
@@ -219,7 +212,6 @@ namespace SlayerLegend.Skill.Testing
             else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Main;
-                Debug.Log("[Menu] 메인 메뉴로 돌아감");
             }
         }
         #endregion
@@ -238,14 +230,12 @@ namespace SlayerLegend.Skill.Testing
                 var skill = skillController.CreateActiveSkill(data);
                 skill.transform.SetParent(dummyCharacter.transform);
                 skillController.AddActiveSkill(skill);
-                Debug.Log($"[Test] 액티브 스킬 장착: {name}");
             }
             else
             {
                 var skill = skillController.CreatePassiveSkill(data);
                 skill.transform.SetParent(dummyCharacter.transform);
                 skillController.AddPassiveSkill(skill);
-                Debug.Log($"[Test] 패시브 스킬 장착: {name}");
             }
         }
 
@@ -347,25 +337,21 @@ namespace SlayerLegend.Skill.Testing
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 currentMenu = MenuState.WeaponTest;
-                Debug.Log("[Menu] 무기 테스트 메뉴로 진입");
             }
             // 2: 악세서리 테스트
             else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 currentMenu = MenuState.AccessoryTest;
-                Debug.Log("[Menu] 악세서리 테스트 메뉴로 진입");
             }
             // 3: 장비 융합
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
                 currentMenu = MenuState.Fusion;
-                Debug.Log("[Menu] 융합 메뉴로 진입");
             }
             // 메인 복귀
             else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Main;
-                Debug.Log("[Menu] 메인 메뉴로 돌아감");
             }
         }
 
@@ -405,7 +391,6 @@ namespace SlayerLegend.Skill.Testing
             else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Equipment;
-                Debug.Log("[Menu] 장비 테스트 메뉴로 돌아감");
             }
         }
 
@@ -445,7 +430,6 @@ namespace SlayerLegend.Skill.Testing
             else if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Equipment;
-                Debug.Log("[Menu] 장비 테스트 메뉴로 돌아감");
             }
         }
         #endregion
@@ -596,7 +580,6 @@ namespace SlayerLegend.Skill.Testing
             if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Equipment;
-                Debug.Log("[Menu] 장비 메뉴로 돌아감");
             }
         }
 
@@ -607,12 +590,11 @@ namespace SlayerLegend.Skill.Testing
 
             if (fusionManager != null && fusionManager.TryFuse(weapon, out EquipData result))
             {
-                Debug.Log($"[융합 성공] {weapon.GetName()} x5 → {result.GetName()}");
+                // 융합 성공
             }
             else
             {
-                string reason = fusionManager?.GetCannotFuseReason(weapon) ?? "FusionManager 없음";
-                Debug.Log($"[융합 실패] {reason}");
+                // 융합 실패
             }
         }
 
@@ -623,12 +605,11 @@ namespace SlayerLegend.Skill.Testing
 
             if (fusionManager != null && fusionManager.TryFuse(accessory, out EquipData result))
             {
-                Debug.Log($"[융합 성공] {accessory.GetName()} x5 → {result.GetName()}");
+                // 융합 성공
             }
             else
             {
-                string reason = fusionManager?.GetCannotFuseReason(accessory) ?? "FusionManager 없음";
-                Debug.Log($"[융합 실패] {reason}");
+                // 융합 실패
             }
         }
 
@@ -689,8 +670,6 @@ namespace SlayerLegend.Skill.Testing
             {
                 equipmentManager.AddEquipment(accessory.GetId(), count: 1, level: 1);
             }
-
-            Debug.Log("[SimpleSkillTest] 모든 장비 +1씩 추가됨");
         }
 
         #region 장비 레벨업 메뉴
@@ -717,7 +696,6 @@ namespace SlayerLegend.Skill.Testing
             if (Input.GetKeyDown(KeyCode.Alpha9))
             {
                 currentMenu = MenuState.Main;
-                Debug.Log("[Menu] 메인 메뉴로 돌아감");
             }
         }
 
@@ -725,20 +703,14 @@ namespace SlayerLegend.Skill.Testing
         {
             if (cachedWeapons == null || index >= cachedWeapons.Length) return;
             EquipData weapon = cachedWeapons[index];
-
-            int currentLevel = weapon.level;
             weapon.level++;
-            Debug.Log($"[레벨업 성공] {weapon.GetName()}: Lv.{currentLevel} → Lv.{weapon.level}");
         }
 
         private void TryLevelUpAccessory(int index)
         {
             if (cachedAccessories == null || index >= cachedAccessories.Length) return;
             EquipData accessory = cachedAccessories[index];
-
-            int currentLevel = accessory.level;
             accessory.level++;
-            Debug.Log($"[레벨업 성공] {accessory.GetName()}: Lv.{currentLevel} → Lv.{accessory.level}");
         }
 
         private void DrawLevelUpMenu()

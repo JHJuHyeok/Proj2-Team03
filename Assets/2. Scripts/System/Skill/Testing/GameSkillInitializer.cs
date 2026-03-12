@@ -122,8 +122,6 @@ namespace SlayerLegend.Skill.Testing
 
             // Phase 8: 특수 Passive 스킬 (체력소모, 지연발동, 회복)
             InitializeSpecialPassiveSkills();
-
-            Debug.Log($"[GameSkillInitializer] 스킬 초기화 완료 - Active: {activeSkills.Count}, Passive: {passiveSkills.Count}");
         }
 
         #region Phase 2: 기본 AOE 스킬
@@ -203,10 +201,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            string targetInfo = maxTargets > 0 ? $"최대 {maxTargets}적" : "전체";
-            string hitInfo = hitCount > 1 ? $"{hitCount}회 타격" : "1회";
-            Debug.Log($"[GameSkillInitializer] AOE 스킬 생성: {skillName} (범위: {radius}, {targetInfo}, {hitInfo})");
         }
 
         /// <summary>
@@ -295,9 +289,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            string splashInfo = useSplash ? $"스플래시 범위: {splashRadius}" : "단일 타겟";
-            Debug.Log($"[GameSkillInitializer] 발사체 스킬 생성: {skillName} ({splashInfo})");
         }
 
         /// <summary>
@@ -352,8 +343,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            Debug.Log($"[GameSkillInitializer] 대각선 발사체 스킬 생성: {skillName} ({hitCount}연발)");
         }
 
         /// <summary>
@@ -401,8 +390,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            Debug.Log($"[GameSkillInitializer] 랜덤 타격 스킬 생성: {skillName} (범위: {range}, {strikeCount}회)");
         }
 
         #endregion
@@ -495,11 +482,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            string ccInfo = "";
-            if (isStun) ccInfo += $"스턴 {stunChance}%/{stunDuration}s";
-            if (isFreeze) ccInfo += (ccInfo.Length > 0 ? ", " : "") + $"빙결 {freezeChance}%/{freezeDuration}s";
-            Debug.Log($"[GameSkillInitializer] CC 스킬 생성: {skillName} (범위: {radius}, {ccInfo})");
         }
 
         /// <summary>
@@ -548,9 +530,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            string multiplierInfo = lastHitMultiplier > 1f ? $", 마지막 {lastHitMultiplier}배" : "";
-            Debug.Log($"[GameSkillInitializer] 점진적 스킬 생성: {skillName} (범위: {radius}, {hitCount}회 타격{multiplierInfo})");
         }
 
         #endregion
@@ -628,8 +607,6 @@ namespace SlayerLegend.Skill.Testing
 
             skill.SetActive(true);
             activeSkills.Add(skill);
-
-            Debug.Log($"[GameSkillInitializer] 연속 돌진 스킬 생성: {skillName} (범위: {radius}, {dashCount}연속)");
         }
 
         #endregion
@@ -676,8 +653,6 @@ namespace SlayerLegend.Skill.Testing
             skill.transform.SetParent(transform);
             skillController.AddPassiveSkill(skill);
             passiveSkills.Add(skill);
-
-            Debug.Log($"[GameSkillInitializer] 패시브 스킬 생성: {skillName}");
         }
 
         #endregion
@@ -716,10 +691,6 @@ namespace SlayerLegend.Skill.Testing
             skill.transform.SetParent(transform);
             skillController.AddPassiveSkill(skill);
             passiveSkills.Add(skill);
-
-            // 누적형 스킬 정보 로그
-            string accumulateInfo = skill.IsAccumulating ? "누적형" : "일반";
-            Debug.Log($"[GameSkillInitializer] 누적형 패시브 스킬 생성: {skillName} ({accumulateInfo})");
         }
 
         #endregion
@@ -767,10 +738,6 @@ namespace SlayerLegend.Skill.Testing
             skill.transform.SetParent(transform);
             skillController.AddPassiveSkill(skill);
             passiveSkills.Add(skill);
-
-            // 특수 스킬 정보 로그
-            string specialInfo = skill.IsSpecialSkill ? "특수" : "일반";
-            Debug.Log($"[GameSkillInitializer] 특수 패시브 스킬 생성: {skillName} ({specialInfo})");
         }
 
         #endregion
@@ -803,8 +770,6 @@ namespace SlayerLegend.Skill.Testing
                 }
             }
             passiveSkills.Clear();
-
-            Debug.Log("[GameSkillInitializer] 모든 스킬 제거 완료");
         }
 
         /// <summary>

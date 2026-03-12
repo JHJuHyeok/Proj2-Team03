@@ -21,8 +21,6 @@ namespace SlayerLegend.Skill.StatusEffects
 
             // 기절 상태 적용
             stunTarget?.ApplyStun(true);
-
-            Debug.Log($"[StunEffect] 기절 적용! {duration}초간 행동 불가");
         }
 
         protected override void OnTick()
@@ -35,7 +33,6 @@ namespace SlayerLegend.Skill.StatusEffects
             // 기절 상태 해제
             stunTarget?.ApplyStun(false);
             base.OnExpire();
-            Debug.Log($"[StunEffect] 기절 해제");
         }
 
         // 기절 효과 강제 종료

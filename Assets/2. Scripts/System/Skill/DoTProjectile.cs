@@ -20,16 +20,12 @@ namespace SlayerLegend.Skill
             // 1. 즉시 데미지 적용
             enemy.TakeDamage(_damage);
 
-            string critText = _isCritical ? " [치명타]" : "";
-            Debug.Log($"[DoTProjectile] {enemy.gameObject.name} 타격: {_damage:F1} 데미지{critText}");
-
             // 2. 기존에 같은 종류의 DoT가 있는지 확인
             DotEffect existingDot = enemy.GetComponent<DotEffect>();
 
             if (existingDot != null)
             {
                 // 이미 있으면 스택 추가 (시간 초기화)
-                Debug.Log($"[DoTProjectile] {enemy.name}에 이미 {dotType} DoT가 있어서 스택 추가");
                 existingDot.AddStack(dotDuration, damagePerTick, transform.parent?.gameObject);
             }
             else
@@ -58,13 +54,6 @@ namespace SlayerLegend.Skill
                         maxHp,
                         dotType  // stackKey로 사용
                     );
-
-                    string type = isPercentage ? "% 체력비례" : "고정";
-                    Debug.Log($"[DoTProjectile] {enemy.name}에 {dotType} DoT 적용! {dotDuration}초간 {damagePerTick}{type}/{tickInterval}s마다");
-                }
-                else
-                {
-                    Debug.LogWarning($"[DoTProjectile] {enemy.name}에 IDamageable 컴포넌트가 없어서 DoT 적용 실패");
                 }
             }
 

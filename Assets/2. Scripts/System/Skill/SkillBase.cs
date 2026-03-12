@@ -27,7 +27,6 @@ namespace SlayerLegend.Skill
         {
             if (IsMaxLevel)
             {
-                Debug.Log($"이미 최대 레벨입니다: {skillData.name}");
                 return false;
             }
 
@@ -65,7 +64,6 @@ namespace SlayerLegend.Skill
 
         protected virtual void OnLevelUp()
         {
-            Debug.Log($"{skillData.name} 레벨업! 현재 레벨: {currentLevel}");
         }
 
         /// <summary>
@@ -79,10 +77,8 @@ namespace SlayerLegend.Skill
             int savedLevel = GetSavedLevel(skillData.id);
             if (savedLevel != currentLevel)
             {
-                int oldLevel = currentLevel;
                 currentLevel = savedLevel;
                 OnLevelUp(); // 레벨 변경 알림
-                Debug.Log($"[SkillBase] {skillData.name} 레벨 갱신: {oldLevel} → {currentLevel}");
             }
         }
 

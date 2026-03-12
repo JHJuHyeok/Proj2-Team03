@@ -33,7 +33,6 @@ namespace SlayerLegend.Equipment
         {
             this.equipmentManager = equipmentManager;
             EquipmentDatabase.Initialize();
-            Debug.Log("[FusionManager] 초기화 완료");
         }
 
         // 합성 가능 여부 확인
@@ -76,10 +75,6 @@ namespace SlayerLegend.Equipment
 
             // 이벤트 발생
             OnFusionComplete?.Invoke(equipment, result);
-
-            string materialName = equipment.GetName();
-            string resultName = result.GetName();
-            Debug.Log($"[FusionManager] 융합 성공: {materialName} x{fusionMaterialCount} → {resultName}");
 
             return true;
         }

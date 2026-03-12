@@ -21,8 +21,6 @@ namespace SlayerLegend.Skill.StatusEffects
 
             // 속박 상태 적용
             rootTarget?.ApplyRoot(true);
-
-            Debug.Log($"[RootEffect] 속박 적용! {duration}초간 이동 불가");
         }
 
         protected override void OnTick()
@@ -35,7 +33,6 @@ namespace SlayerLegend.Skill.StatusEffects
             // 속박 상태 해제
             rootTarget?.ApplyRoot(false);
             base.OnExpire();
-            Debug.Log($"[RootEffect] 속박 해제");
         }
 
         // 속박 효과 강제 종료

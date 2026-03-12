@@ -56,20 +56,17 @@ namespace SlayerLegend.Skill
         {
             if (activeSkills.Count >= MAX_ACTIVE_SKILLS)
             {
-                Debug.Log("더 이상 액티브 스킬을 장착할 수 없습니다.");
                 return false;
             }
 
             if (activeSkills.Contains(skill))
             {
-                Debug.Log($"{skill.Data.name}은(는) 이미 장착되어 있습니다.");
                 return false;
             }
 
             activeSkills.Add(skill);
             skill.SetActive(true);
             skill.transform.SetParent(transform);
-            Debug.Log($"{skill.Data.name} 스킬 장착 완료!");
             return true;
         }
 
@@ -78,14 +75,12 @@ namespace SlayerLegend.Skill
         {
             if (passiveSkills.Contains(skill))
             {
-                Debug.Log($"{skill.Data.name}은(는) 이미 장착되어 있습니다.");
                 return false;
             }
 
             passiveSkills.Add(skill);
             skill.Activate();
             skill.transform.SetParent(transform);
-            Debug.Log($"{skill.Data.name} 패시브 장착 완료!");
             return true;
         }
 
@@ -113,7 +108,6 @@ namespace SlayerLegend.Skill
             {
                 skill.SetActive(false);
                 activeSkills.Remove(skill);
-                Debug.Log($"{skill.Data.name} 스킬 장착 해제");
                 Destroy(skill.gameObject);  // [조민희] 프리셋 전환 시 중복 생성 방지용 Destroy 추가
                 return true;
             }
@@ -128,7 +122,6 @@ namespace SlayerLegend.Skill
             {
                 skill.Deactivate();
                 passiveSkills.Remove(skill);
-                Debug.Log($"{skill.Data.name} 패시브 장착 해제");
                 Destroy(skill.gameObject);  // [조민희] 프리셋 전환 시 중복 생성 방지용 Destroy 추가
                 return true;
             }

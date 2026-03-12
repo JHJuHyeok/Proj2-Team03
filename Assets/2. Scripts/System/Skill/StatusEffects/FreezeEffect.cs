@@ -35,8 +35,6 @@ namespace SlayerLegend.Skill.StatusEffects
 
             // 빙결 상태 적용 (slowPercent만 적용)
             freezeTarget?.ApplyFreeze(slowPercent);
-
-            Debug.Log($"[FreezeEffect] 빙결 적용! {duration}초간 이속 {slowPercent * 100:F0}% 감소 (중첩: {stackCount})");
         }
 
         protected override void OnTick()
@@ -50,7 +48,6 @@ namespace SlayerLegend.Skill.StatusEffects
             freezeTarget?.RemoveFreeze(slowPercent);
             // DecrementFreezeStacks는 EndEffect에서만 호출 (중복 호출 방지)
             base.OnExpire();
-            Debug.Log($"[FreezeEffect] 빙결 해제");
         }
 
         // 빙결 효과 강제 종료

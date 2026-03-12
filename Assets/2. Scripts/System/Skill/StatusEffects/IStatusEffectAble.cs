@@ -52,7 +52,6 @@ namespace SlayerLegend.Skill.StatusEffects
                 CopyEffectSettings(effect, addedEffect);
 
                 activeEffects.Add(addedEffect);
-                Debug.Log($"[StatusEffectContainer] 상태이상 적용: {effect.EffectName}");
             }
         }
 
@@ -92,7 +91,6 @@ namespace SlayerLegend.Skill.StatusEffects
                 }
             }
             activeEffects.Clear();
-            Debug.Log("[StatusEffectContainer] 모든 상태이상 제거");
         }
 
         private void CopyEffectSettings(StatusEffect source, StatusEffect target)

@@ -65,7 +65,6 @@ namespace SlayerLegend.Skill.UI
                     return;
                 }
 
-                Debug.Log($"[SkillGridInitializer] 데이터 로드 대기 완료 ({waitCount * 50}ms)");
             }
 
             Initialize();

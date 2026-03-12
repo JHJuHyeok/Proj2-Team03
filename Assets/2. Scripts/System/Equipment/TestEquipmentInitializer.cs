@@ -108,7 +108,6 @@ namespace SlayerLegend.Testing
             if (enableTestMode)
             {
                 await DataManager.LoadAllDatabase();
-                Debug.Log("[TestEquipmentInitializer] 데이터베이스 로드 완료");
             }
         }
 
@@ -120,14 +119,12 @@ namespace SlayerLegend.Testing
         {
             if (!enableTestMode)
             {
-                Debug.Log("[TestEquipmentInitializer] 테스트 모드 비활성화됨");
                 return;
             }
 
             // 이미 데이터가 있으면 건너뜀
             if (DataManager.CurrentSaveData != null)
             {
-                Debug.Log("[TestEquipmentInitializer] 이미 GameData가 존재함 - 초기화 건너뜀");
                 return;
             }
 
@@ -164,8 +161,6 @@ namespace SlayerLegend.Testing
 
             // DataManager 초기화
             DataManager.Init(testData);
-
-            Debug.Log($"[TestEquipmentInitializer] 테스트 데이터 초기화 완료 - {testWeapons.Count}개 무기, {testAccessories.Count}개 악세서리 추가됨");
 
             // 로그 출력
             LogTestDataSummary();

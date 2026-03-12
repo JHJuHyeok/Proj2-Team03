@@ -40,7 +40,6 @@ namespace SlayerLegend.Skill.Testing
 
         private void Start()
         {
-            Debug.Log($"[DummyEnemy] 적 생성 - HP: {CurrentHealth}");
         }
 
         private void Update()
@@ -64,12 +63,7 @@ namespace SlayerLegend.Skill.Testing
         // 데미지를 입음
         public void TakeDamage(double damage)
         {
-            if (isStunned)
-            {
-                Debug.Log($"[DummyEnemy] 기절 중! 추가 피격!"); // 기절 중에는 추가 콤보 가능
-            }
             CurrentHealth -= damage;
-            Debug.Log($"[DummyEnemy] 피격! 데미지: {damage:F1}, 남은 HP: {CurrentHealth:F1}");
 
             if (CurrentHealth <= 0)
             {
@@ -80,12 +74,7 @@ namespace SlayerLegend.Skill.Testing
         // 스킬 이름과 함께 데미지를 입음 (테스트용)
         public void TakeDamage(double damage, string skillName)
         {
-            if (isStunned)
-            {
-                Debug.Log($"[DummyEnemy] 기절 중! [{skillName}] 추가 피격!");
-            }
             CurrentHealth -= damage;
-            Debug.Log($"[DummyEnemy] [{skillName}] 피격! 데미지: {damage:F1}, 남은 HP: {CurrentHealth:F1}");
 
             if (CurrentHealth <= 0)
             {
@@ -95,7 +84,6 @@ namespace SlayerLegend.Skill.Testing
 
         private void Die()
         {
-            Debug.Log($"[DummyEnemy] 적 처치!");
             ClearAllStatusEffects();
             // 테스트를 위해 3초 후 부활
             Invoke(nameof(Respawn), 3f);
@@ -105,7 +93,6 @@ namespace SlayerLegend.Skill.Testing
         {
             CurrentHealth = maxHealth;
             ClearAllStatusEffects();
-            Debug.Log($"[DummyEnemy] 적 리스폰 - HP: {CurrentHealth}");
         }
 
         #region IStatusEffectAble 구현
@@ -156,7 +143,6 @@ namespace SlayerLegend.Skill.Testing
             if (addedEffect != null)
             {
                 activeEffects.Add(addedEffect);
-                Debug.Log($"[DummyEnemy] 상태이상 적용: {effect.EffectName}");
             }
         }
 
@@ -278,7 +264,6 @@ namespace SlayerLegend.Skill.Testing
         public void ApplyStun(bool stunned)
         {
             isStunned = stunned;
-            Debug.Log($"[DummyEnemy] 기절 상태: {(stunned ? "ON" : "OFF")}");
         }
         #endregion
 
@@ -287,27 +272,23 @@ namespace SlayerLegend.Skill.Testing
         {
             freezeSlowAmount += slowPercent;
             freezeSlowAmount = Mathf.Min(freezeSlowAmount, 0.9f); // 최대 90% 감소
-            Debug.Log($"[DummyEnemy] 빙결 적용! 총 이속 감소: {freezeSlowAmount * 100:F0}% (중첩: {freezeStacks})");
         }
 
         public void RemoveFreeze(float slowPercent)
         {
             freezeSlowAmount -= slowPercent;
             freezeSlowAmount = Mathf.Max(freezeSlowAmount, 0f);
-            Debug.Log($"[DummyEnemy] 빙결 해제! 총 이속 감소: {freezeSlowAmount * 100:F0}%");
         }
 
         public void IncrementFreezeStacks()
         {
             freezeStacks++;
-            Debug.Log($"[DummyEnemy] 빙결 중첩 증가! 현재 중첩: {freezeStacks}");
         }
 
         public void DecrementFreezeStacks()
         {
             freezeStacks--;
             freezeStacks = Mathf.Max(freezeStacks, 0); // 음수 방지
-            Debug.Log($"[DummyEnemy] 빙결 중첩 감소! 현재 중첩: {freezeStacks}");
         }
         #endregion
 
@@ -315,7 +296,6 @@ namespace SlayerLegend.Skill.Testing
         public void ApplyRoot(bool rooted)
         {
             isRooted = rooted;
-            Debug.Log($"[DummyEnemy] 속박 상태: {(rooted ? "ON" : "OFF")}");
         }
         #endregion
     }

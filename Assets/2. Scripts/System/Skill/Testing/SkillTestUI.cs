@@ -49,7 +49,6 @@ namespace SlayerLegend.Skill.Testing
             {
                 skill.transform.SetParent(dummyCharacter.transform);
                 skillController.AddActiveSkill(skill);
-                Debug.Log($"[Test] 액티브 스킬 추가: {name}");
             }
         }
 
@@ -67,7 +66,6 @@ namespace SlayerLegend.Skill.Testing
             {
                 skill.transform.SetParent(dummyCharacter.transform);
                 skillController.AddPassiveSkill(skill);
-                Debug.Log($"[Test] 패시브 스킬 추가: {name}");
             }
         }
     }

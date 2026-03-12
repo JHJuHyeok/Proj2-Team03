@@ -38,7 +38,6 @@ namespace SlayerLegend.Equipment
         public void Initialize(EquipmentManager equipmentManager)
         {
             this.equipmentManager = equipmentManager;
-            Debug.Log("[EnhanceManager] 초기화 완료");
         }
 
         /// <summary>강화 가능 여부 확인</summary>

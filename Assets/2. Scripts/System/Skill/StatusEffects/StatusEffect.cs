@@ -51,7 +51,6 @@ namespace SlayerLegend.Skill.StatusEffects
         // 상태이상 만료 시 호출
         protected virtual void OnExpire()
         {
-            Debug.Log($"[{effectName}] 상태이상 만료");
         }
 
         // 상태이상 강제 종료

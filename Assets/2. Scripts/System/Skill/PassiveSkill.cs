@@ -690,7 +690,6 @@ namespace SlayerLegend.Skill
             {
                 RemovePassiveEffect();
                 ApplyPassiveEffect();
-                Debug.Log($"{skillData.name} 패시브 레벨업! 새로운 효과: {GetBuffValue():F1}");
             }
         }
 

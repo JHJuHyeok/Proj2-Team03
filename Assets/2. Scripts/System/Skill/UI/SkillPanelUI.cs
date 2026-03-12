@@ -95,11 +95,6 @@ namespace SlayerLegend.UI
 
                 FindSkillSlotUI(skill)?.RefreshUI();
                 UpdateGoldDisplay();
-                Debug.Log($"{skill.Data.name} 레벨업 성공! 현재 레벨: {skill.CurrentLevel}");
-            }
-            else
-            {
-                Debug.Log($"골드가 부족합니다! 필요: {cost}G");
             }
         }
 

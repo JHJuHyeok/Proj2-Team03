@@ -24,6 +24,12 @@ namespace SlayerLegend.Skill.UI.Grid
         [SerializeField] private KeyCode rotateKey = KeyCode.R;
         [SerializeField] private bool allowRotation = true;
 
+        [Header("모바일 회전 버튼 설정")]
+        [SerializeField] private bool enableMobileRotateButton = true;
+        [SerializeField] private float rotateButtonSize = 100f;  // 버튼 크기 증가
+        [SerializeField] private Vector2 rotateButtonOffset = new Vector2(-100f, 100f);  // 우측 하단에서 오프셋 (버튼 크기에 맞게 조정)
+        [SerializeField] private Color rotateButtonColor = new Color(0.2f, 0.6f, 1f, 0.9f);  // 파란색
+
         [Header("셀 이미지 설정")]
         [SerializeField] private Transform cellImagesContainer;
         [SerializeField] private GameObject cellImagePrefab;
@@ -52,6 +58,12 @@ namespace SlayerLegend.Skill.UI.Grid
 
         // 드래그 중 임시 저장
         private static SkillDraggableItem currentDraggingItem = null;
+
+        // 모바일 회전 버튼 (정적: 모든 아이템이 공유)
+        private static GameObject mobileRotateButton;
+        private static Button rotateButtonComponent;
+        private static Image rotateButtonImage;
+        private static Canvas rotateButtonCanvas;
 
         // 이벤트
         public event System.Action<SkillDraggableItem> OnDragStarted;
@@ -97,6 +109,16 @@ namespace SlayerLegend.Skill.UI.Grid
             if (isDragging && allowRotation && Input.GetKeyDown(rotateKey))
             {
                 Rotate();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // 아이템이 파괴될 때 회전 버튼도 정리
+            if (currentDraggingItem == this)
+            {
+                HideMobileRotateButton();
+                currentDraggingItem = null;
             }
         }
 
@@ -277,8 +299,211 @@ namespace SlayerLegend.Skill.UI.Grid
             currentRotation = (currentRotation + 90) % 360;
             UpdateCellImages();
             UpdatePreview();
-
         }
+
+        #region 모바일 회전 버튼
+
+        /// <summary>
+        /// 모바일 회전 버튼 표시 (드래그 시작 시 호출)
+        /// </summary>
+        private void ShowMobileRotateButton()
+        {
+            if (!enableMobileRotateButton || !allowRotation) return;
+
+            // 버튼이 없으면 생성
+            if (mobileRotateButton == null)
+            {
+                CreateMobileRotateButton();
+            }
+
+            if (mobileRotateButton != null)
+            {
+                mobileRotateButton.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// 모바일 회전 버튼 숨김 (드래그 종료 시 호출)
+        /// </summary>
+        private void HideMobileRotateButton()
+        {
+            if (mobileRotateButton != null)
+            {
+                mobileRotateButton.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// 모바일 회전 버튼 동적 생성
+        /// </summary>
+        private void CreateMobileRotateButton()
+        {
+            // 최상위 캔버스 찾기
+            Canvas rootCanvas = GetComponentInParent<Canvas>();
+            if (rootCanvas == null) rootCanvas = FindFirstObjectByType<Canvas>();
+
+            if (rootCanvas == null)
+            {
+                Debug.LogWarning("[SkillDraggableItem] 캔버스를 찾을 수 없습니다.");
+                return;
+            }
+
+            // 버튼 게임오브젝트 생성
+            mobileRotateButton = new GameObject("MobileRotateButton");
+            mobileRotateButton.transform.SetParent(rootCanvas.transform, false);
+            mobileRotateButton.transform.SetAsLastSibling();
+
+            // RectTransform 설정
+            RectTransform rt = mobileRotateButton.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rotateButtonSize, rotateButtonSize);
+
+            // 우측 하단에 배치 (오프셋 적용)
+            rt.anchorMin = new Vector2(1, 0);  // 우측 하단
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(rotateButtonOffset.x, rotateButtonOffset.y);
+
+            // 캔버스 그룹 추가 (다른 UI 위에 표시)
+            CanvasGroup cg = mobileRotateButton.AddComponent<CanvasGroup>();
+            cg.blocksRaycasts = true;
+            cg.interactable = true;
+
+            // 이미지 추가 (회전 아이콘)
+            rotateButtonImage = mobileRotateButton.AddComponent<Image>();
+            rotateButtonImage.color = rotateButtonColor;
+            rotateButtonImage.raycastTarget = true;
+
+            // 회전 아이콘 스프라이트 로드 시도
+            Sprite rotateIcon = Resources.Load<Sprite>("Skill/Grid/RotateIcon");
+            if (rotateIcon != null)
+            {
+                rotateButtonImage.sprite = rotateIcon;
+            }
+            else
+            {
+                // 기본 원형 아이콘 생성
+                rotateButtonImage.sprite = CreateCircleSprite();
+            }
+
+            // 버튼 컴포넌트 추가
+            rotateButtonComponent = mobileRotateButton.AddComponent<Button>();
+
+            // 버튼 클릭 이벤트
+            rotateButtonComponent.onClick.AddListener(OnMobileRotateButtonClicked);
+
+            // 버튼에 그림자/효과 추가 (선택사항)
+            AddButtonShadow(mobileRotateButton);
+
+            // "회전" 텍스트 추가
+            AddButtonText(mobileRotateButton);
+        }
+
+        /// <summary>
+        /// 기본 원형 스프라이트 생성
+        /// </summary>
+        private Sprite CreateCircleSprite()
+        {
+            int size = 64;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+
+            Color[] pixels = new Color[size * size];
+            Vector2 center = new Vector2(size / 2f, size / 2f);
+            float radius = size / 2f - 4f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), center);
+                    if (dist <= radius)
+                    {
+                        // 원 내부: 흰색
+                        pixels[y * size + x] = Color.white;
+                    }
+                    else
+                    {
+                        // 원 외부: 투명
+                        pixels[y * size + x] = Color.clear;
+                    }
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+        }
+
+        /// <summary>
+        /// 버튼에 그림자 효과 추가
+        /// </summary>
+        private void AddButtonShadow(GameObject button)
+        {
+            Shadow shadow = button.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.5f);
+            shadow.effectDistance = new Vector2(2, -2);
+        }
+
+        /// <summary>
+        /// 버튼에 "회전" 텍스트 추가
+        /// </summary>
+        private void AddButtonText(GameObject button)
+        {
+            // 텍스트 게임오브젝트 생성
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(button.transform, false);
+
+            // RectTransform 설정 (부모 꽉 채우기)
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.anchoredPosition = Vector2.zero;
+
+            // Text 컴포넌트 추가
+            Text text = textObj.AddComponent<Text>();
+            text.text = "회전";
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.fontSize = 24;
+            text.fontStyle = FontStyle.Bold;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = Color.white;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            // 텍스트에 그림자 추가
+            Shadow textShadow = textObj.AddComponent<Shadow>();
+            textShadow.effectColor = new Color(0, 0, 0, 0.7f);
+            textShadow.effectDistance = new Vector2(1, -1);
+        }
+
+        /// <summary>
+        /// 모바일 회전 버튼 클릭 시 호출
+        /// </summary>
+        private void OnMobileRotateButtonClicked()
+        {
+            // 현재 드래그 중인 아이템 회전
+            if (currentDraggingItem != null && currentDraggingItem == this && isDragging)
+            {
+                Rotate();
+            }
+        }
+
+        /// <summary>
+        /// 모바일 회전 버튼 정적 제거 (씬 전환 등)
+        /// </summary>
+        public static void CleanupMobileRotateButton()
+        {
+            if (mobileRotateButton != null)
+            {
+                Destroy(mobileRotateButton);
+                mobileRotateButton = null;
+                rotateButtonComponent = null;
+                rotateButtonImage = null;
+            }
+        }
+
+        #endregion
 
         // 드래그 시작
         public void OnBeginDrag(PointerEventData eventData)
@@ -319,6 +544,9 @@ namespace SlayerLegend.Skill.UI.Grid
                 canvasGroup.alpha = 0.7f;
                 canvasGroup.blocksRaycasts = false;
             }
+
+            // 모바일 회전 버튼 표시
+            ShowMobileRotateButton();
 
             OnDragStarted?.Invoke(this);
 
@@ -376,6 +604,9 @@ namespace SlayerLegend.Skill.UI.Grid
             {
                 gridManager.ClearAllHighlights();
             }
+
+            // 모바일 회전 버튼 숨김
+            HideMobileRotateButton();
 
             OnDragEnded?.Invoke(this);
         }

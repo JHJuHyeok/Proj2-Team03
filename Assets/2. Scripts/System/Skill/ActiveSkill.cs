@@ -213,13 +213,11 @@ namespace SlayerLegend.Skill
             if (!isActive || !IsAttackCountMode) return;
 
             currentAttackCount++;
-            Debug.Log($"[ActiveSkill] {skillData?.name} 공격 카운트: {currentAttackCount}/{requiredAttackCount}");
 
             // 필요 공격 수 도달 시 스킬 발동
             if (currentAttackCount >= requiredAttackCount)
             {
                 currentAttackCount = 0;  // 카운터 리셋
-                Debug.Log($"[ActiveSkill] {skillData?.name} 발동 조건 충족!");
 
                 // 폭발 스킬 여부 확인
                 if (skillData.effectData != null && skillData.effectData.isBlastSkill)
@@ -250,13 +248,10 @@ namespace SlayerLegend.Skill
                     int currentMana = (int)stats.CurrentMana;  // 수정: CurrentMana 속성 사용
                     if (!stats.UseMana(manaCost))
                     {
-                        Debug.Log($"[Skill] {skillData.name} 발동 실패: 마나 부족 (필요: {manaCost}, 현재: {currentMana})");
                         return; // 마나 부족하면 발동 안 함
                     }
                 }
             }
-
-            Debug.Log($"[Skill] {skillData.name} 발동 시도...");
             ExecuteSkill(cachedCaster);
 
             // 쿨타임 설정 (Cooldown 모드일 때만)
@@ -291,13 +286,10 @@ namespace SlayerLegend.Skill
                     int currentMana = (int)stats.CurrentMana;
                     if (!stats.UseMana(manaCost))
                     {
-                        Debug.Log($"[Skill] {skillData.name} 발동 실패: 마나 부족 (필요: {manaCost}, 현재: {currentMana})");
                         return;
                     }
                 }
             }
-
-            Debug.Log($"[Skill] {skillData.name} 폭발 스킬 발동!");
 
             // 폭발 파라미터 가져오기 (effectData 사용)
             float explosionRadius = skillData.effectData?.explosionRadius ?? 3f;
@@ -386,7 +378,6 @@ namespace SlayerLegend.Skill
 
                 Vector3 spawnPosition = caster.transform.position + offset;
                 SkillProjectile2D.Create(projectilePrefab, spawnPosition, totalDamage, isCritical, fireDirection);
-                Debug.Log($"[Skill] {caster.name}이(가) {skillData.name} 발사!{critText} → 데미지: {totalDamage:F1}");
             }
             else
             {
@@ -422,7 +413,6 @@ namespace SlayerLegend.Skill
                 string ccInfo = "";
                 if (skillData.effectData?.isStun ?? false) ccInfo += $" [스턴 {skillData.effectData.stunChance}%]";
                 if (skillData.effectData?.isFreeze ?? false) ccInfo += $" [빙결 {skillData.effectData.freezeChance}%]";
-                Debug.Log($"[Skill] {caster.name}이(가) {skillData.name} 시전!{critText} → 데미지: {totalDamage:F1} ({targetInfo}, {hitInfo}){ccInfo}");
             }
         }
 
@@ -465,8 +455,6 @@ namespace SlayerLegend.Skill
                 isPercentage,
                 targetMaxHp
             );
-
-            Debug.Log($"[Skill] 도트 데미지 적용! {skillData.GetDotDuration()}초간 {skillData.GetDotTickInterval()}초마다 {(isPercentage ? $"최대HP의 {damageValue:F1}%" : $"{damageValue:F1}데미지")}");
         }
 
         // CC 상태이상 적용
@@ -481,7 +469,6 @@ namespace SlayerLegend.Skill
                     // 적에게 직접 컴포넌트 추가 (불필요한 임시 생성 제거)
                     var stunEffect = enemyObject.AddComponent<StunEffect>();
                     stunEffect.Initialize(skillData.GetStunDuration(), stunTarget);
-                    Debug.Log($"[Skill] 기절 적용! {skillData.GetStunDuration()}초간 행동 불가");
                 }
             }
 
@@ -495,7 +482,6 @@ namespace SlayerLegend.Skill
                     var freezeEffect = enemyObject.AddComponent<FreezeEffect>();
                     // FreezeStacks는 Initialize 내부에서 계산하도록 변경 (중복 관리 제거)
                     freezeEffect.Initialize(skillData.GetFreezeDuration(), freezeTarget);
-                    Debug.Log($"[Skill] 빙결 적용! {skillData.GetFreezeDuration()}초간 이속 감소");
                 }
             }
 
@@ -508,7 +494,6 @@ namespace SlayerLegend.Skill
                     // 적에게 직접 컴포넌트 추가
                     var rootEffect = enemyObject.AddComponent<RootEffect>();
                     rootEffect.Initialize(skillData.GetRootDuration(), rootTarget);
-                    Debug.Log($"[Skill] 속박 적용! {skillData.GetRootDuration()}초간 이동 불가");
                 }
             }
         }
@@ -591,7 +576,6 @@ namespace SlayerLegend.Skill
             string ccInfo = "";
             if (isStun) ccInfo += $" [스턴 {stunChance}%]";
             if (isFreeze) ccInfo += $" [빙결 {freezeChance}%]";
-            Debug.Log($"[Skill] {skillData.name} 폭발 생성! → 예상 데미지: {totalDamage:F1}{critText} ({targetInfo}, {hitInfo}){ccInfo}");
 
             // 일정 시간 후 제거 (다회 타격 고려)
             float destroyTime = hitCount > 1 ? 5f + (hitCount * hitInterval) : 5f;
@@ -603,7 +587,6 @@ namespace SlayerLegend.Skill
         protected override void OnLevelUp()
         {
             base.OnLevelUp();
-            Debug.Log($"{skillData.name} 액티브 스킬 레벨업! 쿨타임: {SkillCalculator.GetCooldown(skillData, currentLevel):F1}초");
 
             // [조민희] 레벨업 시 Inspector 필드 갱신
             UpdateInspectorDamageInfo();

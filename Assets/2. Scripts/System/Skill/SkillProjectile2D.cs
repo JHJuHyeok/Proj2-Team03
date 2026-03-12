@@ -71,9 +71,6 @@ namespace SlayerLegend.Skill
             // 데미지 적용
             enemy.TakeDamage(_damage);
 
-            string critText = _isCritical ? " [치명타]" : "";
-            Debug.Log($"[Projectile2D] {enemy.gameObject.name} 타격: {_damage:F1} 데미지{critText}");
-
             // 타격 이펙트
             if (hitEffectPrefab != null)
             {

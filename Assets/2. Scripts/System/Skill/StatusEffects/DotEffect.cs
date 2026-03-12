@@ -51,13 +51,11 @@ namespace SlayerLegend.Skill.StatusEffects
             {
                 double actualDamage = targetMaxHp * (damagePerTick / 100.0) * currentStack;
                 effectName = $"DoT ({damagePerTick:F1}%x{currentStack}/{tickInterval}s = {actualDamage:F1})";
-                Debug.Log($"[DotEffect] 적용 (체력비례) - 스택:{currentStack}, 총 {duration}초, 최대HP의 {damagePerTick:F1}%/{tickInterval}초 간격 (실데미지: {actualDamage:F1})");
             }
             else
             {
                 double actualDamage = damagePerTick * currentStack;
                 effectName = $"DoT ({damagePerTick:F1}x{currentStack}/{tickInterval}s)";
-                Debug.Log($"[DotEffect] 적용 (고정) - 스택:{currentStack}, 총 {duration}초, {damagePerTick}데미지/{tickInterval}초 간격 (실데미지: {actualDamage:F1})");
             }
         }
 
@@ -88,7 +86,6 @@ namespace SlayerLegend.Skill.StatusEffects
             }
 
             target.TakeDamage(actualDamage);
-            Debug.Log($"[DotEffect] 도트 데미지 적용! 스택:{currentStack}, {actualDamage:F1} 데미지 (남은 시간: {remainingTime:F1}s)");
         }
 
         protected override void OnExpire()
@@ -106,12 +103,10 @@ namespace SlayerLegend.Skill.StatusEffects
                 remainingTime = duration;  // 시간 초기화
                 tickTimer = 0f;
                 isExpired = false;  // 만료 상태 해제
-                Debug.Log($"[DotEffect] 스택 감소! {currentStack + 1} → {currentStack}, 지속시간 초기화");
             }
             else
             {
                 base.OnExpire();
-                Debug.Log($"[DotEffect] 만료 - 총 {duration}초 동안 도트 데미지 적용 완료");
             }
         }
 
@@ -122,13 +117,11 @@ namespace SlayerLegend.Skill.StatusEffects
             {
                 currentStack++;
                 remainingTime = duration;  // 시간 초기화
-                Debug.Log($"[DotEffect] 스택 증가! {currentStack - 1} → {currentStack}/{maxStack}");
             }
             else
             {
                 // 이미 최대 스택이면 시간만 갱신
                 remainingTime = duration;
-                Debug.Log($"[DotEffect] 최대 스택 도달! 시간만 갱신");
             }
         }
     }

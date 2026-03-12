@@ -42,10 +42,6 @@ namespace SlayerLegend.UI
             if (skillGridController == null)
             {
                 skillGridController = FindFirstObjectByType<SkillGridController>();
-                if (skillGridController != null)
-                {
-                    Debug.Log("[SkillSetPanelUI] SkillGridController 자동 연결됨");
-                }
             }
 
             //EarlyGridDataLoader 찾기 (게임 시작 시 그리드 데이터 로드용)
@@ -60,7 +56,6 @@ namespace SlayerLegend.UI
                 skillGridController.OnSkillPlaced += HandleSkillPlaced;
                 skillGridController.OnSkillRemoved += HandleSkillRemoved;
                 skillGridController.OnGridDataLoaded += HandleGridDataLoaded;  //그리드 데이터 로드 완료 이벤트
-                Debug.Log("[SkillSetPanelUI] 이벤트 구독 완료");
             }
             else
             {
@@ -78,7 +73,6 @@ namespace SlayerLegend.UI
             if (SkillPresetManager.Instance != null)
             {
                 SkillPresetManager.Instance.OnPresetChanged += HandlePresetChanged;
-                Debug.Log("[SkillSetPanelUI] SkillPresetManager 이벤트 구독 완료");
             }
             else
             {
@@ -179,8 +173,6 @@ namespace SlayerLegend.UI
         /// </summary>
         private void HandlePresetChanged(int newPresetIndex)
         {
-            Debug.Log($"[SkillSetPanelUI] 프리셋 변경 감지: {newPresetIndex + 1}");
-
             // 강제로 다시 로드 (중복 방지 체크 무시)
             LoadPlacedSkillsToQueue(forceReload: true);
         }
@@ -200,11 +192,6 @@ namespace SlayerLegend.UI
             if (SkillPresetManager.Instance != null)
             {
                 SkillPresetManager.Instance.OnPresetChanged += HandlePresetChanged;
-                Debug.Log("[SkillSetPanelUI] SkillPresetManager 이벤트 구독 완료 (지연)");
-            }
-            else
-            {
-                Debug.LogWarning("[SkillSetPanelUI] SkillPresetManager를 찾을 수 없어 프리셋 변경 이벤트를 구독하지 않음");
             }
         }
 
@@ -313,7 +300,6 @@ namespace SlayerLegend.UI
             // forceReload가 아니면 중복 방지
             if (!forceReload && placedSkillQueue.Count > 0)
             {
-                Debug.Log("[SkillSetPanelUI] 이미 스킬이 로드됨, 중복 로드 방지");
                 return;
             }
 
@@ -344,8 +330,6 @@ namespace SlayerLegend.UI
                     passiveCount++;
                 }
             }
-
-            Debug.Log($"[SkillSetPanelUI] 스킬 로드 완료: Active {activeCount}개, Passive {passiveCount}개");
 
             // 버튼 갱신
             RefreshButtonsFromQueue();
