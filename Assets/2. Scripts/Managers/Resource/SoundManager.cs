@@ -39,7 +39,7 @@ public class SoundManager : Singleton<SoundManager>
         if (soundPlayerPrefab != null)
         {
             GameObject poolParent = new GameObject("SoundPool");
-            PoolManager.Instance.CreatePool(soundPlayerPrefab, initialPoolCount, poolParent.transform);
+            PoolManager.Instance.CreatePool(soundPlayerPrefab, initialPoolCount, this.transform);
         }
     }
 
