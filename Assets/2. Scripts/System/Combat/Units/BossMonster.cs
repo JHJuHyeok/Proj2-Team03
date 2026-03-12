@@ -83,11 +83,6 @@ public class BossMonster : MonsterBase
         if (playerStats != null)
         {
             playerStats.TakeDamage(_attackPower);
-            Debug.Log($"[{_data.name}] 플레이어에게 {_attackPower:F1} 데미지 공격");
-        }
-        else
-        {
-            Debug.LogWarning($"[{_data.name}] 공격 불가: 플레이어에게 PlayerCombatStats 컴포넌트 없음");
         }
 
     }

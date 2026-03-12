@@ -1,38 +1,45 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-public static class AdventureSaveManager
+public static class ClearSaveManager
 {
-    private const string SaveKey = "AdventureClearData";
-    private static AdventureClearSaveData _data;
+    public const string Stage = "StageClearData";
+    public const string Adventure = "AdventureClearData";
 
-    public static void Load()
+    private static readonly Dictionary<string, AdventureClearSaveData> _cache = new();
+
+    public static void Load(string key)
     {
-        string json = PlayerPrefs.GetString(SaveKey, "");
-        if (string.IsNullOrEmpty(json))
-            _data = new AdventureClearSaveData();
-        else
-            _data = AdventureClearSaveData.FromJson(json) ?? new AdventureClearSaveData();
+        string json = PlayerPrefs.GetString(key, "");
+        _cache[key] = string.IsNullOrEmpty(json)
+            ? new AdventureClearSaveData()
+            : AdventureClearSaveData.FromJson(json) ?? new AdventureClearSaveData();
     }
 
-    public static void MarkCleared(string stageId)
+    public static void MarkCleared(string key, string stageId)
     {
-        if (_data == null) Load();
-        if (!_data.clearedStageIds.Contains(stageId))
+        EnsureLoaded(key);
+        if (!_cache[key].clearedStageIds.Contains(stageId))
         {
-            _data.clearedStageIds.Add(stageId);
-            Save();
+            _cache[key].clearedStageIds.Add(stageId);
+            Save(key);
         }
     }
 
-    public static bool IsCleared(string stageId)
+    public static bool IsCleared(string key, string stageId)
     {
-        if (_data == null) Load();
-        return _data.clearedStageIds.Contains(stageId);
+        EnsureLoaded(key);
+        return _cache[key].clearedStageIds.Contains(stageId);
     }
 
-    private static void Save()
+    private static void EnsureLoaded(string key)
     {
-        PlayerPrefs.SetString(SaveKey, _data.ToJson());
+        if (!_cache.ContainsKey(key)) Load(key);
+    }
+
+    private static void Save(string key)
+    {
+        PlayerPrefs.SetString(key, _cache[key].ToJson());
         PlayerPrefs.Save();
     }
 }

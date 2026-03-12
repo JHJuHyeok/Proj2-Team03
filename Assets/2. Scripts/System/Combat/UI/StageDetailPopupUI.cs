@@ -141,7 +141,7 @@ public class StageDetailPopupUI : MonoBehaviour
             // 장비 등급 배경 설정
             if (equipGradeBackgroundImage != null)
             {
-                Debug.Log("장비 등급 배경 설정: " + equipData.grade.ToString());
+                // Debug.Log("장비 등급 배경 설정: " + equipData.grade.ToString());
                 Sprite bg = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_UI.spriteatlasv2", equipData.grade.ToString());
                 if (bg != null) equipGradeBackgroundImage.sprite = bg;
             }

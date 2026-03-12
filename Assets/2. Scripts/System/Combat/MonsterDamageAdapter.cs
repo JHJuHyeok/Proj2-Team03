@@ -23,11 +23,6 @@ namespace SlayerLegend.Combat
         {
             // 같은 GameObject의 MonsterBase 찾기
             _monster = GetComponent<MonsterBase>();
-
-            if (_monster == null)
-            {
-                Debug.LogWarning($"[MonsterDamageAdapter] MonsterBase 컴포넌트를 찾을 수 없습니다: {gameObject.name}");
-            }
         }
 
         // 선택사항: 외부에서 직접 MonsterBase에 접근할 수 있는 프로퍼티

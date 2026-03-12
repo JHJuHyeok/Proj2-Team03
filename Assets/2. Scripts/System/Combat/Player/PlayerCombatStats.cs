@@ -156,7 +156,6 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
         OnHpChanged?.Invoke(_currentHp, MaxHealth);
         OnManaChanged?.Invoke(_currentMana, MaxMana);
 
-        Debug.Log("[PlayerCombatStats] Full restore completed");
     }
 
     /// <summary>
@@ -169,7 +168,6 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
         // 회피 체크
         if (UnityEngine.Random.value < Dodge)
         {
-            Debug.Log("[PlayerCombatStats] Dodged attack!");
             return;
         }
 
@@ -246,6 +244,5 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
     {
         _isDead = true;
         OnDeath?.Invoke();
-        Debug.Log("[PlayerCombatStats] Player died!");
     }
 }

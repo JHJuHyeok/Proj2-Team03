@@ -25,16 +25,22 @@ public class AdventureAreaButtonUI : MonoBehaviour
         if (nameText != null)
             nameText.text = data.name;
 
-        // TODO: 클리어 상태 데이터 연동 시 구현
-        // 현재는 기본적으로 미완료 상태 표시
-        if (doneObject != null) doneObject.SetActive(false);
-        if (todoObject != null) todoObject.SetActive(true);
+        // 클리어 상태 데이터 연동
+        ClearSaveManager.Load(ClearSaveManager.Adventure);
 
-        // 진행도 게이지 초기화
-        if (fillGauge != null)
+        int totalCount = data.stageList != null ? data.stageList.Count : 0;
+        int clearedCount = 0;
+
+        for (int i = 0; i < totalCount; i++)
         {
-            fillGauge.fillAmount = 0f;
+            if (ClearSaveManager.IsCleared(ClearSaveManager.Adventure, data.stageList[i].id))
+                clearedCount++;
         }
+
+        float progress = totalCount > 0 ? (float)clearedCount / totalCount : 0f;
+        bool isAllCleared = totalCount > 0 && clearedCount == totalCount;
+
+        SetClearState(isAllCleared, progress);
     }
 
     /// <summary>

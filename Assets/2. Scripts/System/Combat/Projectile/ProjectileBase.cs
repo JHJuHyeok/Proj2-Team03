@@ -92,8 +92,6 @@ public class ProjectileBase : MonoBehaviour
         // 데미지 적용
         enemy.TakeDamage(_damage);
 
-        string critText = _isCritical ? " [치명타]" : "";
-        Debug.Log($"[Projectile] {enemy.gameObject.name} 타격: {_damage:F1} 데미지{critText}");
 
         // 타격 이펙트 생성
         if (hitEffectPrefab != null)
