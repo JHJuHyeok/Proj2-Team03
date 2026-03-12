@@ -34,56 +34,54 @@ public class PopupOpenButton : MonoBehaviour
 
     private void Awake()
     {
-        // 버튼 컴포넌트 자동 연결
         _btn = GetComponent<Button>();
-
-        // OnClick 이벤트에 Open() 자동 등록
         _btn.onClick.AddListener(Open);
     }
 
-    /// <summary>
-    /// 버튼 클릭 시 호출
-    /// PopupId와 설정된 파라미터에 따라 팝업 열기
-    /// </summary>
     public void Open()
     {
-        if (PopupManager.Instance == null) return;
+        if (PopupManager.Instance == null)
+        {
+            Debug.LogWarning("[PopupOpenButton] PopupManager.Instance가 null입니다.");
+            return;
+        }
 
         object param = null;
 
-        // Equip 파라미터 사용 시
         if (useEquipParam)
         {
-            // [조민희] equipId가 있으면 EquipPopupParam 사용
-            if (!string.IsNullOrEmpty(equipId))
+            // Equip 팝업은 equipId가 있어야 정확한 장비를 열 수 있음
+            if (string.IsNullOrEmpty(equipId))
             {
-                param = new EquipPopupParam(equipTab, equipId);
+                Debug.LogWarning($"[PopupOpenButton] Equip 팝업 열기 실패 - equipId가 비어있음. popupId={popupId}, equipTab={equipTab}");
+                return;
             }
-            else
-            {
-                param = equipTab;
-            }
+
+            param = new EquipPopupParam(equipTab, equipId);
+            Debug.Log($"[PopupOpenButton] EquipPopupParam 생성 - tab={equipTab}, equipId={equipId}");
         }
-        // Skill 파라미터 사용 시
         else if (useSkillParam)
         {
             param = skillAttribute;
+            Debug.Log($"[PopupOpenButton] Skill param 사용 - skillAttribute={skillAttribute}");
         }
-        // Shop 파라미터 사용 시
         else if (useShopParam)
         {
             param = shopTab;
+            Debug.Log($"[PopupOpenButton] Shop param 사용 - shopTab={shopTab}");
         }
 
+        Debug.Log($"[PopupOpenButton] Popup open 호출 - popupId={popupId}, param={(param != null ? param.ToString() : "NULL")}");
         PopupManager.Instance.Open(popupId, param);
     }
 
     /// <summary>
-    /// [조민희] 외부에서 equipId를 동적으로 설정
+    /// 외부에서 equipId를 동적으로 설정
     /// AccessoryBundleUI 등에서 클릭 시 해당 장비 ID 전달용
     /// </summary>
     public void SetEquipId(string id)
     {
         equipId = id;
+        Debug.Log($"[PopupOpenButton] SetEquipId 호출 - equipId={equipId}");
     }
 }
