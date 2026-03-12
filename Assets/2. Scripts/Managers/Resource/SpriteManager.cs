@@ -35,17 +35,11 @@ public static class SpriteManager
             }
             else
             {
-                Debug.Log("????? ?ех? ????");
                 return null;
             }
         }
 
         Sprite targetSprite = atlas.GetSprite(spriteName);
-
-        if (targetSprite == null)
-        {
-            Debug.Log("?????? ?????? ??????????? ???????.");
-        }
 
         return targetSprite;
     }

@@ -40,18 +40,15 @@ public class SaveManager : Singleton<SaveManager>
                 // 저장 함수 호출
                 if (_isDirty)
                 {
-                    Debug.Log("자동 저장 조건을 만족하여 서버 저장을 시작합니다.");
                     await SaveToRemote();
                 }
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("[SaveManager] 작업 취소");
                 break;
             }
             catch (Exception e)
             {
-                Debug.Log($"[SaveManager] 루프 중 에러 발생 : {e.Message}");
                 await Task.Delay(2000, token);
             }
         }
@@ -105,17 +102,11 @@ public class SaveManager : Singleton<SaveManager>
 
             if (results[0] && results[1])
             {
-                Debug.Log("<color=green>원격 저장소에 모든 데이터가 저장됐습니다.");
                 _isDirty = false;
-            }
-            else
-            {
-                Debug.LogError("원격 저장에 실패했습니다. 다음 루프에 다시 시도합니다.");
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"SaveToRemote 중 예상치 못한 오류 발생: {e.Message}");
         }
     }
 
