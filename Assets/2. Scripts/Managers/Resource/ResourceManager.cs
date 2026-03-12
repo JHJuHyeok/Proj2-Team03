@@ -26,7 +26,6 @@ namespace SlayerLegend.Resource
 
         /// <summary>
         /// 스프라이트 이름으로 스프라이트 로드
-        /// 경로: Resources/Skills/Icons/{spriteName}
         /// </summary>
         public Sprite LoadSprite(string spriteName)
         {
@@ -36,25 +35,30 @@ namespace SlayerLegend.Resource
                 return null;
             }
 
-            if (_spriteCache.TryGetValue(spriteName, out var cachedSprite))
+            // ★ 최소 수정: 공백 제거
+            string normalizedName = spriteName.Trim();
+
+            if (_spriteCache.TryGetValue(normalizedName, out var cachedSprite))
                 return cachedSprite;
 
             // 여러 경로 시도
             string[] paths = {
-                $"Skill/skillicon/skill_fire/{spriteName}",
-                $"Skill/skillicon/skill_water/{spriteName}",
-                $"Skill/skillicon/skill_earth/{spriteName}",
-                $"Skill/skillicon/skill_wind/{spriteName}",
-                $"Skill/skillicon/skill_none/{spriteName}",
-                $"Skill/skillicon/{spriteName}",
-                $"Skills/Icons/{spriteName}",
-                $"Slayer Legend/Image/icon/{spriteName}",
-                $"Sprites/{spriteName}",
+                $"Skill/skillicon/skill_fire/{normalizedName}",
+                $"Skill/skillicon/skill_water/{normalizedName}",
+                $"Skill/skillicon/skill_earth/{normalizedName}",
+                $"Skill/skillicon/skill_wind/{normalizedName}",
+                $"Skill/skillicon/skill_none/{normalizedName}",
+                $"Skill/skillicon/{normalizedName}",
+                $"Skills/Icons/{normalizedName}",
+                $"Slayer Legend/Image/icon/{normalizedName}",
+                $"Sprites/{normalizedName}",
+
                 // 조민희 수정 - 장비 아이콘 로드 경로 추가
-                $"Slayer Legend/Bookmark UI/Equip UI/Weapon/{spriteName}",      // 무기 아이콘
-                $"Slayer Legend/Bookmark UI/Equip UI/Accessory/{spriteName}",   // 악세서리 아이콘
+                $"Slayer Legend/Bookmark UI/Equip UI/Weapon/{normalizedName}",
+                $"Slayer Legend/Bookmark UI/Equip UI/Accessory/{normalizedName}",
                 // 조민희 수정 끝
-                spriteName
+
+                normalizedName
             };
 
             foreach (string path in paths)
@@ -62,31 +66,40 @@ namespace SlayerLegend.Resource
                 var sprite = Resources.Load<Sprite>(path);
                 if (sprite != null)
                 {
-                    _spriteCache[spriteName] = sprite;
-                    Debug.Log($"[ResourceManager] 스프라이트 로드 성공: {spriteName} → {path}");
+                    _spriteCache[normalizedName] = sprite;
+                    Debug.Log($"[ResourceManager] 스프라이트 로드 성공: {normalizedName} → {path}");
                     return sprite;
                 }
             }
 
+            // ★ 추가: 대소문자 / _ - 공백 보정 탐색
+            var correctedSprite = TryLoadSpriteIgnoreCase(normalizedName);
+            if (correctedSprite != null)
+            {
+                _spriteCache[normalizedName] = correctedSprite;
+                Debug.LogWarning($"[ResourceManager] 자동보정 로드 성공: {normalizedName} -> {correctedSprite.name}");
+                return correctedSprite;
+            }
+
             // 조민희 추가 - AssetBundleLoader에서 스프라이트 로드 시도
-            var bundleSprite = AssetBundleLoader.Instance.LoadSpriteFromBundle(spriteName, "skin");
+            var bundleSprite = AssetBundleLoader.Instance.LoadSpriteFromBundle(normalizedName, "skin");
             if (bundleSprite != null && bundleSprite.texture != null)
             {
-                _spriteCache[spriteName] = bundleSprite;
-                Debug.Log($"[ResourceManager] AssetBundleLoader에서 스프라이트 로드 성공: {spriteName}, texture={bundleSprite.texture.name}");
+                _spriteCache[normalizedName] = bundleSprite;
+                Debug.Log($"[ResourceManager] AssetBundleLoader에서 스프라이트 로드 성공: {normalizedName}, texture={bundleSprite.texture.name}");
                 return bundleSprite;
             }
             else if (bundleSprite != null && bundleSprite.texture == null)
             {
-                Debug.LogWarning($"[ResourceManager] 스프라이트 로드됨 but 텍스처 null: {spriteName}");
+                Debug.LogWarning($"[ResourceManager] 스프라이트 로드됨 but 텍스처 null: {normalizedName}");
             }
             else if (bundleSprite == null)
             {
-                Debug.LogWarning($"[ResourceManager] AssetBundleLoader에서 스프라이트 찾기 실패: {spriteName}");
+                Debug.LogWarning($"[ResourceManager] AssetBundleLoader에서 스프라이트 찾기 실패: {normalizedName}");
             }
             // 조민희 추가 끝
 
-            Debug.LogWarning($"[ResourceManager] Sprite not found: {spriteName}");
+            Debug.LogWarning($"[ResourceManager] Sprite not found: {normalizedName}");
             return null;
         }
 
@@ -120,6 +133,62 @@ namespace SlayerLegend.Resource
             _spriteCache.Clear();
             _prefabCache.Clear();
             Resources.UnloadUnusedAssets();
+        }
+
+        // ------------------------
+        // 자동보정 함수
+        // ------------------------
+
+        private Sprite TryLoadSpriteIgnoreCase(string spriteName)
+        {
+            string target = NormalizeForCompare(spriteName);
+
+            string[] folders = {
+                "Skill/skillicon/skill_fire",
+                "Skill/skillicon/skill_water",
+                "Skill/skillicon/skill_earth",
+                "Skill/skillicon/skill_wind",
+                "Skill/skillicon/skill_none",
+                "Skill/skillicon",
+                "Skills/Icons",
+                "Slayer Legend/Image/icon",
+                "Sprites",
+                "Slayer Legend/Bookmark UI/Equip UI/Weapon",
+                "Slayer Legend/Bookmark UI/Equip UI/Accessory"
+            };
+
+            for (int i = 0; i < folders.Length; i++)
+            {
+                Sprite[] sprites = Resources.LoadAll<Sprite>(folders[i]);
+
+                if (sprites == null || sprites.Length == 0)
+                    continue;
+
+                for (int j = 0; j < sprites.Length; j++)
+                {
+                    if (sprites[j] == null) continue;
+
+                    if (NormalizeForCompare(sprites[j].name) == target)
+                    {
+                        return sprites[j];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private string NormalizeForCompare(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+
+            return value
+                .Trim()
+                .Replace("_", "")
+                .Replace("-", "")
+                .Replace(" ", "")
+                .ToLower();
         }
     }
 }

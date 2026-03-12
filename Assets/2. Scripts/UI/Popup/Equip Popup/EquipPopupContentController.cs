@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using SlayerLegend.Equipment;
+using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.UI;
-using SlayerLegend.Equipment;
 
 /*
 EquipPopupContentController
@@ -27,37 +28,43 @@ public class EquipPopupContentController : MonoBehaviour
     [SerializeField] private TMP_Text levelText;//강화 레벨
 
     [Header("융합 아이콘 (조민희 추가)")]
-    [SerializeField] private Image currentEquipIcon; // 현재 장비 아이콘
-    [SerializeField] private TMP_Text currentEquipName; // 현재 장비 이름
-    [SerializeField] private TMP_Text currentEquipNumber; // 현재 장비 개수 (예: 2(-10))
-    [SerializeField] private Image upgradeIcon; // 상위 등급 아이콘
-    [SerializeField] private TMP_Text upgradeName; // 상위 등급 이름
-    [SerializeField] private TMP_Text upgradeNumber; // 상위 등급 개수 (예: 3(+2)
+    [SerializeField] private Image currentEquipIcon;
+    [SerializeField] private TMP_Text currentEquipName;
+    [SerializeField] private TMP_Text currentEquipNumber;
+    [SerializeField] private Image upgradeIcon;
+    [SerializeField] private TMP_Text upgradeName;
+    [SerializeField] private TMP_Text upgradeNumber;
 
     [Header("융합 수량 조절 (조민희 추가)")]
-    [SerializeField] private Button increaseAmountButton; // + 버튼
-    [SerializeField] private Button decreaseAmountButton; // - 버튼
-    [SerializeField] private TMP_Text fusionAmountText; // 생산량 숫자
+    [SerializeField] private Button increaseAmountButton;
+    [SerializeField] private Button decreaseAmountButton;
+    [SerializeField] private TMP_Text fusionAmountText;
 
-    private const int FUSION_REQUIRED_COUNT = 5; // 융합에 필요한 장비 개수
-    private int fusionAmount = 1; // 융합 생산량
+    private const int FUSION_REQUIRED_COUNT = 5;
+    private int fusionAmount = 1;
 
     [Header("버튼")]
-    [SerializeField] private Button equipButton;//장착 버튼
-    [SerializeField] private Button fusionButton;//융합 버튼
-    [SerializeField] private Button enhanceButton;//강화 버튼
-    [SerializeField] private TMP_Text enhanceCostText;//강화 비용 텍스트
+    [SerializeField] private Button equipButton;
+    [SerializeField] private Button fusionButton;
+    [SerializeField] private Button enhanceButton;
+    [SerializeField] private TMP_Text enhanceCostText;
 
     [Header("강화 효과 텍스트 (조민희 추가)")]
-    [SerializeField] private TMP_Text installationEffectText; // 장착 효과 수치 (예: 3%)
-    [SerializeField] private TMP_Text holdingEffectText1;     // 보유 효과 1 (AttackBoost)
-    [SerializeField] private TMP_Text holdingEffectText2;     // 보유 효과 2 (CriticalDamage - Rare부터)
-    [SerializeField] private TMP_Text holdingEffectText3;     // 보유 효과 3 (GoldGain - Myth부터)
+    [SerializeField] private TMP_Text installationEffectText;
+    [SerializeField] private TMP_Text holdingEffectText1;
+    [SerializeField] private TMP_Text holdingEffectText2;
+    [SerializeField] private TMP_Text holdingEffectText3;
 
-    [SerializeField] private string spritePath = "Icons";//아이콘 경로
+    [Header("효과 이름 텍스트 추가")]
+    [SerializeField] private TMP_Text installationEffectLabel;
+    [SerializeField] private TMP_Text holdingEffectLabel1;
+    [SerializeField] private TMP_Text holdingEffectLabel2;
+    [SerializeField] private TMP_Text holdingEffectLabel3;
+
+    [SerializeField] private string spritePath = "Icons";
 
     [Header("AccessoryBinder (조민희 추가)")]
-    [SerializeField] private EquipAccessoryBinder accessoryBinder; // 악세서리 전용 바인더
+    [SerializeField] private EquipAccessoryBinder accessoryBinder;
 
     private readonly List<EquipItemCell> cellPool = new List<EquipItemCell>();
 
@@ -71,7 +78,6 @@ public class EquipPopupContentController : MonoBehaviour
             equipmentManager = EquipmentManager.Instance;
         }
 
-        // [조민희] accessoryBinder가 null이면 같은 게임오브젝트 또는 부모에서 자동으로 찾기
         if (accessoryBinder == null)
         {
             accessoryBinder = GetComponent<EquipAccessoryBinder>();
@@ -81,11 +87,10 @@ public class EquipPopupContentController : MonoBehaviour
             }
             if (accessoryBinder != null)
             {
-                Debug.Log($"[EquipPopupContentController] accessoryBinder 자동 할당됨");
+                Debug.Log("[EquipPopupContentController] accessoryBinder 자동 할당됨");
             }
         }
 
-        // [조민희] listRoot가 null이면 자동으로 찾기 (Content 또는 ListRoot 이름의 자식 검색)
         if (listRoot == null)
         {
             listRoot = FindListRoot();
@@ -99,29 +104,26 @@ public class EquipPopupContentController : MonoBehaviour
             }
         }
 
-        // 장착 버튼
         if (equipButton != null)
         {
             equipButton.onClick.AddListener(OnClickEquip);
         }
 
-        // 융합 버튼 (조민희 추가)
         if (fusionButton != null)
         {
             fusionButton.onClick.AddListener(OnClickFusion);
         }
 
-        // 강화 버튼 (조민희 추가)
         if (enhanceButton != null)
         {
             enhanceButton.onClick.AddListener(OnClickEnhance);
         }
 
-        // 융합 수량 조절 버튼 (조민희 추가)
         if (increaseAmountButton != null)
         {
             increaseAmountButton.onClick.AddListener(OnClickIncreaseAmount);
         }
+
         if (decreaseAmountButton != null)
         {
             decreaseAmountButton.onClick.AddListener(OnClickDecreaseAmount);
@@ -129,7 +131,6 @@ public class EquipPopupContentController : MonoBehaviour
 
         if (equipmentManager != null)
         {
-            // OnInventoryChanged 구독 제거 - WeaponBundleUI/AccessoryBundleUI에서 처리
             equipmentManager.OnFusionComplete += OnFusionComplete;
             equipmentManager.OnEquipmentEnhanced += OnEquipmentEnhanced;
         }
@@ -144,24 +145,17 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// [조민희] listRoot 자동 찾기 - Content, ListRoot, ScrollView Content 등의 이름을 가진 Transform 검색
-    /// </summary>
     private Transform FindListRoot()
     {
-        // 1. 직접 자식에서 "Content" 이름 검색
         Transform found = transform.Find("Content");
         if (found != null) return found;
 
-        // 2. 모든 자식에서 검색 (깊이 우선)
         found = FindDeepChild(transform, "Content");
         if (found != null) return found;
 
-        // 3. "ListRoot" 검색
         found = FindDeepChild(transform, "ListRoot");
         if (found != null) return found;
 
-        // 4. "Scroll View/Viewport/Content" 패턴 검색
         found = FindDeepChild(transform, "Viewport");
         if (found != null)
         {
@@ -169,7 +163,6 @@ public class EquipPopupContentController : MonoBehaviour
             if (content != null) return content;
         }
 
-        // 5. ScrollRect가 있는 자식의 Content 찾기
         var scrollRects = GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true);
         foreach (var scroll in scrollRects)
         {
@@ -182,19 +175,14 @@ public class EquipPopupContentController : MonoBehaviour
         return null;
     }
 
-    /// <summary>
-    /// [조민희] 깊이 우선 자식 검색
-    /// </summary>
     private Transform FindDeepChild(Transform parent, string name)
     {
-        // 직접 자식 확인
         foreach (Transform child in parent)
         {
             if (child.name == name)
                 return child;
         }
 
-        // 재귀적으로 검색
         foreach (Transform child in parent)
         {
             Transform found = FindDeepChild(child, name);
@@ -207,7 +195,7 @@ public class EquipPopupContentController : MonoBehaviour
 
     public void SetEquipTab(EquipTab tab, string initialEquipId = null)
     {
-        Debug.Log($"[EquipPopup] SetEquipTab 시작 - tab: {tab}, initialEquipId: {initialEquipId}");
+        Debug.Log($"[EquipPopupContentController] SetEquipTab 시작 - tab: {tab}, initialEquipId: {initialEquipId}");
 
         if (tab == EquipTab.Weapon)
         {
@@ -218,47 +206,55 @@ public class EquipPopupContentController : MonoBehaviour
             currentType = EquipType.Accessorie;
         }
 
+        Debug.Log($"[EquipPopupContentController] currentType 설정 완료: {currentType}");
+
         selectedItem = null;
 
-        // [조민희] initialEquipId가 있으면 해당 장비 선택, 없으면 첫 번째 아이템 선택
         if (equipmentManager != null)
         {
             if (!string.IsNullOrEmpty(initialEquipId))
             {
-                // initialEquipId로 선택
-                Debug.Log($"[EquipPopup] GetEquipData 호출 전 - initialEquipId: {initialEquipId}");
+                Debug.Log($"[EquipPopupContentController] GetEquipData 호출 전 - initialEquipId: {initialEquipId}");
                 EquipData equip = equipmentManager.GetEquipData(initialEquipId);
-                Debug.Log($"[EquipPopup] GetEquipData 결과 - equip: {(equip != null ? equip.GetId() : "NULL")}");
+                Debug.Log($"[EquipPopupContentController] GetEquipData 결과 - equip: {(equip != null ? equip.GetId() : "NULL")}");
 
                 if (equip != null)
                 {
                     int level = equipmentManager.GetLevel(initialEquipId);
                     selectedItem = new InventoryItem(equip, level);
-                    Debug.Log($"[EquipPopup] SetEquipTab - initialEquipId로 선택: {initialEquipId}, selectedItem.equipment.GetId(): {selectedItem.equipment.GetId()}");
+                    Debug.Log($"[EquipPopupContentController] initialEquipId로 선택 성공: {initialEquipId}, level: {level}");
                 }
                 else
                 {
-                    Debug.LogWarning($"[EquipPopup] SetEquipTab - initialEquipId를 찾을 수 없음: {initialEquipId}");
+                    Debug.LogWarning($"[EquipPopupContentController] initialEquipId를 찾을 수 없음: {initialEquipId}");
                 }
             }
 
-            // initialEquipId가 없거나 찾지 못한 경우 첫 번째 아이템 선택
             if (selectedItem == null)
             {
                 IReadOnlyList<InventoryItem> inventory = equipmentManager.GetInventory(currentType);
+                Debug.Log($"[EquipPopupContentController] fallback inventory.Count: {inventory.Count}");
+
                 if (inventory.Count > 0)
                 {
                     selectedItem = inventory[0];
-                    Debug.Log($"[EquipPopup] SetEquipTab - 첫 번째 아이템 선택: {selectedItem.equipment.GetId()}");
+                    Debug.Log($"[EquipPopupContentController] 첫 번째 아이템 fallback 선택: {selectedItem.equipment.GetId()}");
+                }
+                else
+                {
+                    Debug.LogWarning("[EquipPopupContentController] 인벤토리가 비어있음");
                 }
             }
         }
+        else
+        {
+            Debug.LogWarning("[EquipPopupContentController] equipmentManager가 null입니다.");
+        }
 
-        Debug.Log($"[EquipPopup] RebuildList 호출 전 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
+        Debug.Log($"[EquipPopupContentController] RebuildList 호출 전 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
         RebuildList();
-        Debug.Log($"[EquipPopup] RebuildList 호출 후 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
+        Debug.Log($"[EquipPopupContentController] RebuildList 호출 후 - selectedItem: {(selectedItem != null ? selectedItem.equipment.GetId() : "NULL")}");
 
-        // [조민희] 선택된 아이템이 있으면 UI 갱신
         if (selectedItem != null)
         {
             ApplySelection(selectedItem);
@@ -269,26 +265,22 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// [조민희] 초기 선택 장비 설정 - WeaponBundleUI/AccessoryBundleUI에서 클릭 시 호출
-    /// </summary>
     public void SetInitialSelection(string equipId)
     {
         if (string.IsNullOrEmpty(equipId) || equipmentManager == null) return;
 
-        // EquipData 가져오기
         EquipData equip = equipmentManager.GetEquipData(equipId);
         if (equip == null)
         {
-            Debug.LogWarning($"[EquipPopup] 초기 선택 장비를 찾을 수 없음: {equipId}");
+            Debug.LogWarning($"[EquipPopupContentController] 초기 선택 장비를 찾을 수 없음: {equipId}");
             return;
         }
 
-        // InventoryItem 생성 (레벨 포함)
         int level = equipmentManager.GetLevel(equipId);
         selectedItem = new InventoryItem(equip, level);
 
-        // UI 갱신
+        Debug.Log($"[EquipPopupContentController] SetInitialSelection 성공 - equipId: {equipId}, level: {level}");
+
         ApplySelection(selectedItem);
     }
 
@@ -296,57 +288,54 @@ public class EquipPopupContentController : MonoBehaviour
     {
         if (equipmentManager == null)
         {
-            Debug.LogWarning("[EquipPopup] EquipmentManager가 null입니다!");
+            Debug.LogWarning("[EquipPopupContentController] EquipmentManager가 null입니다!");
             return;
         }
 
         IReadOnlyList<InventoryItem> inventory = equipmentManager.GetInventory(currentType);
 
-        // [조민희] 디버그: 인벤토리 내용 확인
-        Debug.Log($"[EquipPopup] RebuildList - currentType: {currentType}, inventory.Count: {inventory.Count}");
-
-        // [조민희] 디버그: cellPrefab, listRoot 확인
-        Debug.Log($"[EquipPopup] cellPrefab: {(cellPrefab != null ? cellPrefab.name : "NULL")}, listRoot: {(listRoot != null ? listRoot.name : "NULL")}, cellPool.Count: {cellPool.Count}");
+        Debug.Log($"[EquipPopupContentController] RebuildList - currentType: {currentType}, inventory.Count: {inventory.Count}");
+        Debug.Log($"[EquipPopupContentController] cellPrefab: {(cellPrefab != null ? cellPrefab.name : "NULL")}, listRoot: {(listRoot != null ? listRoot.name : "NULL")}, cellPool.Count: {cellPool.Count}");
 
         foreach (var item in inventory)
         {
-            Debug.Log($"  [EquipPopup] 아이템: {item.equipment.GetId()} - {item.equipment.GetName()}");
+            Debug.Log($"  [EquipPopupContentController] 아이템: {item.equipment.GetId()} - {item.equipment.GetName()}");
         }
 
-        // [조민희] cellPrefab이 있을 때만 리스트 생성 시도
         if (cellPrefab != null && listRoot != null)
         {
             EnsurePool(inventory.Count);
 
-            // [조민희] 디버그: 풀 생성 후 확인
-            Debug.Log($"[EquipPopup] EnsurePool 후 cellPool.Count: {cellPool.Count}");
+            Debug.Log($"[EquipPopupContentController] EnsurePool 후 cellPool.Count: {cellPool.Count}");
 
             for (int i = 0; i < cellPool.Count; i++)
             {
                 bool active = i < inventory.Count;
-
                 cellPool[i].gameObject.SetActive(active);
 
                 if (active)
                 {
-                    Debug.Log($"[EquipPopup] Bind 호출 - 인덱스: {i}, 아이템: {inventory[i].equipment.GetId()}");
+                    Debug.Log($"[EquipPopupContentController] Bind 호출 - 인덱스: {i}, 아이템: {inventory[i].equipment.GetId()}");
                     cellPool[i].Bind(inventory[i], OnClickItem, ResolveSprite);
                 }
             }
         }
         else
         {
-            // [조민희] cellPrefab이 없으면 리스트 없이 상세 정보만 표시
             if (cellPrefab == null)
             {
                 Debug.LogWarning("[EquipPopupContentController] cellPrefab이 null - 리스트 없이 상세 정보만 표시");
+            }
+
+            if (listRoot == null)
+            {
+                Debug.LogWarning("[EquipPopupContentController] listRoot가 null - 리스트 없이 상세 정보만 표시");
             }
         }
     }
 
     private void EnsurePool(int count)
     {
-        // [조민희] cellPrefab 또는 listRoot가 null이면 생성하지 않음
         if (cellPrefab == null)
         {
             Debug.LogWarning("[EquipPopupContentController] cellPrefab이 null - 리스트 생성 건너뜀");
@@ -355,7 +344,6 @@ public class EquipPopupContentController : MonoBehaviour
 
         if (listRoot == null)
         {
-            // 다시 한번 listRoot 찾기 시도
             listRoot = FindListRoot();
             if (listRoot == null)
             {
@@ -368,12 +356,15 @@ public class EquipPopupContentController : MonoBehaviour
         {
             EquipItemCell cell = Instantiate(cellPrefab, listRoot);
             cellPool.Add(cell);
+            Debug.Log($"[EquipPopupContentController] cell 생성 - 현재 pool.Count: {cellPool.Count}");
         }
     }
 
     private void OnClickItem(InventoryItem item)
     {
         selectedItem = item;
+
+        Debug.Log($"[EquipPopupContentController] OnClickItem - 선택된 아이템: {(item != null ? item.equipment.GetId() : "NULL")}");
 
         for (int i = 0; i < cellPool.Count; i++)
         {
@@ -386,7 +377,7 @@ public class EquipPopupContentController : MonoBehaviour
 
     private void ApplySelection(InventoryItem item)
     {
-        Debug.Log($"[EquipPopup] ApplySelection 호출 - item: {(item != null ? item.equipment?.GetId() : "NULL")}");
+        Debug.Log($"[EquipPopupContentController] ApplySelection 호출 - item: {(item != null ? item.equipment?.GetId() : "NULL")}");
 
         if (item == null)
         {
@@ -396,7 +387,6 @@ public class EquipPopupContentController : MonoBehaviour
             if (levelText != null) levelText.text = "";
             if (enhanceCostText != null) enhanceCostText.text = "";
 
-            // [조민희] 상위 등급 아이콘 초기화
             if (upgradeIcon != null) upgradeIcon.sprite = null;
             if (upgradeName != null) upgradeName.text = "";
             if (upgradeNumber != null) upgradeNumber.text = "";
@@ -404,15 +394,18 @@ public class EquipPopupContentController : MonoBehaviour
             if (currentEquipName != null) currentEquipName.text = "";
             if (currentEquipNumber != null) currentEquipNumber.text = "";
 
-            // [조민희] 융합 수량 초기화
             fusionAmount = 1;
             UpdateFusionAmountUI();
 
-            // [조민희] 강화 효과 텍스트 초기화
             if (installationEffectText != null) installationEffectText.text = "";
             if (holdingEffectText1 != null) holdingEffectText1.text = "";
             if (holdingEffectText2 != null) holdingEffectText2.text = "";
             if (holdingEffectText3 != null) holdingEffectText3.text = "";
+
+            if (installationEffectLabel != null) installationEffectLabel.text = "";
+            if (holdingEffectLabel1 != null) holdingEffectLabel1.text = "";
+            if (holdingEffectLabel2 != null) holdingEffectLabel2.text = "";
+            if (holdingEffectLabel3 != null) holdingEffectLabel3.text = "";
 
             if (equipButton != null) equipButton.interactable = false;
             if (fusionButton != null) fusionButton.interactable = false;
@@ -426,18 +419,17 @@ public class EquipPopupContentController : MonoBehaviour
         if (detailIcon != null)
         {
             Sprite loadedSprite = ResolveSprite(equip.spriteName);
-            Debug.Log($"[EquipPopup] ResolveSprite 호출 - spriteName: {equip.spriteName}, sprite: {(loadedSprite != null ? loadedSprite.name : "NULL")}");
+            Debug.Log($"[EquipPopupContentController] ResolveSprite 호출 - spriteName: {equip.spriteName}, sprite: {(loadedSprite != null ? loadedSprite.name : "NULL")}");
             detailIcon.sprite = loadedSprite;
         }
 
         if (detailName != null)
         {
             detailName.text = equip.GetName();
-            Debug.Log($"[EquipPopup] detailName 설정 - {equip.GetName()}");
+            Debug.Log($"[EquipPopupContentController] detailName 설정 - {equip.GetName()}");
         }
 
         int count = equipmentManager.GetCount(equip.GetId());
-        // EquipmentManager에서 최신 레벨 조회 (강화 후 반영)
         int level = equipmentManager.GetLevel(equip.GetId());
 
         if (ownedText != null)
@@ -450,30 +442,22 @@ public class EquipPopupContentController : MonoBehaviour
             levelText.text = $"+{level}";
         }
 
-        // 버튼 상태 업데이트 (조민희 추가)
         UpdateButtonStates(equip);
 
-        // [조민희] 융합 수량 초기화 및 UI 업데이트
         fusionAmount = 1;
         UpdateFusionAmountUI();
 
-        // [조민희] 현재 장비 아이콘 업데이트
         UpdateCurrentEquipIcon(equip);
-
-        // [조민희] 상위 등급 아이콘 로드
         LoadUpgradeIcon(equip);
-
-        // [조민희] 장비 효과 텍스트 업데이트
         UpdateEffectTexts(equip, level);
 
-        // [조민희] 악세서리인 경우 EquipAccessoryBinder 사용
         if (currentType == EquipType.Accessorie && accessoryBinder != null)
         {
+            Debug.Log($"[EquipPopupContentController] accessoryBinder.Bind 호출 - equipId: {equip.GetId()}, level: {level}");
             accessoryBinder.Bind(equip, level);
         }
     }
 
-    /// <summary>버튼 상태 업데이트 (조민희 추가)</summary>
     private void UpdateButtonStates(EquipData equip)
     {
         if (equip == null)
@@ -486,26 +470,22 @@ public class EquipPopupContentController : MonoBehaviour
 
         string equipId = equip.GetId();
 
-        // 장착 버튼
         if (equipButton != null)
         {
             equipButton.interactable = equipmentManager.GetCount(equipId) > 0;
         }
 
-        // 융합 버튼 (같은 장비 5개 필요)
         if (fusionButton != null)
         {
             bool canFuse = equipmentManager.CanFuse(equipId);
             fusionButton.interactable = canFuse;
         }
 
-        // 강화 버튼
         if (enhanceButton != null)
         {
             bool canEnhance = EnhanceManager.Instance != null && EnhanceManager.Instance.CanEnhance(equip);
             enhanceButton.interactable = canEnhance;
 
-            // 강화 비용 표시
             if (enhanceCostText != null)
             {
                 if (canEnhance)
@@ -524,17 +504,15 @@ public class EquipPopupContentController : MonoBehaviour
     private void OnClickEquip()
     {
         if (selectedItem == null) return;
-
         equipmentManager.Equip(selectedItem.equipment.GetId());
     }
 
-    /// <summary>융합 버튼 클릭 (조민희 추가)</summary>
     private void OnClickFusion()
     {
         if (selectedItem == null) return;
         if (fusionAmount <= 0)
         {
-            Debug.LogWarning("[EquipPopup] 융합 수량이 0입니다.");
+            Debug.LogWarning("[EquipPopupContentController] 융합 수량이 0입니다.");
             return;
         }
 
@@ -544,7 +522,6 @@ public class EquipPopupContentController : MonoBehaviour
         int successCount = 0;
         string lastResultId = null;
 
-        // fusionAmount만큼 융합 수행
         for (int i = 0; i < fusionAmount; i++)
         {
             if (equipmentManager.Fuse(equipId, out string resultId))
@@ -554,27 +531,25 @@ public class EquipPopupContentController : MonoBehaviour
             }
             else
             {
-                break; // 재료 부족 시 중단
+                break;
             }
         }
 
         if (successCount > 0)
         {
-            Debug.Log($"[EquipPopup] 융합 성공: {equip.GetName()} x{successCount * FUSION_REQUIRED_COUNT} → {lastResultId} x{successCount}");
-            // 성공 시 선택 해제
+            Debug.Log($"[EquipPopupContentController] 융합 성공: {equip.GetName()} x{successCount * FUSION_REQUIRED_COUNT} → {lastResultId} x{successCount}");
             selectedItem = null;
-            fusionAmount = 1; // 생산량 초기화
+            fusionAmount = 1;
             ApplySelection(null);
             RebuildList();
         }
         else
         {
             string reason = equipmentManager.GetCannotFuseReason(equipId);
-            Debug.LogWarning($"[EquipPopup] 융합 실패: {reason}");
+            Debug.LogWarning($"[EquipPopupContentController] 융합 실패: {reason}");
         }
     }
 
-    /// <summary>융합 수량 증가 (+버튼) (조민희 추가)</summary>
     private void OnClickIncreaseAmount()
     {
         if (selectedItem == null) return;
@@ -589,7 +564,6 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>융합 수량 감소 (-버튼) (조민희 추가)</summary>
     private void OnClickDecreaseAmount()
     {
         if (fusionAmount > 0)
@@ -604,7 +578,6 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>최대 융합 가능 수량 계산 (조민희 추가)</summary>
     private int GetMaxFusionAmount()
     {
         if (selectedItem == null || equipmentManager == null) return 0;
@@ -613,7 +586,6 @@ public class EquipPopupContentController : MonoBehaviour
         return ownedCount / FUSION_REQUIRED_COUNT;
     }
 
-    /// <summary>융합 수량 UI 업데이트 (조민희 추가)</summary>
     private void UpdateFusionAmountUI()
     {
         if (fusionAmountText != null)
@@ -622,13 +594,12 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>강화 버튼 클릭 (조민희 추가)</summary>
     private void OnClickEnhance()
     {
         if (selectedItem == null) return;
         if (EnhanceManager.Instance == null)
         {
-            Debug.LogError("[EquipPopup] EnhanceManager.Instance가 null입니다.");
+            Debug.LogError("[EquipPopupContentController] EnhanceManager.Instance가 null입니다.");
             return;
         }
 
@@ -636,24 +607,21 @@ public class EquipPopupContentController : MonoBehaviour
 
         if (EnhanceManager.Instance.TryEnhance(equip))
         {
-            // 성공 시 UI 갱신
             int newLevel = equipmentManager.GetLevel(equip.GetId());
             selectedItem = new InventoryItem(equip, newLevel);
             ApplySelection(selectedItem);
         }
     }
 
-    /// <summary>융합 완료 이벤트 핸들러 (조민희 추가)</summary>
     private void OnFusionComplete(string materialId, string resultId)
     {
-        Debug.Log($"[EquipPopup] 융합 완료 이벤트: {materialId} → {resultId}");
+        Debug.Log($"[EquipPopupContentController] 융합 완료 이벤트: {materialId} → {resultId}");
         RebuildList();
     }
 
-    /// <summary>강화 완료 이벤트 핸들러 (조민희 추가)</summary>
     private void OnEquipmentEnhanced(string equipId, int newLevel)
     {
-        Debug.Log($"[EquipPopup] 강화 완료 이벤트: {equipId} → Lv.{newLevel}");
+        Debug.Log($"[EquipPopupContentController] 강화 완료 이벤트: {equipId} → Lv.{newLevel}");
         if (selectedItem != null && selectedItem.equipment.GetId() == equipId)
         {
             ApplySelection(selectedItem);
@@ -663,19 +631,15 @@ public class EquipPopupContentController : MonoBehaviour
     private Sprite ResolveSprite(string spriteName)
     {
         if (string.IsNullOrEmpty(spriteName)) return null;
-
-        // [조민희] AssetBundleLoader를 통해 스프라이트 로드
         return SlayerLegend.Resource.ResourceManager.Instance.LoadSprite(spriteName);
     }
-
-    #region 테스트용 컨텍스트 메뉴 (조민희 추가)
 
     [ContextMenu("테스트: 랜덤 장비 추가 (무작위 수량)")]
     public void DebugAddRandomEquipment()
     {
         if (DataManager.CurrentSaveData == null)
         {
-            Debug.LogError("[EquipPopup] CurrentSaveData가 null입니다.");
+            Debug.LogError("[EquipPopupContentController] CurrentSaveData가 null입니다.");
             return;
         }
 
@@ -689,7 +653,6 @@ public class EquipPopupContentController : MonoBehaviour
 
         int addedCount = 0;
 
-        // 무기: 50% 확률로 추가, 수량 1~10 랜덤
         foreach (var weapon in allWeapons)
         {
             if (UnityEngine.Random.value < 0.5f)
@@ -713,7 +676,6 @@ public class EquipPopupContentController : MonoBehaviour
             }
         }
 
-        // 악세서리: 30% 확률로 추가, 수량 1~5 랜덤
         foreach (var accessory in allAccessories)
         {
             if (UnityEngine.Random.value < 0.3f)
@@ -737,7 +699,7 @@ public class EquipPopupContentController : MonoBehaviour
             }
         }
 
-        Debug.Log($"[EquipPopup] 랜덤 장비 추가 완료: {addedCount}종류");
+        Debug.Log($"[EquipPopupContentController] 랜덤 장비 추가 완료: {addedCount}종류");
         RebuildList();
     }
 
@@ -746,7 +708,7 @@ public class EquipPopupContentController : MonoBehaviour
     {
         if (DataManager.CurrentSaveData == null)
         {
-            Debug.LogError("[EquipPopup] CurrentSaveData가 null입니다.");
+            Debug.LogError("[EquipPopupContentController] CurrentSaveData가 null입니다.");
             return;
         }
 
@@ -760,7 +722,6 @@ public class EquipPopupContentController : MonoBehaviour
 
         int addedCount = 0;
 
-        // 모든 무기 10개씩
         foreach (var weapon in allWeapons)
         {
             string equipId = weapon.GetId();
@@ -779,7 +740,6 @@ public class EquipPopupContentController : MonoBehaviour
             addedCount++;
         }
 
-        // 모든 악세서리 10개씩
         foreach (var accessory in allAccessories)
         {
             string equipId = accessory.GetId();
@@ -798,7 +758,7 @@ public class EquipPopupContentController : MonoBehaviour
             addedCount++;
         }
 
-        Debug.Log($"[EquipPopup] 모든 장비 10개씩 추가 완료: {addedCount}종류");
+        Debug.Log($"[EquipPopupContentController] 모든 장비 10개씩 추가 완료: {addedCount}종류");
         RebuildList();
     }
 
@@ -808,20 +768,13 @@ public class EquipPopupContentController : MonoBehaviour
         if (DataManager.CurrentSaveData != null && DataManager.CurrentSaveData.equipInfo != null)
         {
             DataManager.CurrentSaveData.equipInfo.Clear();
-            Debug.Log("[EquipPopup] 장비 데이터 전체 삭제 완료");
+            Debug.Log("[EquipPopupContentController] 장비 데이터 전체 삭제 완료");
             selectedItem = null;
             ApplySelection(null);
             RebuildList();
         }
     }
 
-
-    #endregion
-
-    #region 융합 결과 아이콘 로드 (조민희 추가)
-    /// <summary>
-    /// 상위 등급 장비 아이콘을 로드하여 표시
-    /// </summary>
     private void LoadUpgradeIcon(EquipData currentEquip)
     {
         if (upgradeIcon == null && upgradeName == null && upgradeNumber == null) return;
@@ -833,21 +786,15 @@ public class EquipPopupContentController : MonoBehaviour
             return;
         }
 
-        // EquipmentManager를 통해 다음 순서 장비 찾기
         EquipData upgradeEquip = equipmentManager.FindNextGradeData(currentEquip);
 
         if (upgradeEquip != null)
         {
-            // 다음 순서 장비의 아이콘 로드
             if (upgradeIcon != null) upgradeIcon.sprite = ResolveSprite(upgradeEquip.spriteName);
-            // 다음 순서 장비의 이름 표시
             if (upgradeName != null) upgradeName.text = upgradeEquip.GetName();
-            // 다음 순서 장비의 개수 표시 (다음 장비 현재 보유 + 융합으로 생성될 개수)
             if (upgradeNumber != null)
             {
-                // [조민희] 다음 장비의 현재 보유 개수
                 int nextEquipOwnedCount = equipmentManager.GetCount(upgradeEquip.GetId());
-                // 최종 개수 = 다음 장비 현재 보유 + 융합으로 얻을 개수 (fusionAmount 사용)
                 upgradeNumber.text = $"{nextEquipOwnedCount + fusionAmount}(+{fusionAmount})";
             }
         }
@@ -858,12 +805,7 @@ public class EquipPopupContentController : MonoBehaviour
             if (upgradeNumber != null) upgradeNumber.text = "";
         }
     }
-    
-    #endregion
 
-    /// <summary>
-    /// 현재 장비 아이콘, 이름, 개수 업데이트 (조민희 추가)
-    /// </summary>
     private void UpdateCurrentEquipIcon(EquipData equip)
     {
         if (currentEquipIcon == null && currentEquipName == null && currentEquipNumber == null) return;
@@ -878,7 +820,6 @@ public class EquipPopupContentController : MonoBehaviour
         if (currentEquipIcon != null) currentEquipIcon.sprite = ResolveSprite(equip.spriteName);
         if (currentEquipName != null) currentEquipName.text = equip.GetName();
 
-        // 현재 장비 개수 표시 (현재 보유 - 융합에 필요한 개수)
         if (currentEquipNumber != null)
         {
             int ownedCount = equipmentManager.GetCount(equip.GetId());
@@ -887,81 +828,136 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 장비 효과 텍스트 업데이트 (조민희 추가)
-    /// </summary>
     private void UpdateEffectTexts(EquipData equip, int level)
     {
-        // 장착 효과 (Installation Effect)
-        if (installationEffectText != null)
+        if (installationEffectText != null || installationEffectLabel != null)
         {
             ItemEffect equipEffect = equip.GetEquipEffect();
             if (equipEffect != null)
             {
                 float value = equipEffect.initValue + (level - 1) * equipEffect.levelUpValue;
-                installationEffectText.text = FormatEffectValue(value, equipEffect.type);
+
+                if (installationEffectLabel != null)
+                {
+                    installationEffectLabel.text = GetEffectLabel(equipEffect.type);
+                }
+
+                if (installationEffectText != null)
+                {
+                    installationEffectText.text = FormatEffectValue(value, equipEffect.type);
+                }
             }
             else
             {
-                installationEffectText.text = "";
+                if (installationEffectLabel != null) installationEffectLabel.text = "";
+                if (installationEffectText != null) installationEffectText.text = "";
             }
         }
 
-        // 보유 효과 (Holding Effects) - 여러 개 표시
         var holdEffects = equip.GetHoldEffects();
 
-        // 보유 효과 1 - AttackBoost (모든 등급)
-        if (holdingEffectText1 != null)
+        if (holdingEffectText1 != null || holdingEffectLabel1 != null)
         {
             if (holdEffects != null && holdEffects.Count >= 1)
             {
                 ItemEffect effect = holdEffects[0];
                 float value = effect.initValue + (level - 1) * effect.levelUpValue;
-                holdingEffectText1.text = FormatEffectValue(value, effect.type);
+
+                if (holdingEffectLabel1 != null)
+                {
+                    holdingEffectLabel1.text = GetEffectLabel(effect.type);
+                }
+
+                if (holdingEffectText1 != null)
+                {
+                    holdingEffectText1.text = FormatEffectValue(value, effect.type);
+                }
             }
             else
             {
-                holdingEffectText1.text = "";
+                if (holdingEffectLabel1 != null) holdingEffectLabel1.text = "";
+                if (holdingEffectText1 != null) holdingEffectText1.text = "";
             }
         }
 
-        // 보유 효과 2 - CriticalDamage (Rare부터)
-        if (holdingEffectText2 != null)
+        if (holdingEffectText2 != null || holdingEffectLabel2 != null)
         {
             if (holdEffects != null && holdEffects.Count >= 2)
             {
                 ItemEffect effect = holdEffects[1];
                 float value = effect.initValue + (level - 1) * effect.levelUpValue;
-                holdingEffectText2.text = FormatEffectValue(value, effect.type);
+
+                if (holdingEffectLabel2 != null)
+                {
+                    holdingEffectLabel2.text = GetEffectLabel(effect.type);
+                }
+
+                if (holdingEffectText2 != null)
+                {
+                    holdingEffectText2.text = FormatEffectValue(value, effect.type);
+                }
             }
             else
             {
-                holdingEffectText2.text = "";
+                if (holdingEffectLabel2 != null) holdingEffectLabel2.text = "";
+                if (holdingEffectText2 != null) holdingEffectText2.text = "";
             }
         }
 
-        // 보유 효과 3 - GoldGain (Myth부터)
-        if (holdingEffectText3 != null)
+        if (holdingEffectText3 != null || holdingEffectLabel3 != null)
         {
             if (holdEffects != null && holdEffects.Count >= 3)
             {
                 ItemEffect effect = holdEffects[2];
                 float value = effect.initValue + (level - 1) * effect.levelUpValue;
-                holdingEffectText3.text = FormatEffectValue(value, effect.type);
+
+                if (holdingEffectLabel3 != null)
+                {
+                    holdingEffectLabel3.text = GetEffectLabel(effect.type);
+                }
+
+                if (holdingEffectText3 != null)
+                {
+                    holdingEffectText3.text = FormatEffectValue(value, effect.type);
+                }
             }
             else
             {
-                holdingEffectText3.text = "";
+                if (holdingEffectLabel3 != null) holdingEffectLabel3.text = "";
+                if (holdingEffectText3 != null) holdingEffectText3.text = "";
             }
         }
     }
 
-    /// <summary>
-    /// 효과 수치를 포맷팅 (조민희 추가)
-    /// </summary>
+    private string GetEffectLabel(EffectType effectType)
+    {
+        switch (effectType)
+        {
+            case EffectType.AttackBoost:
+                return "공격력 증가";
+
+            case EffectType.CriticalDamage:
+                return "추가 치명타 데미지";
+
+            case EffectType.GoldGain:
+                return "추가 골드 획득량";
+
+            case EffectType.HealthBoost:
+                return "체력/체력 회복량 증가";
+
+            case EffectType.ManaBoost:
+                return "전체 마나/마나 회복량";
+
+            case EffectType.ExpGain:
+                return "추가 경험치";
+
+            default:
+                return "";
+        }
+    }
+
     private string FormatEffectValue(float value, EffectType effectType)
     {
-        // 효과 타입에 따라 단위 결정
         switch (effectType)
         {
             case EffectType.AttackBoost:
@@ -969,9 +965,11 @@ public class EquipPopupContentController : MonoBehaviour
             case EffectType.GoldGain:
             case EffectType.ExpGain:
                 return $"{value:0.##}%";
+
             case EffectType.HealthBoost:
             case EffectType.ManaBoost:
                 return $"{value:0.##}";
+
             default:
                 return $"{value:0.##}%";
         }
