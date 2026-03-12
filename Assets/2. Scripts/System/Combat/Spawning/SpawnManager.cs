@@ -82,10 +82,6 @@ public class SpawnManager : MonoBehaviour
         }
 
         MonsterBase boss = SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
-        if (boss != null)
-        {
-            Debug.Log($"[SpawnManager] 모험 보스 소환: {bossData.name} ({bossData.id})");
-        }
         return boss != null;
     }
 
@@ -115,11 +111,8 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterBase rewardBox = SpawnMonster(boxData, commonMonsterPrefab, GetSpawnPosition() + Vector3.right * 5);
-        if (rewardBox != null)
-        {
-            Debug.Log($"[SpawnManager] 보상 상자 소환: {boxData.name} ({boxData.id})");
-        }
+        SpawnMonster(boxData, commonMonsterPrefab, GetSpawnPosition() + Vector3.right * 5);
+
     }
 
     public void SpawnBoss()
@@ -134,11 +127,7 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
-        MonsterBase boss = SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
-        if (boss != null)
-        {
-            Debug.Log($"[SpawnManager] 보스 소환: {bossData.name} ({bossData.id})");
-        }
+        SpawnMonster(bossData, bossMonsterPrefab, GetSpawnPosition() + Vector3.right * 3);
     }
 
     public void CleanUpEnemies()
@@ -162,10 +151,12 @@ public class SpawnManager : MonoBehaviour
     {
         if (_playerTransform == null) return;
 
+        // 파괴되었지만 UnregisterEnemy가 호출되지 않은 null 엔트리 정리
+        _enemyQueue.RemoveAll(e => e == null);
+
         for (int i = 0; i < _enemyQueue.Count; i++)
         {
             MonsterBase enemy = _enemyQueue[i];
-            if (enemy == null) continue;
 
             // 타겟 위치: 플레이어 + 오른쪽 * (기본 + 인덱스 * 간격)
             // XZ 평면에서의 2D 로직 가정 (X가 수평)
@@ -297,7 +288,7 @@ public class SpawnManager : MonoBehaviour
             // 죽은 적이 보상 상자라면, 다른 것을 소환하지 않음.
             if (enemy.IsRewardBox)
             {
-                Debug.Log("[SpawnManager] 보상 상자 처치됨. 스테이지 재시작.");
+                // Debug.Log("[SpawnManager] 보상 상자 처치됨. 스테이지 재시작.");
                 // 파밍 스폰을 재시작하면 카운트와 루프가 초기화됨
                 StartFarmingSpawn(_currentStageData);
                 return;
@@ -323,9 +314,10 @@ public class SpawnManager : MonoBehaviour
 
     public MonsterBase GetFirstEnemy()
     {
-        if (_enemyQueue.Count > 0)
+        for (int i = 0; i < _enemyQueue.Count; i++)
         {
-            return _enemyQueue[0];
+            if (_enemyQueue[i] != null)
+                return _enemyQueue[i];
         }
         return null;
     }

@@ -61,7 +61,6 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         // Sprite Load & 스프라이트 프리로드
         if (!string.IsNullOrEmpty(data.spriteName))
         {
-            Debug.Log($"data.spriteName {data.spriteName}");
             LoadSprite(data.spriteName);
             PreloadSprites(data.spriteName);
         }
@@ -79,10 +78,10 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
             _renderer.sprite = sprite;
             _renderer.enabled = true;
         }
-        else
-        {
-            Debug.LogError($"[MonsterBase] 스프라이트를 로드할 수 없습니다: {spriteName}");
-        }
+        // else
+        // {
+        //     Debug.LogError($"[MonsterBase] 스프라이트를 로드할 수 없습니다: {spriteName}");
+        // }
     }
 
     /// <summary>
