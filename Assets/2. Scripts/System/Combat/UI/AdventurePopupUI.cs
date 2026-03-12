@@ -81,7 +81,7 @@ public class AdventurePopupUI : MonoBehaviour
         if (transform.childCount > 0)
             transform.GetChild(0).gameObject.SetActive(true);
 
-        AdventureSaveManager.Load();
+        ClearSaveManager.Load(ClearSaveManager.Adventure);
         UpdateAreaInfo();
         ClearQuestInfo();
         UpdateQuestSlots();
@@ -129,7 +129,7 @@ public class AdventurePopupUI : MonoBehaviour
         int firstUncleared = currentAreaData.stageList.Count;
         for (int i = 0; i < currentAreaData.stageList.Count; i++)
         {
-            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+            if (!ClearSaveManager.IsCleared(ClearSaveManager.Adventure, currentAreaData.stageList[i].id))
             {
                 firstUncleared = i;
                 break;
@@ -147,7 +147,7 @@ public class AdventurePopupUI : MonoBehaviour
                 questSlots[i].SetSelected(false);
 
                 AdventureSlotState state;
-                if (AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+                if (ClearSaveManager.IsCleared(ClearSaveManager.Adventure, currentAreaData.stageList[i].id))
                     state = AdventureSlotState.Cleared;
                 else if (i == firstUncleared)
                     state = AdventureSlotState.Available;
@@ -173,7 +173,7 @@ public class AdventurePopupUI : MonoBehaviour
 
         for (int i = 0; i < currentAreaData.stageList.Count; i++)
         {
-            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id))
+            if (!ClearSaveManager.IsCleared(ClearSaveManager.Adventure, currentAreaData.stageList[i].id))
             {
                 SelectQuest(i);
                 return;
@@ -183,9 +183,9 @@ public class AdventurePopupUI : MonoBehaviour
 
     private bool IsSlotAvailable(int index)
     {
-        if (AdventureSaveManager.IsCleared(currentAreaData.stageList[index].id)) return false;
+        if (ClearSaveManager.IsCleared(ClearSaveManager.Adventure, currentAreaData.stageList[index].id)) return false;
         for (int i = 0; i < index; i++)
-            if (!AdventureSaveManager.IsCleared(currentAreaData.stageList[i].id)) return false;
+            if (!ClearSaveManager.IsCleared(ClearSaveManager.Adventure, currentAreaData.stageList[i].id)) return false;
         return true;
     }
 
@@ -266,6 +266,14 @@ public class AdventurePopupUI : MonoBehaviour
             Debug.LogWarning("[AdventurePopupUI] 선택된 퀘스트가 없습니다.");
             return;
         }
+
+        if (!CurrencyManager.Instance.HasEnoughCurrency(CurrencyType.Feather, 1))
+        {
+            Debug.LogWarning("[AdventurePopupUI] 깃털이 부족합니다.");
+            return;
+        }
+
+        CurrencyManager.Instance.ConsumeCurrency(CurrencyType.Feather, 1);
 
         Debug.Log($"[AdventurePopupUI] 모험 시작: {selectedStageData.id}");
         CombatManager.Instance.StartAdventure(selectedStageData);

@@ -59,6 +59,12 @@ public class StageSlotUI : MonoBehaviour
         }
     }
 
+    public void SetMoveInteractable(bool enabled)
+    {
+        if (moveButton != null)
+            moveButton.interactable = enabled;
+    }
+
     // 현재 진행 중인 스테이지 여부 설정
     public void SetSelected(bool isSelected)
     {

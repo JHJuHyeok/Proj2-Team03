@@ -64,6 +64,7 @@ public class CombatManager : MonoBehaviour
     public event Action<int, int> OnAdventureMonsterCountChanged;
     public event Action OnAdventureBossPhaseStarted;
     public event Action<bool> OnAdventureCompleted;
+    public event Action<string> OnBackgroundSpriteChanged;
 
     // 보스 HP 비율 (UI용)
     public float BossHpRatio { get; private set; } = 1f;
@@ -83,7 +84,6 @@ public class CombatManager : MonoBehaviour
         // 데이터가 아직 로드되지 않았으면 먼저 로드
         if (DataManager.stages.GetAll().Count == 0)
         {
-            Debug.Log("데이터 다시 로드");
             await DataManager.LoadAllDatabase();
         }
 
@@ -119,7 +119,6 @@ public class CombatManager : MonoBehaviour
             if (_bossTimeRemaining <= 0f)
             {
                 _isBossTimerActive = false;
-                Debug.Log("[CombatManager] 보스전 시간 초과!");
                 HandleBossFail();
             }
         }
@@ -131,7 +130,6 @@ public class CombatManager : MonoBehaviour
             if (_adventureTimeRemaining <= 0f)
             {
                 _isAdventureTimerActive = false;
-                Debug.Log("[CombatManager] 모험 시간 초과!");
                 HandleAdventureFail();
             }
         }
@@ -153,7 +151,6 @@ public class CombatManager : MonoBehaviour
             {
                 _adventureMonsterKillCount++;
                 OnAdventureMonsterCountChanged?.Invoke(_adventureMonsterKillCount, _adventureTotalMonsters);
-                Debug.Log($"[CombatManager] 모험 몬스터 처치: {_adventureMonsterKillCount}/{_adventureTotalMonsters}");
 
                 if (_adventureMonsterKillCount >= _adventureTotalMonsters)
                 {
@@ -172,7 +169,6 @@ public class CombatManager : MonoBehaviour
         {
             if (isRewardBox)
             {
-                spawnManager.StartFarmingSpawn(stageManager.CurrentStageData);
                 stageManager.ResetProgress();
             }
             else
@@ -185,7 +181,6 @@ public class CombatManager : MonoBehaviour
     // 보스전 시작
     public void StartBossBattle()
     {
-        Debug.Log("[CombatManager] 보스전 시작!");
         CurrentState = CombatState.BossBattle;
         BossHpRatio = 1f;
         OnCombatStateChanged?.Invoke(CurrentState);
@@ -200,10 +195,62 @@ public class CombatManager : MonoBehaviour
     private void HandleBossWin()
     {
         _isBossTimerActive = false;
-        Debug.Log("[CombatManager] 보스 처치! 스테이지 클리어.");
-        // TODO: 다음 스테이지 로드 로직
-        stageManager.ResetProgress();
-        StartFarming();
+
+        string clearedId = stageManager.CurrentStageData?.id;
+        if (!string.IsNullOrEmpty(clearedId))
+            ClearSaveManager.MarkCleared(ClearSaveManager.Stage, clearedId);
+
+        StageData nextStage = FindNextStage();
+        if (nextStage != null)
+        {
+            MoveToStage(nextStage);
+        }
+        else
+        {
+            stageManager.ResetProgress();
+            StartFarming();
+        }
+    }
+
+    private AreaData FindAreaByStage(StageData stageData)
+    {
+        if (stageData == null) return null;
+
+        foreach (var area in DataManager.stages.GetAll())
+        {
+            if (area.stageList == null) continue;
+            foreach (var stage in area.stageList)
+            {
+                if (stage.id == stageData.id) return area;
+            }
+        }
+
+        foreach (var area in DataManager.adventures.GetAll())
+        {
+            if (area.stageList == null) continue;
+            foreach (var stage in area.stageList)
+            {
+                if (stage.id == stageData.id) return area;
+            }
+        }
+
+        return null;
+    }
+
+    private StageData FindNextStage()
+    {
+        string currentId = stageManager.CurrentStageData?.id;
+        var areas = DataManager.stages.GetAll();
+        foreach (var area in areas)
+        {
+            if (area.stageList == null) continue;
+            for (int i = 0; i < area.stageList.Count - 1; i++)
+            {
+                if (area.stageList[i].id == currentId)
+                    return area.stageList[i + 1];
+            }
+        }
+        return null;
     }
 
     // 보스전 실패 처리
@@ -211,7 +258,6 @@ public class CombatManager : MonoBehaviour
     {
         _isBossTimerActive = false;
         spawnManager.CleanUpEnemies();
-        Debug.Log("[CombatManager] 보스전 실패. 일반 스테이지로 복귀.");
         stageManager.ResetProgress();
         StartFarming();
     }
@@ -240,6 +286,11 @@ public class CombatManager : MonoBehaviour
         PlayFadeTransition(() =>
         {
             stageManager.SetStage(stageData);
+
+            AreaData area = FindAreaByStage(stageData);
+            if (area != null && !string.IsNullOrEmpty(area.spriteName))
+                OnBackgroundSpriteChanged?.Invoke(area.spriteName);
+
             StartFarming();
         });
     }
@@ -265,7 +316,6 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[CombatManager] 파밍 중 플레이어 사망. 스테이지 재시작.");
             StartFarming();
         }
     }
@@ -282,13 +332,14 @@ public class CombatManager : MonoBehaviour
 
         PlayFadeTransition(() =>
         {
-            Debug.Log($"[CombatManager] 모험 시작: {adventureData.name}");
 
             _adventureStageData = adventureData;
             _adventureMonsterKillCount = 0;
             _adventureTotalMonsters = adventureData.monsterCount;
             _adventureBossPhase = false;
             BossHpRatio = 1f;
+
+            stageManager.SetStage(adventureData);
 
             CurrentState = CombatState.Adventure;
             OnCombatStateChanged?.Invoke(CurrentState);
@@ -299,7 +350,10 @@ public class CombatManager : MonoBehaviour
             if (playerStats != null)
                 playerStats.FullRestore();
 
-            stageManager.SetStage(adventureData); // OnStageChanged 발동
+            AreaData adventureArea = FindAreaByStage(adventureData);
+            if (adventureArea != null && !string.IsNullOrEmpty(adventureArea.spriteName))
+                OnBackgroundSpriteChanged?.Invoke(adventureArea.spriteName);
+
             spawnManager.StartAdventureSpawn(adventureData);
             OnAdventureMonsterCountChanged?.Invoke(0, _adventureTotalMonsters);
         });
@@ -307,14 +361,12 @@ public class CombatManager : MonoBehaviour
 
     private void StartAdventureBossPhase()
     {
-        Debug.Log("[CombatManager] 모험 보스 페이즈 시작!");
         _adventureBossPhase = true;
         BossHpRatio = 1f;
         OnAdventureBossPhaseStarted?.Invoke();
         bool spawnSuccess = spawnManager.SpawnAdventureBoss(_adventureStageData);
         if (!spawnSuccess)
         {
-            Debug.LogError("[CombatManager] 모험 보스 스폰 실패. 모험 실패 처리.");
             HandleAdventureFail();
         }
     }
@@ -322,9 +374,12 @@ public class CombatManager : MonoBehaviour
     private void HandleAdventureSuccess()
     {
         _isAdventureTimerActive = false;
-        Debug.Log("[CombatManager] 모험 성공!");
         if (_adventureStageData != null)
-            AdventureSaveManager.MarkCleared(_adventureStageData.id);
+            ClearSaveManager.MarkCleared(ClearSaveManager.Adventure, _adventureStageData.id);
+
+        CurrencyManager.Instance.AddCurrency(CurrencyType.Emerald, 1000);
+        CurrencyManager.Instance.AddCurrency(CurrencyType.Diamond, 1000);
+
         OnAdventureCompleted?.Invoke(true);
         RestoreFromAdventure();
     }
@@ -333,7 +388,6 @@ public class CombatManager : MonoBehaviour
     {
         _isAdventureTimerActive = false;
         spawnManager.CleanUpEnemies();
-        Debug.Log("[CombatManager] 모험 실패.");
         OnAdventureCompleted?.Invoke(false);
         RestoreFromAdventure();
     }
@@ -345,6 +399,11 @@ public class CombatManager : MonoBehaviour
             if (_savedStageData != null)
             {
                 stageManager.SetStage(_savedStageData);
+
+                AreaData savedArea = FindAreaByStage(_savedStageData);
+                if (savedArea != null && !string.IsNullOrEmpty(savedArea.spriteName))
+                    OnBackgroundSpriteChanged?.Invoke(savedArea.spriteName);
+
                 _savedStageData = null;
             }
             _adventureStageData = null;
