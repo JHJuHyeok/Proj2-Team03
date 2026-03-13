@@ -37,8 +37,6 @@ public static class DataManager
     {
         // 데이터 동기화
         CurrentSaveData = data;
-
-        Debug.Log("성장 데이터 동기화 완료");
     }
 
     /// <summary>
@@ -49,9 +47,7 @@ public static class DataManager
     {
         try
         {
-            Debug.Log("데이터베이스 로드 시작");
-
-            await Task.WhenAll(
+           await Task.WhenAll(
                 monsters.LoadAsync("Json/Monster/MonsterList"),
                 skills.LoadAsync("Json/Skill/SkillList"),
                 weapons.LoadAsync("Json/Equip/WeaponList"),
@@ -59,11 +55,9 @@ public static class DataManager
                 stages.LoadAsync("Json/Stage/StageList"),
                 adventures.LoadAsync("Json/Stage/AdventureList")
             );
-            Debug.Log("데이터베이스 로드 완료");
         }
         catch (Exception e)
         {
-            Debug.LogError($"데이터베이스 로드 실패: {e.Message}\n{e.StackTrace}");
         }
     }
 

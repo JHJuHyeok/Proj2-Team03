@@ -43,7 +43,6 @@ namespace Combat.Drop
         /// </summary>
         public void Initialize(Transform player)
         {
-            Debug.Log("[DropManager] Initializing...");
             _playerTransform = player;
 
             // 골드 드롭 풀 생성
@@ -67,7 +66,6 @@ namespace Combat.Drop
             }
 
             _isInitialized = true;
-            Debug.Log("[DropManager] Initialized.");
         }
 
         /// <summary>

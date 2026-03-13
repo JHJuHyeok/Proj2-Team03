@@ -12,16 +12,6 @@ public class BackendManager : Singleton<BackendManager>
     {
         base.Awake();
         var bro = Backend.Initialize(); // 뒤끝 초기화
-
-        // 뒤끝 초기화에 대한 응답값
-        if (bro.IsSuccess())
-        {
-            Debug.Log("초기화 성공 : " + bro); // 성공일 경우 statusCode 204 Success
-        }
-        else
-        {
-            Debug.LogError("초기화 실패 : " + bro); // 실패일 경우 statusCode 400대 에러 발생
-        }
     }
 
     /// <summary>
@@ -31,8 +21,6 @@ public class BackendManager : Singleton<BackendManager>
     /// <returns></returns>
     public async Task<string> GetDataAsync(string tableName)
     {
-        Debug.Log($"{tableName} 데이터 요청 중...");
-
         try
         {
             // 뒤끝의 전용 비동기 핸들러를 사용하여 데드락 방지
@@ -53,7 +41,6 @@ public class BackendManager : Singleton<BackendManager>
 
             if (bro == null)
             {
-                Debug.LogError($"[GetDataAsync] {tableName} 응답 객체가 null입니다.");
                 return null;
             }
 
@@ -62,24 +49,19 @@ public class BackendManager : Singleton<BackendManager>
                 var rows = bro.FlattenRows();
                 if (rows.Count > 0)
                 {
-                    Debug.Log($"[GetDataAsync] {tableName} 조회 성공: {rows[0]["Content"].ToString()}");
-
                     string inDate = bro.Rows()[0]["inDate"]["S"].ToString();
                     SetInDate(tableName, inDate);
 
                     return rows[0]["Content"].ToString();
                 }
-                Debug.Log($"[GetDataAsync] {tableName} 데이터가 존재하지 않습니다.");
 
                 return null;
             }
 
-            Debug.LogWarning($"[GetDataAsync] {tableName} 조회 실패: {bro.GetStatusCode()} / {bro.GetErrorCode()} - {bro.GetMessage()}");
             return null;
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"[GetDataAsync] 심각한 오류 발생: {e.Message}\n{e.StackTrace}");
             return null;
         }
     }
@@ -112,15 +94,6 @@ public class BackendManager : Singleton<BackendManager>
         {
             await Task.Yield();
         }
-
-        if (bro.IsSuccess())
-        {
-            Debug.Log($"{tableName} 서버 저장 성공");
-        }
-        else
-        {
-            Debug.LogError($"{tableName} 서버 저장 실패: {bro.GetStatusCode()} / {bro.GetErrorCode()}");
-        }
     }
 
     /// <summary>
@@ -144,7 +117,6 @@ public class BackendManager : Singleton<BackendManager>
             return inDate;
         }
 
-        Debug.LogError($"[Backend] {tableName}의 inDate를 찾을 수 없습니다. 먼저 데이터를 불러와야 합니다.");
         return string.Empty;
     }
 }

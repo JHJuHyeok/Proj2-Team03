@@ -27,9 +27,8 @@ public class EquipPopup : UIPopup
         base.OnOpen(param);
 
         EquipTab tab = EquipTab.Weapon;
-        string initialEquipId = null; // [조민희] 초기 선택할 장비 ID
+        string initialEquipId = null;
 
-        // [조민희] EquipPopupParam 처리 (우선순위)
         if (param is EquipPopupParam popupParam)
         {
             tab = popupParam.Tab;
@@ -40,12 +39,31 @@ public class EquipPopup : UIPopup
             tab = t;
         }
 
+        Debug.Log($"[EquipPopup] OnOpen - tab: {tab}, initialEquipId: {initialEquipId}");
+
         ApplyTab(tab);
 
+        // 팝업 내부 탭도 같이 전환
+        if (tabManager != null)
+        {
+            int defaultInnerTabIndex = 0;
+            Debug.Log($"[EquipPopup] 내부 탭 초기화 - 강화탭 index: {defaultInnerTabIndex}");
+            tabManager.TabClick(defaultInnerTabIndex);
+        }
+        else
+        {
+            Debug.LogWarning("[EquipPopup] tabManager가 null입니다.");
+        }
+
+        // 무기/악세 데이터 구분은 controller가 처리
         if (controller != null)
         {
-            // [조민희] SetEquipTab에 initialEquipId 전달
+            Debug.Log($"[EquipPopup] controller.SetEquipTab 호출 - tab: {tab}, initialEquipId: {initialEquipId}");
             controller.SetEquipTab(tab, initialEquipId);
+        }
+        else
+        {
+            Debug.LogWarning("[EquipPopup] controller가 null입니다.");
         }
     }
 
@@ -53,11 +71,19 @@ public class EquipPopup : UIPopup
     {
         if (tab == EquipTab.Weapon)
         {
-            if (iconImage != null) iconImage.sprite = weaponSprite;
+            if (iconImage != null)
+            {
+                iconImage.sprite = weaponSprite;
+                Debug.Log("[EquipPopup] 상단 아이콘 = weaponSprite");
+            }
         }
         else
         {
-            if (iconImage != null) iconImage.sprite = accessorySprite;
+            if (iconImage != null)
+            {
+                iconImage.sprite = accessorySprite;
+                Debug.Log("[EquipPopup] 상단 아이콘 = accessorySprite");
+            }
         }
     }
 }

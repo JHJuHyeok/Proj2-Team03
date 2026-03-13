@@ -26,7 +26,6 @@ public class CurrencyManager : Singleton<CurrencyManager>
         {
             _currencies[currency.type] = currency.value;
         }
-        Debug.Log("재화 데이터 동기화 완료");
     }
 
     /// <summary>

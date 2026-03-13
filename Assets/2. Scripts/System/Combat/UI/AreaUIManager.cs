@@ -22,7 +22,7 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     [SerializeField] private StageDetailPopupUI stageDetailPopup; // 스테이지 상세 팝업
 
     [Header("배경")]
-    [SerializeField] private SpriteRenderer backgroundSpriteRenderer; // 배경 스프라이트 렌더러
+    [SerializeField] private Image backgroundImage; // 배경 이미지
 
     [Header("스테이지 슬롯")]
     [SerializeField] private StageSlotUI stageSlotPrefab;       // 스테이지 슬롯 프리팹
@@ -35,6 +35,27 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     private void Start()
     {
         LoadAreaData();
+    }
+
+    private void OnEnable()
+    {
+        if (CombatManager.Instance != null)
+            CombatManager.Instance.OnBackgroundSpriteChanged += HandleBackgroundSpriteChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (CombatManager.Instance != null)
+            CombatManager.Instance.OnBackgroundSpriteChanged -= HandleBackgroundSpriteChanged;
+    }
+
+    private async void HandleBackgroundSpriteChanged(string spriteName)
+    {
+        if (backgroundImage == null || string.IsNullOrEmpty(spriteName)) return;
+
+        Sprite sprite = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Map.spriteatlasv2", spriteName);
+        if (sprite != null)
+            backgroundImage.sprite = sprite;
     }
 
     // 지역 데이터 로드
@@ -203,6 +224,11 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
                 slot.SetMoveAction(() => MoveToStage(stageData));
 
                 slot.SetSelected(stageData.id == currentStageId);
+
+                // 이동 버튼 활성화: 첫 스테이지이거나 이전 스테이지 클리어 시
+                bool isUnlocked = i == 0 || ClearSaveManager.IsCleared(ClearSaveManager.Stage, currentAreaData.stageList[i - 1].id);
+                bool isCurrentStage = stageData.id == currentStageId;
+                slot.SetMoveInteractable(isUnlocked && !isCurrentStage);
             }
             else
             {
@@ -226,20 +252,12 @@ public class AreaUIManager : MonoBehaviour, IPointerDownHandler
     }
 
     // 스테이지 이동 처리
-    private async void MoveToStage(StageData stageData)
+    private void MoveToStage(StageData stageData)
     {
         if (stageData == null) return;
 
-        // 스테이지 전환
+        // 스테이지 전환 (배경 변경은 CombatManager의 OnBackgroundSpriteChanged 이벤트로 처리)
         CombatManager.Instance.MoveToStage(stageData);
-
-        // 현재 지역 데이터로 배경 스프라이트 변경
-        if (currentAreaData != null && backgroundSpriteRenderer != null && !string.IsNullOrEmpty(currentAreaData.spriteName))
-        {
-            Sprite sprite = await SpriteManager.GetSprite(SpriteManager.AtlasBase + "Atlas_Map.spriteatlasv2", currentAreaData.spriteName);
-            if (sprite != null)
-                backgroundSpriteRenderer.sprite = sprite;
-        }
 
         // 팝업 닫기
         ClosePopup();

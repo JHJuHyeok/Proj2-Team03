@@ -79,10 +79,6 @@ public class LevelManager : Singleton<LevelManager>
                 _isCanLevelUp = false;
             }
         }
-        else
-        {
-            Debug.Log("경험치가 부족해 레벨업이 불가능합니다.");
-        }
     }
 
     /// <summary>

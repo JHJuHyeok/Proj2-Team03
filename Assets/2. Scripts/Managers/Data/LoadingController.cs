@@ -93,7 +93,6 @@ public class LoadingController : MonoBehaviour
         catch (System.Exception e)
         {
             Fail("Exception: " + e.Message);
-            Debug.LogError(e);
             return false;
         }
     }
@@ -110,22 +109,6 @@ public class LoadingController : MonoBehaviour
         CurrentStep = "Error";
         Progress = 0f;
     }
-    /*private async void Start()
-    {
-        // 1. 로그인 스텝
-        bool loginSuccess = await AuthStep();
-        if (!loginSuccess)
-        {
-            BackendLogin.Instance.GuestSignUp();
-            return;
-        }
-
-        // 2. 서버 데이터 통합 로드
-        bool dataLoadSuccess = await LoadGameDataStep();
-        if (!dataLoadSuccess) return;
-
-        // 4. 씬 이동
-    }*/
 
     // 자동 로그인
     private async Task<bool> AuthStep()
@@ -157,7 +140,6 @@ public class LoadingController : MonoBehaviour
         // 4. 서버에 데이터가 없을 경우 초기화
         if (string.IsNullOrEmpty(currencyJson))
         {
-            Debug.Log("신규 재화 데이터를 생성하고 서버에 저장합니다.");
             serverCurrency = CurrencyData.CreateDefault();
             await BackendManager.Instance.SaveDataAsync("UserCurrency", serverCurrency);
         }
@@ -168,7 +150,6 @@ public class LoadingController : MonoBehaviour
         
         if (string.IsNullOrEmpty(dataJson))
         {
-            Debug.Log("신규 게임 데이터를 생성하고 서버에 저장합니다.");
             serverData = GameData.CreateDefault();
             await BackendManager.Instance.SaveDataAsync("UserSave", serverData);
         }
@@ -201,21 +182,9 @@ public class LoadingController : MonoBehaviour
             // 9. [조민희] 장비 아이콘 로드 (AssetBundleLoader 초기화)
             SlayerLegend.Resource.AssetBundleLoader.Instance.Initialize();
 
-            // [조민희] 디버그: equipInfo 내용 확인
-            Debug.Log($"[LoadingController] equipInfo 개수: {latestData.equipInfo?.Count ?? 0}");
-            if (latestData.equipInfo != null)
-            {
-                foreach (var kvp in latestData.equipInfo)
-                {
-                    Debug.Log($"  [equipInfo] {kvp.Key}: count={kvp.Value.count}, level={kvp.Value.level}");
-                }
-            }
-
-            Debug.Log("전체 데이터 로드 완료");
             return true;
         }
 
-        Debug.Log("데이터 로드 실패");
         return false;
     }
 
@@ -253,14 +222,11 @@ public class LoadingController : MonoBehaviour
         data.equipInfo["AC_001"] = new Possesion { count = 3, level = 1 };   // 나태의 귀걸이
         data.equipInfo["AC_002"] = new Possesion { count = 2, level = 5 };   // 초조의 반지
         data.equipInfo["AC_003"] = new Possesion { count = 1, level = 2 };   // 오래된 팬던트
-
-        Debug.Log($"[LoadingController] 기본 장비 추가 완료: 무기 4종, 악세서리 4종");
     }
 
     private async Task ResourcesLoadStep()
     {
         await SpriteManager.LoadAllAtlasAsync();
         await Task.Delay(100);      // 로딩 체감되도록 살짝 딜레이
-        Debug.Log("리소스 로드 완료");
     }
 }
