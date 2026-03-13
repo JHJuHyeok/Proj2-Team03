@@ -64,18 +64,18 @@ public class InfoHandler : MonoBehaviour
         CurrencyManager.Instance.AddCurrency(type, amount);
     }
     #region ÀçÈ­ È¹µæ ÇÔ¼ö
-    public void GetDiamond3500() => AddCurrency(CurrencyType.Diamond, 3500);
-    public void GetDiamond6000() => AddCurrency(CurrencyType.Diamond, 6000);
-    public void GetDiamond9900() => AddCurrency(CurrencyType.Diamond, 9900);
-    public void GetDiamond30000() => AddCurrency(CurrencyType.Diamond, 30000);
-    public void GetDiamond60000() => AddCurrency(CurrencyType.Diamond, 60000);
-    public void GetDiamond100000() => AddCurrency(CurrencyType.Diamond, 100000);
-    public void GetEmerald3500() => AddCurrency(CurrencyType.Emerald, 3500);
-    public void GetEmerald6000() => AddCurrency(CurrencyType.Emerald, 6000);
-    public void GetEmerald9900() => AddCurrency(CurrencyType.Emerald, 9900);
-    public void GetEmerald30000() => AddCurrency(CurrencyType.Emerald, 30000);
-    public void GetEmerald60000() => AddCurrency(CurrencyType.Emerald, 60000);
-    public void GetEmerald100000() => AddCurrency(CurrencyType.Emerald, 100000);
+    public void GetDiamond1400() => AddCurrency(CurrencyType.Diamond, 1400);
+    public void GetDiamond2700() => AddCurrency(CurrencyType.Diamond, 2700);
+    public void GetDiamond5000() => AddCurrency(CurrencyType.Diamond, 5000);
+    public void GetDiamond20000() => AddCurrency(CurrencyType.Diamond, 20000);
+    public void GetDiamond40000() => AddCurrency(CurrencyType.Diamond, 40000);
+    public void GetDiamond80000() => AddCurrency(CurrencyType.Diamond, 80000);
+    public void GetEmerald350() => AddCurrency(CurrencyType.Emerald, 350);
+    public void GetEmerald620() => AddCurrency(CurrencyType.Emerald, 620);
+    public void GetEmerald1200() => AddCurrency(CurrencyType.Emerald, 1200);
+    public void GetEmerald3800() => AddCurrency(CurrencyType.Emerald, 3800);
+    public void GetEmerald7500() => AddCurrency(CurrencyType.Emerald, 7500);
+    public void GetEmerald15000() => AddCurrency(CurrencyType.Emerald, 15000);
     #endregion
 
     /// <summary>
