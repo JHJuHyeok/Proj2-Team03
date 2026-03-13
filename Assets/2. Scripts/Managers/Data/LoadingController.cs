@@ -164,22 +164,15 @@ public class LoadingController : MonoBehaviour
 
         if (latestCurrency != null && latestData != null)
         {
-            // [조민희] equipInfo가 비어있으면 기본 장비 추가 (기존 유저 대응)
-            if (latestData.equipInfo == null || latestData.equipInfo.Count == 0)
-            {
-                Debug.Log("[LoadingController] equipInfo가 비어있음 - 기본 장비 추가");
-                AddDefaultEquipment(latestData);
-            }
-
-            // 6. 각 매니저의 데이터 초기화
+            // 5. 각 매니저의 데이터 초기화
             CurrencyManager.Instance.Init(latestCurrency);
             DataManager.Init(latestData);
 
-            // 7. 아틀라스 스프라이트 로드
+            // 6. 아틀라스 스프라이트 로드
             await ResourcesLoadStep();
-            // 8. 데이터베이스 로드
+            // 7. 데이터베이스 로드
             await DataManager.LoadAllDatabase();
-            // 9. [조민희] 장비 아이콘 로드 (AssetBundleLoader 초기화)
+            // 8. [조민희] 장비 아이콘 로드 (AssetBundleLoader 초기화)
             SlayerLegend.Resource.AssetBundleLoader.Instance.Initialize();
 
             return true;
@@ -204,24 +197,6 @@ public class LoadingController : MonoBehaviour
 
         string json = File.ReadAllText(path);
         return JsonConvert.DeserializeObject<CurrencyData>(json);
-    }
-
-    /// <summary>
-    /// [조민희] 기본 장비 추가 (기존 유저 대응)
-    /// </summary>
-    private void AddDefaultEquipment(GameData data)
-    {
-        // 기본 무기 지급 (Common 등급)
-        data.equipInfo["WP_000"] = new Possesion { count = 5, level = 3 };   // 녹슨검
-        data.equipInfo["WP_001"] = new Possesion { count = 3, level = 1 };   // 넓은검
-        data.equipInfo["WP_002"] = new Possesion { count = 2, level = 5 };   // 장검
-        data.equipInfo["WP_003"] = new Possesion { count = 1, level = 2 };   // 강철검
-
-        // 기본 악세서리 지급 (Common 등급)
-        data.equipInfo["AC_000"] = new Possesion { count = 5, level = 3 };   // 녹슨 팔찌
-        data.equipInfo["AC_001"] = new Possesion { count = 3, level = 1 };   // 나태의 귀걸이
-        data.equipInfo["AC_002"] = new Possesion { count = 2, level = 5 };   // 초조의 반지
-        data.equipInfo["AC_003"] = new Possesion { count = 1, level = 2 };   // 오래된 팬던트
     }
 
     private async Task ResourcesLoadStep()
