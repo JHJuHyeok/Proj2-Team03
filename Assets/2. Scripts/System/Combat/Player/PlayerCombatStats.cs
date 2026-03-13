@@ -55,7 +55,7 @@ public class PlayerCombatStats : MonoBehaviour, IDamageable
     private double ManaRegenPerSecond => GetStatValue(StatType.VIT_MANA);
 
     // === 고정 스탯 (상수) ===
-    public float AttackSpeed => 10f;
+    public float AttackSpeed => 1f;
     public float AttackRange => 2f;
     public float DetectionRange => 15f;
     public float BlowDamage => 3.0f;        // TODO: StatController 완성 후 GetStatValue로 변경

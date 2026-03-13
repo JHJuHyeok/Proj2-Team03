@@ -161,6 +161,7 @@ public class PlayerCombat : MonoBehaviour
         {
             _animator.SetInteger("AttackIndex", _attackIndex);
             _animator.SetTrigger("Attack");
+            SoundManager.Instance.PlaySound("Attack");
 
             // 0 → 1 → 0 → 1 번갈아가기
             _attackIndex = (_attackIndex + 1) % 2;

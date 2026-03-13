@@ -9,7 +9,7 @@ public class TemporarySoundPlayer : MonoBehaviour
 
     private void Awake()
     {
-        // Àç»ý½ÃÅ³ ¿Àµð¿À ¼Ò½º ÂüÁ¶
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò½ï¿½ ï¿½ï¿½ï¿½ï¿½
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
@@ -18,9 +18,9 @@ public class TemporarySoundPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// »ç¿îµå ÃÊ±âÈ­
+    /// ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     /// </summary>
-    /// <param name="clip">ÃÊ±âÈ­½ÃÅ³ ¿Àµð¿À Å¬¸³</param>
+    /// <param name="clip">ï¿½Ê±ï¿½È­ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½</param>
     public void InitSound(AudioClip clip)
     {
         ClipName = clip.name;
@@ -35,10 +35,10 @@ public class TemporarySoundPlayer : MonoBehaviour
 
         _audioSource.PlayDelayed(delay);
 
-        // ·çÇÁ°¡ ¾Æ´Ï¸é Àç»ýÀÌ ³¡³ª°í Ç®·Î ¹ÝÈ¯
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½ï¿½È¯
         if (!isLoop)
         {
-            //StartCoroutine();
+            StartCoroutine(ReturnToPoolAfterPlayback(_audioSource.clip.length + delay));
         }
     }
 
