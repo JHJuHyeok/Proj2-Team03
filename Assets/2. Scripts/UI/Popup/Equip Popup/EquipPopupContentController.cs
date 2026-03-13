@@ -27,6 +27,13 @@ public class EquipPopupContentController : MonoBehaviour
     [SerializeField] private TMP_Text ownedText;//보유 개수
     [SerializeField] private TMP_Text levelText;//강화 레벨
 
+    [Header("상단 장비 정보")]
+    [SerializeField] private TMP_Text rarityText;//신화
+    [SerializeField] private TMP_Text itemNameText;//귀멸의 검 - 데몬 슬레이어
+    [SerializeField] private TMP_Text enhanceText;//+200
+    [SerializeField] private TMP_Text gradeText;//1등급
+    [SerializeField] private TMP_Text countText;//3/5
+
     [Header("융합 아이콘 (조민희 추가)")]
     [SerializeField] private Image currentEquipIcon;
     [SerializeField] private TMP_Text currentEquipName;
@@ -85,6 +92,7 @@ public class EquipPopupContentController : MonoBehaviour
             {
                 accessoryBinder = GetComponentInParent<EquipAccessoryBinder>();
             }
+
             if (accessoryBinder != null)
             {
                 Debug.Log("[EquipPopupContentController] accessoryBinder 자동 할당됨");
@@ -180,14 +188,18 @@ public class EquipPopupContentController : MonoBehaviour
         foreach (Transform child in parent)
         {
             if (child.name == name)
+            {
                 return child;
+            }
         }
 
         foreach (Transform child in parent)
         {
             Transform found = FindDeepChild(child, name);
             if (found != null)
+            {
                 return found;
+            }
         }
 
         return null;
@@ -387,6 +399,12 @@ public class EquipPopupContentController : MonoBehaviour
             if (levelText != null) levelText.text = "";
             if (enhanceCostText != null) enhanceCostText.text = "";
 
+            if (rarityText != null) rarityText.text = "";
+            if (itemNameText != null) itemNameText.text = "";
+            if (enhanceText != null) enhanceText.text = "";
+            if (gradeText != null) gradeText.text = "";
+            if (countText != null) countText.text = "";
+
             if (upgradeIcon != null) upgradeIcon.sprite = null;
             if (upgradeName != null) upgradeName.text = "";
             if (upgradeNumber != null) upgradeNumber.text = "";
@@ -415,6 +433,8 @@ public class EquipPopupContentController : MonoBehaviour
         }
 
         EquipData equip = item.equipment;
+        int count = equipmentManager.GetCount(equip.GetId());
+        int level = equipmentManager.GetLevel(equip.GetId());
 
         if (detailIcon != null)
         {
@@ -429,9 +449,6 @@ public class EquipPopupContentController : MonoBehaviour
             Debug.Log($"[EquipPopupContentController] detailName 설정 - {equip.GetName()}");
         }
 
-        int count = equipmentManager.GetCount(equip.GetId());
-        int level = equipmentManager.GetLevel(equip.GetId());
-
         if (ownedText != null)
         {
             ownedText.text = $"보유: {count}개";
@@ -440,6 +457,31 @@ public class EquipPopupContentController : MonoBehaviour
         if (levelText != null)
         {
             levelText.text = $"+{level}";
+        }
+
+        if (rarityText != null)
+        {
+            rarityText.text = GetRarityText(equip);
+        }
+
+        if (itemNameText != null)
+        {
+            itemNameText.text = equip.GetName();
+        }
+
+        if (enhanceText != null)
+        {
+            enhanceText.text = $"+{level}";
+        }
+
+        if (gradeText != null)
+        {
+            gradeText.text = GetGradeText(equip);
+        }
+
+        if (countText != null)
+        {
+            countText.text = $"{count}/{FUSION_REQUIRED_COUNT}";
         }
 
         UpdateButtonStates(equip);
@@ -929,6 +971,48 @@ public class EquipPopupContentController : MonoBehaviour
         }
     }
 
+    private string GetRarityText(EquipData equip)
+    {
+        if (equip == null) return "";
+
+        string id = equip.GetId();
+
+        if (id.Contains("myth") || id.Contains("Myth"))
+            return "신화";
+
+        if (id.Contains("legend") || id.Contains("Legend"))
+            return "전설";
+
+        if (id.Contains("hero") || id.Contains("Hero"))
+            return "영웅";
+
+        if (id.Contains("rare") || id.Contains("Rare"))
+            return "희귀";
+
+        return "일반";
+    }
+
+    private string GetGradeText(EquipData equip)
+    {
+        if (equip == null) return "";
+
+        string id = equip.GetId();
+
+        if (id.Contains("grade1") || id.Contains("_1"))
+            return "1등급";
+
+        if (id.Contains("grade2") || id.Contains("_2"))
+            return "2등급";
+
+        if (id.Contains("grade3") || id.Contains("_3"))
+            return "3등급";
+
+        if (id.Contains("grade4") || id.Contains("_4"))
+            return "4등급";
+
+        return "1등급";
+    }
+
     private string GetEffectLabel(EffectType effectType)
     {
         switch (effectType)
@@ -937,19 +1021,19 @@ public class EquipPopupContentController : MonoBehaviour
                 return "공격력 증가";
 
             case EffectType.CriticalDamage:
-                return "추가 치명타 데미지";
+                return "치명타 데미지 증가";
 
             case EffectType.GoldGain:
-                return "추가 골드 획득량";
+                return "골드 획득량 증가";
 
             case EffectType.HealthBoost:
-                return "체력/체력 회복량 증가";
+                return "체력 및 체력 회복량 증가";
 
             case EffectType.ManaBoost:
-                return "전체 마나/마나 회복량";
+                return "마나 및 마나 회복량 증가";
 
             case EffectType.ExpGain:
-                return "추가 경험치";
+                return "경험치 획득량 증가";
 
             default:
                 return "";
