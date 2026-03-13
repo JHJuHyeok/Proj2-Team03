@@ -104,6 +104,7 @@ namespace Combat.Drop
             if (dropType == DropType.Gold)
             {
                 CurrencyManager.Instance.AddCurrency(CurrencyType.Gold, _amount);
+                SoundManager.Instance.PlaySound("coin");
             }
             else if (dropType == DropType.Exp)
             {

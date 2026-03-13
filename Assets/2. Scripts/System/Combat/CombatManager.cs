@@ -83,15 +83,60 @@ public class CombatManager : MonoBehaviour
     {
         // 데이터가 아직 로드되지 않았으면 먼저 로드
         if (DataManager.stages.GetAll().Count == 0)
-        {
             await DataManager.LoadAllDatabase();
-        }
 
-        if (stageManager) stageManager.Initialize(initialStageId);
+        // 저장 데이터로 스탯 초기화
+        if (DataManager.CurrentSaveData != null)
+            StatManager.Instance?.InitFromSaveData(DataManager.CurrentSaveData);
+
+        // 최고 클리어 스테이지 기반으로 시작 스테이지 결정
+        string startStageId = DetermineStartStageId();
+
+        if (stageManager) stageManager.Initialize(startStageId);
         if (spawnManager) spawnManager.Initialize(playerTransform);
         if (dropManager) dropManager.Initialize(playerTransform);
 
+        // 초기 배경 이미지 이벤트 발생
+        if (stageManager?.CurrentStageData != null)
+        {
+            AreaData initialArea = FindAreaByStage(stageManager.CurrentStageData);
+            if (initialArea != null && !string.IsNullOrEmpty(initialArea.spriteName))
+                OnBackgroundSpriteChanged?.Invoke(initialArea.spriteName);
+        }
+
         StartFarming();
+    }
+
+    private string DetermineStartStageId()
+    {
+        var areas = DataManager.stages.GetAll();
+        StageData lastCleared = null;
+
+        foreach (var area in areas)
+        {
+            if (area.stageList == null) continue;
+            foreach (var stage in area.stageList)
+            {
+                if (ClearSaveManager.IsCleared(ClearSaveManager.Stage, stage.id))
+                    lastCleared = stage;
+            }
+        }
+
+        if (lastCleared == null)
+            return initialStageId;
+
+        // lastCleared 다음 스테이지 탐색
+        foreach (var area in areas)
+        {
+            if (area.stageList == null) continue;
+            for (int i = 0; i < area.stageList.Count - 1; i++)
+            {
+                if (area.stageList[i].id == lastCleared.id)
+                    return area.stageList[i + 1].id;
+            }
+        }
+
+        return lastCleared.id;  // 모든 스테이지 클리어 시 마지막 스테이지
     }
 
     private void OnEnable()

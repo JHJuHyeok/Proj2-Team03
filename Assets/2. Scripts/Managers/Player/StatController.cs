@@ -61,26 +61,24 @@ public class StatController
         {
             foreach (var stat in sourceList)
             {
-                if (!tempBase.ContainsKey(stat.type))
-                {
-                    tempBase[stat.type] = 0;
-                    tempBase[stat.type] += stat.baseValue;
-                }
+                tempBase.TryGetValue(stat.type, out double existingBase);
+                tempBase[stat.type] = existingBase + stat.baseValue;
 
-                if (!tempMult.ContainsKey(stat.type))
-                {
-                    tempMult[stat.type] = 0;
-                    tempMult[stat.type] += stat.multiplier;
-                }
+                tempMult.TryGetValue(stat.type, out double existingMult);
+                tempMult[stat.type] = existingMult + stat.multiplier;
             }
         }
-        
+
         _finalStats.Clear();
 
-        // 계산된 스탯 적용
-        foreach (var type in tempBase.Keys)
+        // 계산된 스탯 적용 (tempBase와 tempMult의 합집합으로 누락 방지)
+        var allTypes = new HashSet<StatType>(tempBase.Keys);
+        allTypes.UnionWith(tempMult.Keys);
+        foreach (var type in allTypes)
         {
-            _finalStats[type] = tempBase[type] * (1.0 + tempMult[type]);
+            tempBase.TryGetValue(type, out double b);
+            tempMult.TryGetValue(type, out double m);
+            _finalStats[type] = b * (1.0 + m);
         }
     }
 
