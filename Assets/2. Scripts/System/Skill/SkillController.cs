@@ -176,5 +176,105 @@ namespace SlayerLegend.Skill
                 passiveSkill.RefreshLevel();
             }
         }
+
+        #region 스킬 보유 관리 (상점 소환 연동용)
+
+        /// <summary>스킬 획득 이벤트</summary>
+        public event System.Action<string> OnSkillAcquired;
+
+        /// <summary>스킬 제거 이벤트</summary>
+        public event System.Action<string> OnSkillRemoved;
+
+        /// <summary>
+        /// 스킬 획득 (상점 소환 등에서 사용)
+        /// </summary>
+        /// <param name="skillId">스킬 ID</param>
+        /// <param name="count">획득 개수 (기본값 1)</param>
+        /// <param name="level">스킬 레벨 (기본값 1)</param>
+        public void AddSkill(string skillId, int count = 1, int level = 1)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                Debug.LogWarning("[SkillController] 스킬 ID가 null 또는 비어있습니다.");
+                return;
+            }
+
+            if (DataManager.CurrentSaveData == null)
+            {
+                Debug.LogWarning("[SkillController] CurrentSaveData가 null입니다.");
+                return;
+            }
+
+            var skillInfo = DataManager.CurrentSaveData.skillInfo;
+
+            if (!skillInfo.ContainsKey(skillId))
+            {
+                skillInfo[skillId] = new Possesion { count = 0, level = level };
+            }
+
+            skillInfo[skillId].count += count;
+            skillInfo[skillId].level = System.Math.Max(skillInfo[skillId].level, level);
+
+            OnSkillAcquired?.Invoke(skillId);
+        }
+
+        /// <summary>
+        /// 스킬 제거
+        /// </summary>
+        /// <param name="skillId">스킬 ID</param>
+        /// <param name="count">제거 개수 (기본값 1)</param>
+        /// <returns>제거 성공 여부</returns>
+        public bool RemoveSkill(string skillId, int count = 1)
+        {
+            if (string.IsNullOrEmpty(skillId)) return false;
+
+            if (DataManager.CurrentSaveData == null) return false;
+
+            var skillInfo = DataManager.CurrentSaveData.skillInfo;
+
+            if (!skillInfo.ContainsKey(skillId)) return false;
+
+            skillInfo[skillId].count -= count;
+
+            if (skillInfo[skillId].count <= 0)
+            {
+                skillInfo.Remove(skillId);
+            }
+
+            OnSkillRemoved?.Invoke(skillId);
+            return true;
+        }
+
+        /// <summary>
+        /// 스킬 보유 개수 확인
+        /// </summary>
+        /// <param name="skillId">스킬 ID</param>
+        /// <returns>보유 개수 (없으면 0)</returns>
+        public int GetSkillCount(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId)) return 0;
+            if (DataManager.CurrentSaveData == null) return 0;
+
+            var skillInfo = DataManager.CurrentSaveData.skillInfo;
+
+            if (skillInfo.TryGetValue(skillId, out var possession))
+            {
+                return possession.count;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// 스킬 보유 여부 확인
+        /// </summary>
+        /// <param name="skillId">스킬 ID</param>
+        /// <returns>보유 여부</returns>
+        public bool HasSkill(string skillId)
+        {
+            return GetSkillCount(skillId) > 0;
+        }
+
+        #endregion
     }
 }

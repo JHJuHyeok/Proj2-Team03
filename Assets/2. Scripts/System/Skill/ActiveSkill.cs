@@ -1,4 +1,5 @@
-﻿﻿using UnityEngine;
+﻿﻿using System.Collections.Generic;
+using UnityEngine;
 using SlayerLegend.Resource;
 using SlayerLegend.Skill.StatusEffects;
 
@@ -10,6 +11,14 @@ namespace SlayerLegend.Skill
     // - 마나 소모, 발사체 생성, 데미지 계산
     public class ActiveSkill : SkillBase, ISkillDisplayable
     {
+        // 스킬 속성별 사운드 클립 이름 매핑
+        private static readonly Dictionary<SkillElement, string> SkillSoundNames = new()
+        {
+            { SkillElement.Fire, "Skill_Fire" },
+            { SkillElement.Wind, "Skill_Wind" },
+            { SkillElement.Water, "Skill_Water" },
+            { SkillElement.Earth, "Skill_Earth" }
+        };
         [Header("액티브 스킬 상태")]
         [SerializeField] private float currentCooldown = 0f;
         [SerializeField] private bool isActive = false;
@@ -312,6 +321,9 @@ namespace SlayerLegend.Skill
             float tickInterval = skillData.effectData?.dotTickInterval ?? 1f;
             string dotType = skillData.effectData?.dotType ?? "burn";
 
+            // 스킬 속성에 맞는 사운드 재생
+            PlaySkillSound();
+
             // 폭발 실행
             ExecuteExplosion(explosionRadius, explodeDelay, explosionEffect,
                 dotDuration, damagePerTick, tickInterval, dotType);
@@ -333,6 +345,9 @@ namespace SlayerLegend.Skill
         // 스킬 효과 실행 (하위 클래스에서 오버라이드 가능)
         protected virtual void ExecuteSkill(GameObject caster)
         {
+            // 스킬 속성에 맞는 사운드 재생
+            PlaySkillSound();
+
             // 적은 항상 오른쪽에서 왼쪽으로 일직선 이동하므로,
             // 굳이 적을 찾지 않고 오른쪽으로 발사
 
@@ -711,6 +726,24 @@ namespace SlayerLegend.Skill
 
             // 준비 완료 - 초록색
             return Color.green;
+        }
+
+        #endregion
+
+        #region 스킬 사운드
+
+        /// <summary>
+        /// 스킬 속성에 맞는 사운드 재생
+        /// </summary>
+        private void PlaySkillSound()
+        {
+            if (skillData == null) return;
+            if (SoundManager.Instance == null) return;
+
+            if (SkillSoundNames.TryGetValue(skillData.element, out string soundName))
+            {
+                SoundManager.Instance.PlaySound(soundName, 0f, false, SoundType.effect);
+            }
         }
 
         #endregion
