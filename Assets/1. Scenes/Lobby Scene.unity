@@ -917,6 +917,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1932413389372372752, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
   m_PrefabInstance: {fileID: 2104754947}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2104754950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7797056299943163445, guid: 403fa64673b2247ab872c6b852c1ac3c, type: 3}
+  m_PrefabInstance: {fileID: 2104754947}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d58caa1ca83687c488b5c339aa3894d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2133880551
 GameObject:
   m_ObjectHideFlags: 0
@@ -3107,6 +3118,10 @@ PrefabInstance:
       propertyPath: rootCanvas
       value: 
       objectReference: {fileID: 6174608481779298055}
+    - target: {fileID: 7716015065412067178, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
+      propertyPath: skillController
+      value: 
+      objectReference: {fileID: 2104754950}
     - target: {fileID: 7729571160529514478, guid: 5ca292f191ee1d54382bc0b6a1ebef1f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
