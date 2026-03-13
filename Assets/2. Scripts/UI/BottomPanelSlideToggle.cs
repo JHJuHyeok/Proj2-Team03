@@ -54,6 +54,24 @@ public class BottomPanelSlideToggle : MonoBehaviour
     private readonly List<RaycastResult> raycastResults = new List<RaycastResult>(16);
     private PointerEventData pointerEventData;
 
+    private void OnEnable()
+    {
+        if (CombatManager.Instance != null)
+            CombatManager.Instance.OnCombatStateChanged += OnCombatStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (CombatManager.Instance != null)
+            CombatManager.Instance.OnCombatStateChanged -= OnCombatStateChanged;
+    }
+
+    private void OnCombatStateChanged(CombatState state)
+    {
+        if (state == CombatState.Adventure)
+            Hide();
+    }
+
     private void Awake()
     {
         if (bottomRoot == null)
