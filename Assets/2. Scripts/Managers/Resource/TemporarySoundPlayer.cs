@@ -38,7 +38,7 @@ public class TemporarySoundPlayer : MonoBehaviour
         // 루프가 아니면 재생이 끝나고 풀로 반환
         if (!isLoop)
         {
-            StartCoroutine(ReturnToPoolAfterPlayback(0.1f));
+            StartCoroutine(ReturnToPoolAfterPlayback(_audioSource.clip.length));
         }
     }
 
