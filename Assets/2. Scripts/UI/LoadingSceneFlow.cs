@@ -54,6 +54,9 @@ public class LoadingSceneFlow : MonoBehaviour
         SetReadyUI(false);
         SetLoadingUI(false);
 
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySound("Ambient 7", 0.2f, true, SoundType.bgm);
+
         await RunLoadingAsync();
     }
 
@@ -141,7 +144,13 @@ public class LoadingSceneFlow : MonoBehaviour
         if (remain > 0f)
             await Task.Delay(Mathf.CeilToInt(remain * 1000f));
 
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.StopLoopSound("Ambient 7");
+
         op.allowSceneActivation = true;
+
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySound("Ambient 3", 0.2f, true, SoundType.bgm);
 
         while (!op.isDone)
             await Task.Yield();
