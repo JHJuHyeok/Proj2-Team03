@@ -101,6 +101,7 @@ public class SpawnManager : MonoBehaviour
         if (string.IsNullOrEmpty(rewardBoxId))
         {
             Debug.LogWarning("[SpawnManager] 보상 상자 ID가 설정되지 않음.");
+            StartFarmingSpawn(_currentStageData);
             return;
         }
 
@@ -108,11 +109,16 @@ public class SpawnManager : MonoBehaviour
         if (boxData == null)
         {
             Debug.LogError($"[SpawnManager] 보상 상자 데이터 없음 ID: {rewardBoxId}");
+            StartFarmingSpawn(_currentStageData);
             return;
         }
 
-        SpawnMonster(boxData, commonMonsterPrefab, GetSpawnPosition() + Vector3.right * 5);
-
+        MonsterBase box = SpawnMonster(boxData, commonMonsterPrefab, GetSpawnPosition() + Vector3.right * 5);
+        if (box == null)
+        {
+            Debug.LogWarning("[SpawnManager] 보상 상자 스폰 실패, 파밍 재시작.");
+            StartFarmingSpawn(_currentStageData);
+        }
     }
 
     public void SpawnBoss()

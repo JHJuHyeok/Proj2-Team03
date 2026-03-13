@@ -41,6 +41,13 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
 
     public virtual void Initialize(MonsterData data, StageData stageData, Transform target)
     {
+        // Clean up any leftover status effects from pool reuse
+        var statusEffects = GetComponents<SlayerLegend.Skill.StatusEffects.StatusEffect>();
+        foreach (var effect in statusEffects)
+        {
+            effect.EndEffect();
+        }
+
         _data = data;
         _stageData = stageData;
         _target = target;
@@ -252,6 +259,14 @@ public abstract class MonsterBase : MonoBehaviour, IDamageable
         if (CombatManager.Instance.SpawnManager != null)
         {
             CombatManager.Instance.SpawnManager.UnregisterEnemy(this);
+        }
+
+        // Clean up status effects before returning to pool
+        // EndEffect()로 isExpired=true 설정하여 같은 프레임 내 OnTick 방지
+        var statusEffects = GetComponents<SlayerLegend.Skill.StatusEffects.StatusEffect>();
+        foreach (var effect in statusEffects)
+        {
+            effect.EndEffect();
         }
 
         var renderer = _renderer != null ? _renderer : GetComponentInChildren<SpriteRenderer>();
