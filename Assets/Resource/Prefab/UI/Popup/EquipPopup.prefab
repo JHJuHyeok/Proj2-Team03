@@ -316,9 +316,9 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -10
   m_characterHorizontalScale: 1
-  m_wordSpacing: 0
+  m_wordSpacing: -10
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
@@ -2291,9 +2291,9 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -10
   m_characterHorizontalScale: 1
-  m_wordSpacing: 0
+  m_wordSpacing: -10
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
@@ -2587,9 +2587,9 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -10
   m_characterHorizontalScale: 1
-  m_wordSpacing: 0
+  m_wordSpacing: -10
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
@@ -3416,6 +3416,11 @@ MonoBehaviour:
   detailName: {fileID: 957569977501329667}
   ownedText: {fileID: 5080276254352380061}
   levelText: {fileID: 4242896722940051150}
+  rarityText: {fileID: 3153289351486874140}
+  itemNameText: {fileID: 957569977501329667}
+  enhanceText: {fileID: 4242896722940051150}
+  gradeText: {fileID: 6683943023627147191}
+  countText: {fileID: 5080276254352380061}
   currentEquipIcon: {fileID: 359432533026209447}
   currentEquipName: {fileID: 2977729620387078419}
   currentEquipNumber: {fileID: 6644119975046936879}
@@ -3783,7 +3788,7 @@ GameObject:
   - component: {fileID: 2924695039964829497}
   - component: {fileID: 3153289351486874140}
   m_Layer: 5
-  m_Name: Grade Text
+  m_Name: Rarity Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4855,9 +4860,9 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -10
   m_characterHorizontalScale: 1
-  m_wordSpacing: 0
+  m_wordSpacing: -10
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
@@ -5683,7 +5688,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6246650357735438839, guid: fddbf82ee1bcc2f4bb8b03fe1ff7984c, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8859493265164384134, guid: fddbf82ee1bcc2f4bb8b03fe1ff7984c, type: 3}
       propertyPath: m_fontAsset

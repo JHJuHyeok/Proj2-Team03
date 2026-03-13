@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SlayerLegend.Equipment;
+using SlayerLegend.Skill;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -10,7 +12,9 @@ ShopSummonSystem
 - Addressables Address(키)로 Weapon / Accessorie / Skill JSON을 Awake에서 자동 로드
 - SetCurrentTab으로 현재 탭 저장
 - TryBuyBatch(count)는 현재 탭 기준으로 랜덤 결과 생성
-- 간단 버전: 재화/확률/중복처리 없이 랜덤 결과만 생성
+- 뽑기 결과를 실제 게임 데이터에 즉시 반영
+- 스킬은 SkillController.AddSkill(...)
+- 장비는 EquipmentManager.Instance.AddEquipment(...)
 */
 public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
 {
@@ -78,6 +82,12 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
     [SerializeField] private string accessorieJsonKey = "Json/Equip/AccessorieList";
     [SerializeField] private string skillJsonKey = "Json/Skill/SkillList";
 
+    [Header("Reward Target")]
+    [SerializeField] private SkillController skillController;
+    [SerializeField] private bool grantRewardOnSummon = true;
+    [SerializeField] private int defaultRewardCount = 1;
+    [SerializeField] private int defaultRewardLevel = 1;
+
     [Header("Tab Items(Runtime)")]
     [SerializeField] private List<ShopItemData> weaponItems = new List<ShopItemData>(33);
     [SerializeField] private List<ShopItemData> accessoryItems = new List<ShopItemData>(33);
@@ -143,7 +153,10 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
         if (list == null) return 0;
 
         int count = list.Count;
-        if (count > 33) count = 33;
+        if (count > 33)
+        {
+            count = 33;
+        }
 
         return count;
     }
@@ -202,6 +215,11 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
             resultCache.Add(PickRandom(list));
         }
 
+        if (grantRewardOnSummon)
+        {
+            GrantSummonResults(resultCache);
+        }
+
         Debug.Log("[ShopSummonSystem] Summon done.");
         OnSummonResult?.Invoke(currentTab, resultCache);
         return true;
@@ -213,8 +231,10 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
         {
             case ShopTab.Weapon:
                 return weaponItems;
+
             case ShopTab.Accessory:
                 return accessoryItems;
+
             case ShopTab.Skill:
                 return skillItems;
         }
@@ -237,6 +257,58 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
         };
 
         return info;
+    }
+
+    private void GrantSummonResults(IReadOnlyList<ShopItemInfo> results)
+    {
+        if (results == null || results.Count == 0)
+        {
+            Debug.LogWarning("[ShopSummonSystem] 지급할 결과가 없습니다.");
+            return;
+        }
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            GrantSingleResult(results[i]);
+        }
+    }
+
+    private void GrantSingleResult(ShopItemInfo item)
+    {
+        if (string.IsNullOrEmpty(item.Id))
+        {
+            Debug.LogWarning("[ShopSummonSystem] item.Id가 비어있습니다.");
+            return;
+        }
+
+        int count = defaultRewardCount;
+        int level = defaultRewardLevel;
+
+        switch (currentTab)
+        {
+            case ShopTab.Skill:
+                if (skillController == null)
+                {
+                    Debug.LogError("[ShopSummonSystem] skillController가 null입니다.");
+                    return;
+                }
+
+                skillController.AddSkill(item.Id, count, level);
+                Debug.Log($"[ShopSummonSystem] 스킬 지급 완료: {item.Id}, count={count}, level={level}");
+                break;
+
+            case ShopTab.Weapon:
+            case ShopTab.Accessory:
+                if (EquipmentManager.Instance == null)
+                {
+                    Debug.LogError("[ShopSummonSystem] EquipmentManager.Instance가 null입니다.");
+                    return;
+                }
+
+                EquipmentManager.Instance.AddEquipment(item.Id, count, level);
+                Debug.Log($"[ShopSummonSystem] 장비 지급 완료: {item.Id}, count={count}, level={level}");
+                break;
+        }
     }
 
     private void LoadFromAddressablesIfPossible()
@@ -339,9 +411,9 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
             ShopItemData item = new ShopItemData();
             item.Set(
                 e.id,
-                gradeName,         // 위쪽 등급명
-                e.spriteName,      // 아이콘
-                gradeStepText,     // 아래쪽 숫자 등급
+                gradeName,
+                e.spriteName,
+                gradeStepText,
                 true
             );
 
@@ -380,9 +452,9 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
             ShopItemData item = new ShopItemData();
             item.Set(
                 s.id,
-                s.name,         // 스킬 이름
-                s.spriteName,   // 아이콘
-                s.element,      // 필요 시 속성
+                s.name,
+                s.spriteName,
+                s.element,
                 true
             );
 
@@ -395,7 +467,9 @@ public class ShopSummonSystem : MonoBehaviour, IShopItemProvider
     private string ConvertGradeToKorean(string grade)
     {
         if (string.IsNullOrEmpty(grade))
+        {
             return "일반";
+        }
 
         switch (grade)
         {
