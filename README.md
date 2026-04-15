@@ -34,6 +34,7 @@
   - [작성 스크립트]
     - Scripts/System/Skill 하위 스크립트 전체
     - Scripts/System/Equipment 하위 스크립트 전체
+  ---
 - QA: 서준
   - TC리스트 작성
   - 리소스 탐색
